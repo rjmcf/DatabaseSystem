@@ -155,6 +155,16 @@ public class Table implements java.io.Serializable
     }
 
     /**
+     * Utility method to allow you to add Records by giving a comma separated
+     * list of field values.
+     * @param fs The comma separated list of field values.
+     */
+    public void addRecord(String fs)
+    {
+        addRecord(fs.split(", "));
+    }
+
+    /**
      * Inserts a new Record at the given key, as long as it has not already been
      * assigned. Typically only for use by code that creates a Table from a file,
      * as there may be keys missing from such a Table.
@@ -573,6 +583,7 @@ public class Table implements java.io.Serializable
         testEquals();
         testGetAllKeys();
         testStringHexConversions();
+        testAddRecordAsSingleString();
     }
 
     private void testGetters()
@@ -815,6 +826,15 @@ public class Table implements java.io.Serializable
         claim(allKeys.size() == 2);
         claim(allKeys.get(0) == 1);
         claim(allKeys.get(1) == 3);
+    }
+
+    private void testAddRecordAsSingleString()
+    {
+        addRecord("Kat, 2");
+        claim(getNumRecords() == 3);
+        Record r = getRecord(4);
+        claim(r.getField(0).equals("Kat"));
+        claim(r.getField(1).equals("2"));
     }
 
     private void testStringHexConversions()
