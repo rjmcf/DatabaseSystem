@@ -1,7 +1,7 @@
 package fileutils;
 
-import tablesrecords.Table;
-import tablesrecords.Record;
+import dbcomponents.Table;
+import dbcomponents.Record;
 
 import java.io.IOException;
 import java.util.ArrayList;

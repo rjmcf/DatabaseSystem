@@ -1,6 +1,6 @@
 package printutils;
 
-import tablesrecords.Table;
+import dbcomponents.Table;
 
 /**
  * Utility class to pretty print a Table to the console.

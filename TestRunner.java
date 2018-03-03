@@ -1,5 +1,5 @@
-import tablesrecords.Record;
-import tablesrecords.Table;
+import dbcomponents.Record;
+import dbcomponents.Table;
 import fileutils.FileUtil;
 import fileutils.TableFileReadWriter;
 import printutils.TablePrinter;
