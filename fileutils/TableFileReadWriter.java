@@ -4,6 +4,7 @@ import dbcomponents.Table;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.io.File;
 
 import java.io.FileNotFoundException;
 import java.io.FileInputStream;
@@ -17,28 +18,29 @@ import java.io.ObjectOutputStream;
  */
 public class TableFileReadWriter
 {
+    private static TableFileReadWriter instance;
+
     // The folder in which all Tables are saved.
-    private static final String PARENT_DIR_PATH = "tableFiles/";
-
-
+    private String parentDirPath;
     // The file extension with which table files are saved.
     private String fileExtension;
     // Determines which method of reading and writing files to be used.
     private boolean useSerialization;
-    private static TableFileReadWriter instance;
 
     private TableFileReadWriter() { }
 
     /**
      * Gets the TableFileReadWriter instance.
-     * @param  uS Whether to use the Serialization method or my own method.
-     * @return    The TableFileReadWriter instance.
+     * @param  pDP The parent directory path under which to store all Table files.
+     * @param  uS  Whether to use the Serialization method or my own method.
+     * @return     The TableFileReadWriter instance.
      */
-    public static TableFileReadWriter getInstance(boolean uS)
+    public static TableFileReadWriter getInstance(String pDP, boolean uS)
     {
         if (instance == null)
             instance = new TableFileReadWriter();
 
+        instance.parentDirPath = pDP;
         instance.useSerialization = uS;
         instance.fileExtension = uS ? ".ser" : ".rjmTable";
         return instance;
@@ -47,14 +49,13 @@ public class TableFileReadWriter
     /**
      * Writes the given table to a file, using the chosen method.
      * @param  t The Table to write.
-     * @return   Whether the writing was successful.
      */
-    public boolean writeToFile(Table t) throws IOException
+    public void writeToFile(Table t) throws IOException
     {
         if (useSerialization)
-            return serWriteToFile(t);
+            serWriteToFile(t);
         else
-            return rjmWriteToFile(t);
+            rjmWriteToFile(t);
     }
 
     /**
@@ -70,30 +71,26 @@ public class TableFileReadWriter
             return rjmReadFromFile(name);
     }
 
-    private boolean serWriteToFile(Table t)
+
+    private void serWriteToFile(Table t) throws IOException
     {
-        try
+        String fPath = parentDirPath + t.getName() + fileExtension;
+        // Need to make sure that the parent directories exist first.
+        FileUtil.makeParentDirsIfNeeded(fPath);
+        try(FileOutputStream fileOut = new FileOutputStream(fPath);
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);)
         {
-            FileOutputStream fileOut = new FileOutputStream(PARENT_DIR_PATH + t.getName() + fileExtension);
-            ObjectOutputStream out = new ObjectOutputStream(fileOut);
             // This requires both Table and Record to implement Serializable.
             out.writeObject(t);
-            out.close();
-            fileOut.close();
-            return true;
-        }
-        catch (IOException i) {
-            i.printStackTrace();
-            return false;
         }
     }
 
-    private Table serReadFromFile(String tableName)
+    private Table serReadFromFile(String tableName) throws IOException
     {
         Table t = null;
         try
         {
-            FileInputStream fileIn = new FileInputStream(PARENT_DIR_PATH + tableName + fileExtension);
+            FileInputStream fileIn = new FileInputStream(parentDirPath + tableName + fileExtension);
             ObjectInputStream in = new ObjectInputStream(fileIn);
             // This requires both Table and Record to implement Serializable.
             t = (Table) in.readObject();
@@ -105,27 +102,22 @@ public class TableFileReadWriter
         {
             throw new IllegalArgumentException("Table " + tableName + " file not found");
         }
-        catch (IOException i)
-        {
-            throw new Error("Table " + tableName + " could not be read from file");
-        }
         catch (ClassNotFoundException c)
         {
             throw new Error("Table class not found");
         }
     }
 
-    private boolean rjmWriteToFile(Table t) throws IOException
+    private void rjmWriteToFile(Table t) throws IOException
     {
         String[] lines = t.prepareLinesForWriting();
-        String filePath = PARENT_DIR_PATH + t.getName() + fileExtension;
-        return FileUtil.writeFile(filePath, lines);
-
+        String filePath = parentDirPath + t.getName() + fileExtension;
+        FileUtil.writeFile(filePath, lines);
     }
 
     private Table rjmReadFromFile(String name) throws IOException
     {
-        ArrayList<String> lines = FileUtil.readFile(PARENT_DIR_PATH + name + fileExtension);
+        ArrayList<String> lines = FileUtil.readFile(parentDirPath + name + fileExtension);
         return Table.createTableFromLines(name, lines);
     }
 
@@ -136,10 +128,16 @@ public class TableFileReadWriter
     public static void main(String[] args)
     {
         System.out.println("Testing TableFileReadWriter");
-        TableFileReadWriter tfrw1 = TableFileReadWriter.getInstance(true);
+        TableFileReadWriter tfrw1 = TableFileReadWriter.getInstance("tableFiles/", true);
         tfrw1.test(args);
-        TableFileReadWriter tfrw2 = TableFileReadWriter.getInstance(false);
+        TableFileReadWriter tfrw2 = TableFileReadWriter.getInstance("tableFiles/", false);
         tfrw2.test(args);
+        TableFileReadWriter tfrw3 = TableFileReadWriter.getInstance("newTableFiles/", true);
+        tfrw3.test(args);
+        deleteDir(new File("newTableFiles/"));
+        TableFileReadWriter tfrw4 = TableFileReadWriter.getInstance("newTableFiles/", false);
+        tfrw4.test(args);
+        deleteDir(new File("newTableFiles/"));
         System.out.println("Testing complete");
     }
 
@@ -155,7 +153,7 @@ public class TableFileReadWriter
         t.addRecord(new String[]{"Val, 3!\n", "  Val  4  \n"});
         try
         {
-            claim(writeToFile(t));
+            writeToFile(t);
         }
         catch (IOException e)
         {
@@ -175,13 +173,25 @@ public class TableFileReadWriter
             Table n = readFromFile("NotATable");
             claim(false);
         }
-        catch (IOException e)
-        {
-            // test passed
-        }
         catch (IllegalArgumentException i)
         {
             // test passed
         }
+        catch (IOException e)
+        {
+            // Should be the first, not the second exception type.
+            claim(false);
+        }
+    }
+
+    private static void deleteDir(File file)
+    {
+        File[] contents = file.listFiles();
+        if (contents != null) {
+            for (File f : contents) {
+                deleteDir(f);
+            }
+        }
+        file.delete();
     }
 }

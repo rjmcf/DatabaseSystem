@@ -6,9 +6,12 @@ import java.nio.file.Files;
 import java.io.File;
 import java.nio.file.Paths;
 import java.nio.file.Path;
-import java.util.Scanner;
 import java.io.BufferedWriter;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 /**
@@ -20,19 +23,27 @@ public class FileUtil
     private final static Charset ENCODING = StandardCharsets.UTF_8;
 
     /**
-     * Writes the lines to the file.
-     * @param  fName The name of the file to write to.
-     * @param  lines The lines to be written.
-     * @return       Whether the writing was succesful.
+     * Makes the parent directories of a new file if they don't yet exist.
+     * @param fName The path to the file containing any parent directories.
      */
-    public static boolean writeFile(String fName, String[] lines) throws IOException
+    public static void makeParentDirsIfNeeded(String fName)
     {
         File file = new File(fName);
-        // If this file is in directories that don't exist, make those
-        // directories first.
         File parent = file.getParentFile();
         if (parent != null && !parent.exists())
             parent.mkdirs();
+    }
+
+    /**
+     * Writes the lines to the file.
+     * @param  fName The name of the file to write to.
+     * @param  lines The lines to be written.
+     */
+    public static void writeFile(String fName, String[] lines) throws IOException
+    {
+        // If this file is in directories that don't exist, make those
+        // directories first.
+        makeParentDirsIfNeeded(fName);
 
         Path path = Paths.get(fName);
         try (BufferedWriter writer = Files.newBufferedWriter(path, ENCODING))
@@ -42,7 +53,6 @@ public class FileUtil
                 writer.write(line);
                 writer.newLine();
             }
-            return true;
         }
     }
 
@@ -53,18 +63,23 @@ public class FileUtil
      */
     public static ArrayList<String> readFile(String fName) throws IOException
     {
-        Path path = Paths.get(fName);
-        try (Scanner scanner = new Scanner(path, ENCODING.name()))
+        try (FileInputStream fis = new FileInputStream(fName);
+             InputStreamReader isr = new InputStreamReader(fis, ENCODING);
+             BufferedReader br = new BufferedReader(isr))
         {
             ArrayList<String> result = new ArrayList<>();
-            while(scanner.hasNextLine())
+            String line = br.readLine();
+            while (line != null)
             {
-                result.add(scanner.nextLine());
+                result.add(line);
+                line = br.readLine();
             }
 
-            scanner.close();
-
             return result;
+        }
+        catch (FileNotFoundException e)
+        {
+            throw new IllegalArgumentException("File " + fName + " not found");
         }
     }
 
@@ -91,7 +106,7 @@ public class FileUtil
         String fName = "testDir/testFile.txt";
         try
         {
-            claim(FileUtil.writeFile(fName, new String[] {"This is the first line", "This is the second line"}));
+            FileUtil.writeFile(fName, new String[] {"This is the first line", "This is the second line"});
         }
         catch (IOException e)
         {
@@ -115,9 +130,15 @@ public class FileUtil
             FileUtil.readFile("fakeFile");
             claim(false);
         }
-        catch (IOException e)
+        catch (IllegalArgumentException e)
         {
             // test passed
+        }
+        catch (IOException e)
+        {
+            // If it's not an IllegalArgumentException, it means it tried to
+            // read from a file that doesn't exist!
+            claim(false);
         }
     }
 }
