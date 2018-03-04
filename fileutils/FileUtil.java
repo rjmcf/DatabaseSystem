@@ -36,8 +36,9 @@ public class FileUtil
 
     /**
      * Writes the lines to the file.
-     * @param  fName The name of the file to write to.
-     * @param  lines The lines to be written.
+     * @param  fName       The name of the file to write to.
+     * @param  lines       The lines to be written.
+     * @throws IOException If an io exception occurred.
      */
     public static void writeFile(String fName, String[] lines) throws IOException
     {
@@ -58,8 +59,9 @@ public class FileUtil
 
     /**
      * Reads all the lines in a file.
-     * @param  fName The name of the file to be read.
-     * @return       The list of lines that have been read.
+     * @param  fName       The name of the file to be read.
+     * @return             The list of lines that have been read.
+     * @throws IOException If an io exception occurred.
      */
     public static ArrayList<String> readFile(String fName) throws IOException
     {
