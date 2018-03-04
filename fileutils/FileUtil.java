@@ -25,10 +25,9 @@ public class FileUtil
      * @param  lines The lines to be written.
      * @return       Whether the writing was succesful.
      */
-    public static boolean writeFile(String fName, String[] lines)
+    public static boolean writeFile(String fName, String[] lines) throws IOException
     {
         File file = new File(fName);
-
         // If this file is in directories that don't exist, make those
         // directories first.
         File parent = file.getParentFile();
@@ -43,14 +42,7 @@ public class FileUtil
                 writer.write(line);
                 writer.newLine();
             }
-
-            writer.close();
             return true;
-        }
-        catch (IOException e)
-        {
-            System.err.println("Could not write to file " + fName);
-            return false;
         }
     }
 
@@ -59,7 +51,7 @@ public class FileUtil
      * @param  fName The name of the file to be read.
      * @return       The list of lines that have been read.
      */
-    public static ArrayList<String> readFile(String fName)
+    public static ArrayList<String> readFile(String fName) throws IOException
     {
         Path path = Paths.get(fName);
         try (Scanner scanner = new Scanner(path, ENCODING.name()))
@@ -73,11 +65,6 @@ public class FileUtil
             scanner.close();
 
             return result;
-        }
-        catch (IOException e)
-        {
-            System.err.println("Could not read from file " + fName);
-            return null;
         }
     }
 
@@ -102,11 +89,35 @@ public class FileUtil
     private void test(String args[])
     {
         String fName = "testDir/testFile.txt";
-        claim(FileUtil.writeFile(fName, new String[] {"This is the first line", "This is the second line"}));
-        ArrayList<String> lines = FileUtil.readFile(fName);
-        claim(lines != null);
-        claim(lines.size() == 2);
-        claim(lines.get(0).equals("This is the first line"));
-        claim(lines.get(1).equals("This is the second line"));
+        try
+        {
+            claim(FileUtil.writeFile(fName, new String[] {"This is the first line", "This is the second line"}));
+        }
+        catch (IOException e)
+        {
+            claim(false);
+        }
+        try
+        {
+            ArrayList<String> lines = FileUtil.readFile(fName);
+            claim(lines != null);
+            claim(lines.size() == 2);
+            claim(lines.get(0).equals("This is the first line"));
+            claim(lines.get(1).equals("This is the second line"));
+        }
+        catch (IOException e)
+        {
+            claim(false);
+        }
+
+        try
+        {
+            FileUtil.readFile("fakeFile");
+            claim(false);
+        }
+        catch (IOException e)
+        {
+            // test passed
+        }
     }
 }

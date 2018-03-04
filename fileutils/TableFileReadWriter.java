@@ -49,7 +49,7 @@ public class TableFileReadWriter
      * @param  t The Table to write.
      * @return   Whether the writing was successful.
      */
-    public boolean writeToFile(Table t)
+    public boolean writeToFile(Table t) throws IOException
     {
         if (useSerialization)
             return serWriteToFile(t);
@@ -62,7 +62,7 @@ public class TableFileReadWriter
      * @param  name The name of the table to be read.
      * @return      The Table instance that has been loaded.
      */
-    public Table readFromFile(String name)
+    public Table readFromFile(String name) throws IOException
     {
         if (useSerialization)
             return serReadFromFile(name);
@@ -80,7 +80,6 @@ public class TableFileReadWriter
             out.writeObject(t);
             out.close();
             fileOut.close();
-            System.out.println("Serialized data is saved in " + PARENT_DIR_PATH + t.getName() + fileExtension);
             return true;
         }
         catch (IOException i) {
@@ -100,43 +99,33 @@ public class TableFileReadWriter
             t = (Table) in.readObject();
             in.close();
             fileIn.close();
+            return t;
         }
         catch (FileNotFoundException f)
         {
-            System.out.println("Table " + tableName + " file not found");
+            throw new IllegalArgumentException("Table " + tableName + " file not found");
         }
         catch (IOException i)
         {
-            System.out.println("Could not read Table " + tableName + " from file");
-            i.printStackTrace();
+            throw new Error("Table " + tableName + " could not be read from file");
         }
         catch (ClassNotFoundException c)
         {
-            System.out.println("Table class not found");
-            c.printStackTrace();
-        }
-        finally
-        {
-            return t;
+            throw new Error("Table class not found");
         }
     }
 
-    private boolean rjmWriteToFile(Table t)
+    private boolean rjmWriteToFile(Table t) throws IOException
     {
         String[] lines = t.prepareLinesForWriting();
         String filePath = PARENT_DIR_PATH + t.getName() + fileExtension;
         return FileUtil.writeFile(filePath, lines);
+
     }
 
-    private Table rjmReadFromFile(String name)
+    private Table rjmReadFromFile(String name) throws IOException
     {
         ArrayList<String> lines = FileUtil.readFile(PARENT_DIR_PATH + name + fileExtension);
-        if (lines == null)
-        {
-            System.err.println("Could not read table " + name + " from file");
-            return null;
-        }
-
         return Table.createTableFromLines(name, lines);
     }
 
@@ -164,10 +153,35 @@ public class TableFileReadWriter
         Table t = new Table("TestTable", "Attr1, Attr2");
         t.addRecord(new String[]{"Val1", "Val2"});
         t.addRecord(new String[]{"Val, 3!\n", "  Val  4  \n"});
-        claim(writeToFile(t));
-        Table r = readFromFile(t.getName());
-        claim(t.equals(r));
-        Table n = readFromFile("NotATable");
-        claim(n == null);
+        try
+        {
+            claim(writeToFile(t));
+        }
+        catch (IOException e)
+        {
+            claim(false);
+        }
+        try
+        {
+            Table r = readFromFile(t.getName());
+            claim(t.equals(r));
+        }
+        catch (IOException e)
+        {
+            claim(false);
+        }
+        try
+        {
+            Table n = readFromFile("NotATable");
+            claim(false);
+        }
+        catch (IOException e)
+        {
+            // test passed
+        }
+        catch (IllegalArgumentException i)
+        {
+            // test passed
+        }
     }
 }
