@@ -17,28 +17,29 @@ import java.io.ObjectOutputStream;
  */
 public class TableFileReadWriter
 {
+    private static TableFileReadWriter instance;
+
     // The folder in which all Tables are saved.
-    private static final String PARENT_DIR_PATH = "tableFiles/";
-
-
+    private String parentDirPath;
     // The file extension with which table files are saved.
     private String fileExtension;
     // Determines which method of reading and writing files to be used.
     private boolean useSerialization;
-    private static TableFileReadWriter instance;
 
     private TableFileReadWriter() { }
 
     /**
      * Gets the TableFileReadWriter instance.
-     * @param  uS Whether to use the Serialization method or my own method.
-     * @return    The TableFileReadWriter instance.
+     * @param  pDP The parent directory path under which to store all Table files.
+     * @param  uS  Whether to use the Serialization method or my own method.
+     * @return     The TableFileReadWriter instance.
      */
-    public static TableFileReadWriter getInstance(boolean uS)
+    public static TableFileReadWriter getInstance(String pDP, boolean uS)
     {
         if (instance == null)
             instance = new TableFileReadWriter();
 
+        instance.parentDirPath = pDP;
         instance.useSerialization = uS;
         instance.fileExtension = uS ? ".ser" : ".rjmTable";
         return instance;
@@ -74,7 +75,7 @@ public class TableFileReadWriter
     {
         try
         {
-            FileOutputStream fileOut = new FileOutputStream(PARENT_DIR_PATH + t.getName() + fileExtension);
+            FileOutputStream fileOut = new FileOutputStream(parentDirPath + t.getName() + fileExtension);
             ObjectOutputStream out = new ObjectOutputStream(fileOut);
             // This requires both Table and Record to implement Serializable.
             out.writeObject(t);
@@ -93,7 +94,7 @@ public class TableFileReadWriter
         Table t = null;
         try
         {
-            FileInputStream fileIn = new FileInputStream(PARENT_DIR_PATH + tableName + fileExtension);
+            FileInputStream fileIn = new FileInputStream(parentDirPath + tableName + fileExtension);
             ObjectInputStream in = new ObjectInputStream(fileIn);
             // This requires both Table and Record to implement Serializable.
             t = (Table) in.readObject();
@@ -118,14 +119,14 @@ public class TableFileReadWriter
     private boolean rjmWriteToFile(Table t) throws IOException
     {
         String[] lines = t.prepareLinesForWriting();
-        String filePath = PARENT_DIR_PATH + t.getName() + fileExtension;
+        String filePath = parentDirPath + t.getName() + fileExtension;
         return FileUtil.writeFile(filePath, lines);
 
     }
 
     private Table rjmReadFromFile(String name) throws IOException
     {
-        ArrayList<String> lines = FileUtil.readFile(PARENT_DIR_PATH + name + fileExtension);
+        ArrayList<String> lines = FileUtil.readFile(parentDirPath + name + fileExtension);
         return Table.createTableFromLines(name, lines);
     }
 
@@ -136,9 +137,9 @@ public class TableFileReadWriter
     public static void main(String[] args)
     {
         System.out.println("Testing TableFileReadWriter");
-        TableFileReadWriter tfrw1 = TableFileReadWriter.getInstance(true);
+        TableFileReadWriter tfrw1 = TableFileReadWriter.getInstance("tableFiles/", true);
         tfrw1.test(args);
-        TableFileReadWriter tfrw2 = TableFileReadWriter.getInstance(false);
+        TableFileReadWriter tfrw2 = TableFileReadWriter.getInstance("tableFiles/", false);
         tfrw2.test(args);
         System.out.println("Testing complete");
     }
