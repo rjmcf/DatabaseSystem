@@ -1,5 +1,6 @@
 import dbcomponents.Record;
 import dbcomponents.Table;
+import dbcomponents.Database;
 import fileutils.FileUtil;
 import fileutils.TableFileReadWriter;
 import printutils.TablePrinter;
@@ -26,5 +27,6 @@ class TestRunner
         FileUtil.main(args);
         TableFileReadWriter.main(args);
         TablePrinter.main(args);
+        Database.main(args);
     }
 }
