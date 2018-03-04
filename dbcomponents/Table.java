@@ -12,6 +12,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import printutils.PrintInfo;
 
+import printutils.TablePrinter;
+
 /**
  * Represents a Table, which stores Records. Implements Serializable in order to
  * allow saving to a file by serialization.
@@ -296,7 +298,7 @@ public class Table implements java.io.Serializable
     public boolean equals(Object that)
     {
         if (this == that) return true;
-        if (!(that instanceof Table)) return false;
+        if (!(that instanceof Table))return false;
         Table thatTable = (Table)that;
         if (!name.equals(thatTable.name)) return false;
         // Tables are equal only if they share the same field names.
@@ -313,10 +315,11 @@ public class Table implements java.io.Serializable
         }
         catch (IndexOutOfBoundsException e)
         {
-            // A key in this table is not in the other Table, so they are not equal.
+            // They had the same number of keys, but one of the keys didn't
+            // appear in thatTable, so we got an exception.
             return false;
         }
-
+        
         return true;
     }
 
@@ -810,11 +813,16 @@ public class Table implements java.io.Serializable
         t.renameColumn("NumLegs", "NumPets");
         t.deleteRecord(2);
         claim(!this.equals(t));
+        t.addRecord(new String[]{"Laura", "1"});
+        claim(!this.equals(t));
+        t.deleteRecord(3);
         deleteRecord(2);
+        addRecord(new String[]{"Laura", "1"});
+        deleteRecord(3);
         addRecord(new String[]{"Laura", "1"});
         t.addRecord(new String[]{"Laura", "2"});
         claim(!this.equals(t));
-        t.updateRecord(3,"NumPets","1");
+        t.updateRecord(4,"NumPets","1");
         claim(this.equals(t));
         t.addRecord(new String[]{"Amy","0"});
         claim(!this.equals(t));
@@ -825,14 +833,14 @@ public class Table implements java.io.Serializable
         ArrayList<Integer> allKeys = getAllKeys();
         claim(allKeys.size() == 2);
         claim(allKeys.get(0) == 1);
-        claim(allKeys.get(1) == 3);
+        claim(allKeys.get(1) == 4);
     }
 
     private void testAddRecordAsSingleString()
     {
         addRecord("Kat, 2");
         claim(getNumRecords() == 3);
-        Record r = getRecord(4);
+        Record r = getRecord(5);
         claim(r.getField(0).equals("Kat"));
         claim(r.getField(1).equals("2"));
     }
