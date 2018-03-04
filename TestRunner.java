@@ -8,8 +8,10 @@ import printutils.TablePrinter;
  * Runs all the tests for all the classes in this project.
  * @author Rjmcf
  */
-class TestRunner
+public class TestRunner
 {
+    private TestRunner() {}
+
     /**
      * Entry point to the TestRunner. Simply runs all the tests.
      * @param args Command line arguments.

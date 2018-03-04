@@ -16,7 +16,7 @@ public class Record implements java.io.Serializable
 
     /**
      * Creates a Record storing the fields as Strings.
-     * @param es The list of Strings to be stored as fields.
+     * @param fs The list of Strings to be stored as fields.
      */
     public Record(ArrayList<String> fs)
     {

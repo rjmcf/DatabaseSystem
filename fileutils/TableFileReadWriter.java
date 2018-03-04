@@ -48,7 +48,8 @@ public class TableFileReadWriter
 
     /**
      * Writes the given table to a file, using the chosen method.
-     * @param  t The Table to write.
+     * @param  t           The Table to write.
+     * @throws IOException If an io exception occurred.
      */
     public void writeToFile(Table t) throws IOException
     {
@@ -60,8 +61,9 @@ public class TableFileReadWriter
 
     /**
      * Reads a table from a file, using the chosen method.
-     * @param  name The name of the table to be read.
-     * @return      The Table instance that has been loaded.
+     * @param  name        The name of the table to be read.
+     * @return             The Table instance that has been loaded.
+     * @throws IOException If an io exception occurred.
      */
     public Table readFromFile(String name) throws IOException
     {
