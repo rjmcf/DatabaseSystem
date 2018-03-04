@@ -2,45 +2,41 @@ package dbcomponents;
 
 import java.util.HashMap;
 import fileutils.TableFileReadWriter;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Represents a database. Currently a collection of Tables with some utility
  * methods. Singleton class to ensure that Singleton TableFileReadWriter is not
- * abused, and to restrict number Database sessions to 1.
+ * abused, and to restrict number of Database sessions to 1.
  * @author Rjmcf
  */
 public class Database
 {
     private static Database instance;
 
-    //TODO Set up a folder for Database that stores the names of the tables to
-    //TODO be loaded. Have a save function that saves the database and all
-    //TODO associated tables, and have a load function that loads all associated
-    //TODO tables. Look into incremental saving.
     private HashMap<String, Table> tables;
     // The path to where all the Table files will be saved.
-    private String filePath;
+    private String parentDirPath;
     private TableFileReadWriter tableFileReadWriter;
 
     private Database()
-    {
-        tables = new HashMap<>();
-    }
+    { }
 
     /**
-     * Gets the instance of the Database class, with the supplied folder name
-     * and saving method.
+     * Creates a new Database using the supplied folder name and saving method.
      * @param  fN The name of the folder to store all tables under.
      * @param  uS Whether to use serialization to store the files.
      * @return    The Database instance.
      */
-    public static Database getInstance(String fN, boolean uS)
+    public static Database createNewDatabase(String fN, boolean uS)
     {
         if (instance == null)
             instance = new Database();
 
-        instance.filePath = fN + "/";
-        instance.tableFileReadWriter = TableFileReadWriter.getInstance(fN, uS);
+        instance.tables = new HashMap<>();
+        instance.parentDirPath = fN + "/";
+        instance.tableFileReadWriter = TableFileReadWriter.getInstance(instance.parentDirPath, uS);
 
         return instance;
     }
@@ -71,12 +67,55 @@ public class Database
     }
 
     /**
+     * Saves the Tables stored in this database to the correct folder.
+     * @throws IOException If an io exception occurred.
+     */
+    public void saveDatabase() throws IOException
+    {
+        for (Table table : tables.values())
+        {
+            tableFileReadWriter.writeToFile(table);
+        }
+    }
+
+    /**
+     * Loads the database Tables from the given folder name.
+     * @param  fN          The folder name to load the Tables from.
+     * @param  uS          Whether to use serialization when loading the Tables.
+     * @return             The loaded Database instance.
+     * @throws IOException If an io exception occurred.
+     */
+    public static Database loadDatabase(String fN, boolean uS) throws IOException
+    {
+        Database result = Database.createNewDatabase(fN, uS);
+        result.loadTablesFromFile();
+        return result;
+    }
+
+    private void loadTablesFromFile() throws IOException
+    {
+        File parentDir = new File(parentDirPath);
+        if (!parentDir.exists())
+            throw new IllegalArgumentException("Folder " + parentDirPath + " does not exist");
+        String tableName;
+        for (File tableFile : parentDir.listFiles())
+        {
+            tableName = TableFileReadWriter.getTableNameFromFileName(tableFile.getName());
+            if (tableName == null)
+                continue;
+            addTable(tableFileReadWriter.readFromFile(tableName));
+        }
+    }
+
+    /**
      * Runs tests for this class.
      * @param args Command line arguments
      */
     public static void main(String[] args) {
         System.out.println("Testing Database");
-        Database db = Database.getInstance("dbTestFolder", false);
+        Database db = Database.createNewDatabase("dbTestFolderRjm", false);
+        db.test(args);
+        db = Database.createNewDatabase("dbTestFolderSer", true);
         db.test(args);
         System.out.println("Testing complete");
     }
@@ -117,6 +156,53 @@ public class Database
         {
             // test passed
         }
-    }
 
+        try
+        {
+            saveDatabase();
+        }
+        catch (IOException e)
+        {
+            claim(false);
+        }
+
+        try
+        {
+            Database.loadDatabase("dbTestFolder", true);
+            claim(false);
+        }
+        catch (IllegalArgumentException e)
+        {
+            // test passed
+        }
+        catch (IOException e)
+        {
+            claim(false);
+        }
+        try
+        {
+            Database.loadDatabase("fakeFolderName", false);
+            claim(false);
+        }
+        catch (IllegalArgumentException e)
+        {
+            // test passed
+        }
+        catch (IOException e)
+        {
+            claim(false);
+        }
+
+        try
+        {
+            Database loaded = Database.loadDatabase("dbTestFolder", false);
+            claim(personTable.equals(loaded.getTable("Person")));
+            claim(animalTable.equals(loaded.getTable("Animal")));
+        }
+        catch (IOException e)
+        {
+            claim(false);
+        }
+
+    }
 }
