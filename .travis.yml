@@ -7,6 +7,7 @@ script:
 - javac dbcomponents/Table.java
 - javac fileutils/TableFileReadWriter.java
 - javac printutils/TablePrinter.java
+- javac dbcomponents/Database.java
 - javac TestRunner.java
 - java TestRunner
 
