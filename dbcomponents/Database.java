@@ -1,18 +1,49 @@
 package dbcomponents;
 
 import java.util.HashMap;
+import fileutils.TableFileReadWriter;
 
 /**
- * Represents a database. Currently a collection of Tables with some utility methods.
+ * Represents a database. Currently a collection of Tables with some utility
+ * methods. Singleton class to ensure that Singleton TableFileReadWriter is not
+ * abused, and to restrict number Database sessions to 1.
  * @author Rjmcf
  */
 public class Database
 {
+    private static Database instance;
+
     //TODO Set up a folder for Database that stores the names of the tables to
     //TODO be loaded. Have a save function that saves the database and all
     //TODO associated tables, and have a load function that loads all associated
     //TODO tables. Look into incremental saving.
-    private HashMap<String, Table> tables = new HashMap<>();
+    private HashMap<String, Table> tables;
+    // The path to where all the Table files will be saved.
+    private String filePath;
+    private TableFileReadWriter tableFileReadWriter;
+
+    private Database()
+    {
+        tables = new HashMap<>();
+    }
+
+    /**
+     * Gets the instance of the Database class, with the supplied folder name
+     * and saving method.
+     * @param  fN The name of the folder to store all tables under.
+     * @param  uS Whether to use serialization to store the files.
+     * @return    The Database instance.
+     */
+    public static Database getInstance(String fN, boolean uS)
+    {
+        if (instance == null)
+            instance = new Database();
+
+        instance.filePath = fN + "/";
+        instance.tableFileReadWriter = TableFileReadWriter.getInstance(fN, uS);
+
+        return instance;
+    }
 
     /**
      * Add a Table to the database as long as no table with the same name is
@@ -45,7 +76,7 @@ public class Database
      */
     public static void main(String[] args) {
         System.out.println("Testing Database");
-        Database db = new Database();
+        Database db = Database.getInstance("dbTestFolder", false);
         db.test(args);
         System.out.println("Testing complete");
     }
