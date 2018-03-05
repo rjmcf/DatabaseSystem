@@ -1,4 +1,6 @@
 # Database System
+[![Build Status](https://travis-ci.org/rjmcf/DatabaseSystem.svg?branch=master)](https://travis-ci.org/rjmcf/DatabaseSystem)
+
 An exercise in development, I have tried to emulate a database system in Java.
 
 Currently, the Table and Record classes can represent any standard relational table and record respectively. 
