@@ -9,8 +9,3 @@ script:
 - javac printutils/TablePrinter.java
 - javac TestRunner.java
 - java TestRunner
-
-after_success:
-- mkdir javadoc
-- javadoc -d javadoc *.java
-- javadoc -d javadoc */*.java
