@@ -91,17 +91,10 @@ public class Record implements java.io.Serializable
         fields.remove(i);
     }
 
-    /**
-     * Gets all the fields as a comma separated list.
-     * @return The String containing all the field values.
-     */
-    public String getAllFields()
+    // Method can only be accessed from within this package
+    ArrayList<String> getAllFields()
     {
-        StringJoiner j = new StringJoiner(", ");
-        for (String f: fields)
-            j.add(f);
-
-        return j.toString();
+        return fields;
     }
 
     /**
@@ -237,7 +230,7 @@ public class Record implements java.io.Serializable
         other.addField("Nope");
         claim(!this.equals(other));
 
-        claim(getAllFields().equals(""));
+        claim(getAllFields().size() == 0);
     }
 
     private void testFilled(String args[])
@@ -341,6 +334,6 @@ public class Record implements java.io.Serializable
         other.addField("Wait");
         claim(!this.equals(other));
 
-        claim(getAllFields().equals("These, are, Things"));
+        claim(getAllFields().equals(fields));
     }
 }

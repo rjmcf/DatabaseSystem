@@ -4,7 +4,12 @@ import dbcomponents.Table;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.StringJoiner;
 import java.io.File;
+import java.math.BigInteger;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import javax.xml.bind.DatatypeConverter;
 
 import java.io.FileNotFoundException;
 import java.io.FileInputStream;
@@ -26,6 +31,10 @@ public class TableFileReadWriter
     private String fileExtension;
     // Determines which method of reading and writing files to be used.
     private boolean useSerialization;
+    // The encoding used to convert between hex and String.
+    private static final Charset ENCODING = StandardCharsets.UTF_8;
+    // The String used to separate fields in files.
+    private static final String FIELD_SEPARATOR = String.valueOf((char)0x1F);
 
     private TableFileReadWriter() { }
 
@@ -112,7 +121,25 @@ public class TableFileReadWriter
 
     private void rjmWriteToFile(Table t) throws IOException
     {
-        String[] lines = t.prepareLinesForWriting();
+        String[][] tableData = t.getTableData();
+
+        // The lines to write.
+        String[] lines = new String[tableData.length-1];
+        StringJoiner joiner = new StringJoiner(FIELD_SEPARATOR);
+
+        // Build the line to print for each row.
+        for (int row = 1; row < tableData.length; row++)
+        {
+            String[] rowFields = tableData[row];
+            joiner = new StringJoiner(FIELD_SEPARATOR);
+            for (int f = 0; f < rowFields.length; f++)
+            {
+                // We convert to hex to allow strange characters in these fields.
+                joiner.add(convertStringToHex(rowFields[f]));
+            }
+            lines[row - 1] = joiner.toString();
+        }
+
         String filePath = parentDirPath + t.getName() + fileExtension;
         FileUtil.writeFile(filePath, lines);
     }
@@ -120,7 +147,27 @@ public class TableFileReadWriter
     private Table rjmReadFromFile(String name) throws IOException
     {
         ArrayList<String> lines = FileUtil.readFile(parentDirPath + name + fileExtension);
-        return Table.createTableFromLines(name, lines);
+        String[][] tableData = new String[lines.size()][];
+        for (int row = 0; row < lines.size(); row++)
+        {
+            tableData[row] = lines.get(row).split(FIELD_SEPARATOR);
+            for (int col = 0; col < tableData[row].length; col++)
+                tableData[row][col] = convertHexToString(tableData[row][col]);
+        }
+        return Table.createTableFromData(name, tableData);
+    }
+
+    private static String convertHexToString(String h)
+    {
+        byte[] bytes = DatatypeConverter.parseHexBinary(h);
+        return new String(bytes, ENCODING);
+    }
+
+    private String convertStringToHex(String s)
+    {
+        String result = String.format("%x", new BigInteger(1, s.getBytes(ENCODING)));
+        // Remember to add a leading "0" if we need it.
+        return result.length() % 2 == 0 ? result : "0" + result;
     }
 
     /**
