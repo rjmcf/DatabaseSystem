@@ -6,13 +6,7 @@ import java.util.Map;
 import java.util.Arrays;
 import java.util.StringJoiner;
 import java.util.Collections;
-import java.math.BigInteger;
-import javax.xml.bind.DatatypeConverter;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import printutils.PrintInfo;
 
-import printutils.TablePrinter;
 
 /**
  * Represents a Table, which stores Records. Implements Serializable in order to
@@ -25,22 +19,6 @@ public class Table implements java.io.Serializable
      * The actual name of the first column, representing the Key for the table.
      */
     public static final String KEY_COL_NAME = "KeyTable";
-    // The String used to separate fields in files.
-    private static final String FILE_FIELD_SEPARATOR = String.valueOf((char)0x1F);
-    // The encoding used to convert between hex and String.
-    private static final Charset ENCODING = StandardCharsets.UTF_8;
-    // The String used to separate fields when printing.
-    private static final String PRINT_FIELD_SEPARATOR = " | ";
-    // The String which, when repeated, is used to build the Record separator
-    // for printing.
-    private static final String RECORD_SEPARATOR_CHAR = "-";
-    // The start of the Record separator when we include the first line.
-    private static final String RECORD_SEPARATOR_FIRST_CHAR = "|-";
-    // The String that appears in Record separator on the boundary between two
-    // fields.
-    private static final String RECORD_SEPARATOR_BETWEEN_CHAR = "-+-";
-    // The end of the Record separator when we include the last line.
-    private static final String RECORD_SEPARATOR_LAST_CHAR = "-|";
 
     // The name of this table.
     private String name;
@@ -84,12 +62,10 @@ public class Table implements java.io.Serializable
         return nextKey;
     }
 
-    /**
-     * Finds the largest key assigned so far, and sets the next key to be one
-     * larger than it. This will be called when we try to add a new Record and
-     * discover that the next key is out of sync with the Records in the table.
-     */
-    public void setNextKeyBasedOnRecords()
+    // Finds the largest key assigned so far, and sets the next key to be one
+    // larger than it. This will be called when we try to add a new Record and
+    // discover that the next key is out of sync with the Records in the table.
+    private void setNextKeyBasedOnRecords()
     {
         nextKey = Collections.max(table.keySet()) + 1;
     }
@@ -319,240 +295,72 @@ public class Table implements java.io.Serializable
             // appear in thatTable, so we got an exception.
             return false;
         }
-        
+
         return true;
     }
 
     /**
-     * Generates and returns the PrintInfo instance specific to this Table.
-     * @param  includeFirstColLine Whether to include the first vertical line when
-     *                             printing.
-     * @param  includeLastColLine  Whether to include the last vertical line when
-     *                             printing.
-     * @return                     The PrintInfo instance.
+     * Builds a matrix of Strings that represent the Table. The first line
+     * gives the name of the Table. The second line gives the names of the
+     * fields. Every line after that gives the values of those fields for a
+     * particular Record.
+     * @return The PrintInfo instance.
      */
-    public PrintInfo getPrintInfo(boolean includeFirstColLine, boolean includeLastColLine)
+    public String[][] getTableData()
     {
-        PrintInfo printInfo = new PrintInfo();
-        printInfo.setTableName(getName());
+        // We need space for all the Records, the name of the Table, and the names
+        // of the fields.
+        String[][] tableData = new String[getNumRecords() + 2][];
+        tableData[0] = new String[]{getName()};
+        // Need to have the first col name be the key col name.
+        ArrayList<String> colNames = new ArrayList<>();
+        colNames.add(KEY_COL_NAME);
+        colNames.addAll(fieldNames);
+        tableData[1] = colNames.toArray(new String[0]);
 
-        // Stores some useful stats about the size of the table.
-        int numCols = getNumFields() + 1; // +1 because of the key column.
-        int numRecords = getNumRecords();
-        // Stores the maximum sizes of individual columns and rows. There is the
-        // implicit assumption here that the header row is always exactly one
-        // line tall.
-        int[] colWidths = new int[numCols];
-        int[] recordHeights = new int[numRecords];
-        // Stores the names of the columns.
-        String[] colNames = new String[numCols];
-        colNames[0] = KEY_COL_NAME;
-        int counter = 1;
-        for (String colName : getFieldNames().split(", "))
-            colNames[counter++] = colName;
-        // Sets the initial widths of the columns to be that of their names.
-        for (int a = 0; a < colNames.length; a++)
-            colWidths[a] = colNames[a].length();
-
-        // Space for every field.
-        String[][] fields = new String[numRecords][numCols];
-        String field;
-        Record record;
-        int row = 0;
-        // Set the maximum height and width for every row and column by checking
-        // the number of lines in each field and the width of each field.
+        // Record 0 is row 2.
+        int counter = 2;
+        ArrayList<String> fields;
         for (Map.Entry<Integer, Record> entry : table.entrySet())
         {
-            record = entry.getValue();
-            for (int col = 0; col < numCols; col++)
-            {
-                // Make sure that the first column is the key.
-                if (col == 0)
-                    field = Integer.toString(entry.getKey());
-                else
-                    field = record.getField(col-1); // Column 1 is Field 0.
-                // Check the actual height and width of this field.
-                setRowHeightAndColWidthForField(field, recordHeights, row, colWidths, col);
-                fields[row][col] = field;
-            }
-            row++; // Remember to increment the row counter.
+            fields = new ArrayList<>();
+            fields.add(Integer.toString(entry.getKey()));
+            fields.addAll(entry.getValue().getAllFields());
+            tableData[counter++] = fields.toArray(new String[0]);
         }
-
-        // Build the record separator based on how wide each column is.
-        String recSepPrefix = includeFirstColLine ? RECORD_SEPARATOR_FIRST_CHAR : "";
-        String recSepSuffix = includeLastColLine ? RECORD_SEPARATOR_LAST_CHAR : "";
-        StringJoiner recSepJ = new StringJoiner(RECORD_SEPARATOR_BETWEEN_CHAR, recSepPrefix, recSepSuffix);
-        for (int width: colWidths)
-            recSepJ.add(String.join("", Collections.nCopies(width, RECORD_SEPARATOR_CHAR)));
-        printInfo.setRecordSeparator(recSepJ.toString());
-
-        // Space for the actual Strings that we are going to print.
-        // +1 because we include the header row now.
-        // The first level corresponds to records, the second corresponds to
-        // lines within fields in those records.
-        String[][] linesToPrint = new String[1 + numRecords][];
-
-        // Build the header row
-        StringJoiner lineJ = getLineStringJoiner(includeFirstColLine, includeLastColLine);
-        for (int i = 0; i < numCols; i++)
-        {
-            // The amount of padding required due to the difference between
-            // the max width and the width of these actual names.
-            int numSpacesRequired = colWidths[i] - colNames[i].length();
-            lineJ.add(colNames[i] + getNSpaces(numSpacesRequired));
-        }
-        // Here we make the assumption that the header row is one line tall.
-        linesToPrint[0] = new String[]{lineJ.toString()};
-
-        // Now build the String to print for each record in lines.
-        for (int recordNum = 0; recordNum < numRecords; recordNum++)
-        {
-            // For this record we need to print as many lines as is the maximum
-            // height for this record.
-            String[] linesInThisRecord = new String[recordHeights[recordNum]];
-
-            // Split each field in this record into lines.
-            String[][] fieldsInLines = new String[numCols][];
-            for (int col = 0; col < numCols; col++)
-                fieldsInLines[col] = fields[recordNum][col].split("\n");
-            // Now build up each line for this record.
-            for (int lineNum = 0; lineNum < recordHeights[recordNum]; lineNum++)
-            {
-                lineJ = getLineStringJoiner(includeFirstColLine, includeLastColLine);
-                // We add lines of fields to the line column by column.
-                for (int col = 0; col < numCols; col++)
-                {
-                    // If there are no more lines in this column, pad it with spaces.
-                    if (fieldsInLines[col].length <= lineNum)
-                        lineJ.add(getNSpaces(colWidths[col]));
-                    else
-                    {
-                        // The amount of padding required due to the difference between
-                        // the max width and the width of these actual lines.
-                        int numSpacesRequired = colWidths[col] - fieldsInLines[col][lineNum].length();
-                        lineJ.add(fieldsInLines[col][lineNum] + getNSpaces(numSpacesRequired));
-                    }
-                }
-                linesInThisRecord[lineNum] = lineJ.toString();
-            }
-            // +1 because we skip the header row.
-            // Record 0 is Line 1.
-            linesToPrint[recordNum+1] = linesInThisRecord;
-        }
-        printInfo.setLinesToPrint(linesToPrint);
-        return printInfo;
-    }
-
-    private void setRowHeightAndColWidthForField(String field, int[] recordHeights, int row, int[] colWidths, int col)
-    {
-        String[] lines = field.split("\n");
-        // If this field has more lines than the current max height for this row,
-        // update the max height.
-        if (lines.length > recordHeights[row])
-            recordHeights[row] = lines.length;
-        // If there's a line in this field wider than the current max width for
-        // this column, update the max width.
-        for (String line: lines)
-            if (line.length() > colWidths[col])
-                colWidths[col] = line.length();
-    }
-
-    // Gets the StringJoiner used to build up lines to print.
-    private StringJoiner getLineStringJoiner(boolean includeFirstColLine, boolean includeFinalColLine)
-    {
-        String prefix = includeFirstColLine ? PRINT_FIELD_SEPARATOR.replaceFirst("^\\s++", "") : "";
-        String suffix = includeFinalColLine ? PRINT_FIELD_SEPARATOR.replaceFirst("\\s++$", "") : "";
-        return new StringJoiner(PRINT_FIELD_SEPARATOR, prefix, suffix);
-    }
-
-    private String getNSpaces(int n)
-    {
-        return String.join("", Collections.nCopies(n, " "));
+        return tableData;
     }
 
     /**
-     * Gets a list of the lines to write to a file to store this Table.
-     * @return The lines to write.
+     * Factory method to load a Table from the data read in from a file.
+     * @param  name The name of the Table.
+     * @param  data The data read from the Table file.
+     * @return      The Table instance.
      */
-    public String[] prepareLinesForWriting()
-    {
-        // The lines to print. +1 because of the header row containing the
-        // field names.
-        String[] lines = new String[getNumRecords() + 1];
-        StringJoiner joiner = new StringJoiner(FILE_FIELD_SEPARATOR);
-
-        // Build the header row. No need to hex up these names, as it is assumed
-        // that they will not contain commas or newLines.
-        for (String a: getFieldNames().split(", "))
-            joiner.add(a);
-        lines[0] = joiner.toString();
-
-        // Now build the line to print for each Record.
-        Record r;
-        int recordSize = getNumFields();
-        int counter = 1;
-        for (Map.Entry<Integer,Record> entry : table.entrySet())
-        {
-            r = entry.getValue();
-            joiner = new StringJoiner(FILE_FIELD_SEPARATOR);
-            joiner.add(Integer.toString(entry.getKey()));
-            for (int f = 0; f < recordSize; f++)
-            {
-                // We convert to hex to allow strange characters in these fields.
-                joiner.add(convertStringToHex(r.getField(f)));
-            }
-            lines[counter++] = joiner.toString(); // Remember to increment the counter.
-        }
-
-        return lines;
-    }
-
-    private String convertStringToHex(String s)
-    {
-        String result = String.format("%x", new BigInteger(1, s.getBytes(ENCODING)));
-        // Remember to add a leading "0" if we need it.
-        return result.length() % 2 == 0 ? result : "0" + result;
-    }
-
-    /**
-     * Factory method to load a Table from the lines read in from a file.
-     * @param  name  The name of the Table.
-     * @param  lines The lines read from the Table file.
-     * @return       The Table instance.
-     */
-    public static Table createTableFromLines(String name, ArrayList<String> lines)
+    public static Table createTableFromData(String name, String[][] data)
     {
         // The first line is the human readable field names. We build the
         // comma separated list of field names for the Table constructor.
-        String[] keyAndAttrs = lines.get(0).split(FILE_FIELD_SEPARATOR);
+        String[] keyAndAttrs = data[0];
         StringJoiner joiner = new StringJoiner(", ");
-        for (int i = 0; i < keyAndAttrs.length; i++)
+        for (int i = 1; i < keyAndAttrs.length; i++)
             joiner.add(keyAndAttrs[i]);
-
-        // Can discard that first line now.
-        lines.remove(0);
 
         // The new Table instance.
         Table t = new Table(name, joiner.toString());
 
         // Now add the Records one at a time.
-        for (String line: lines)
+        for (int row = 1; row < data.length; row++)
         {
-            String[] keyAndValues = line.split(FILE_FIELD_SEPARATOR);
-            String[] fields = new String[keyAndValues.length - 1];
-            int key = Integer.parseInt(keyAndValues[0]);
-            for (int f = 1; f < keyAndValues.length; f++)
-                fields[f - 1] = convertHexToString(keyAndValues[f]);
+            String[] recordFields = data[row];
+            String[] fields = new String[recordFields.length - 1];
+            int key = Integer.parseInt(recordFields[0]);
+            for (int f = 1; f < recordFields.length; f++)
+                fields[f - 1] = recordFields[f];
             t.insertRecord(key, fields);
         }
 
         return t;
-    }
-
-    private static String convertHexToString(String h)
-    {
-        byte[] bytes = DatatypeConverter.parseHexBinary(h);
-        return new String(bytes, ENCODING);
     }
 
     /**
@@ -585,8 +393,8 @@ public class Table implements java.io.Serializable
         testRenameColumn();
         testEquals();
         testGetAllKeys();
-        testStringHexConversions();
         testAddRecordAsSingleString();
+        testGetTableData();
     }
 
     private void testGetters()
@@ -845,11 +653,18 @@ public class Table implements java.io.Serializable
         claim(r.getField(1).equals("2"));
     }
 
-    private void testStringHexConversions()
+    private void testGetTableData()
     {
-        String s = "a\na!, b";
-        String h = convertStringToHex(s);
-        claim(h.equals("610a61212c2062"));
-        claim(Table.convertHexToString(h).equals(s));
+        String[][] tableData = getTableData();
+        claim(tableData[0][0].equals(getName()));
+        claim(tableData[1][0].equals(KEY_COL_NAME));
+        for (int i = 1; i < tableData[1].length; i++)
+            tableData[1][i].equals(fieldNames.get(i-1));
+        for (int row = 2; row < tableData.length; row++)
+        {
+            Record record = getRecord(Integer.parseInt(tableData[row][0]));
+            for (int field = 1; field < tableData[row].length; field++)
+                claim(record.getField(field - 1).equals(tableData[row][field]));
+        }
     }
 }
