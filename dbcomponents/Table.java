@@ -198,7 +198,7 @@ public class Table implements java.io.Serializable
         int fieldIndex = fieldNames.indexOf(fieldName);
         if (fieldIndex == -1)
             throw new IndexOutOfBoundsException("No attribute: " + fieldName + " exists");
-        getRecord(key).setField(fieldIndex, replacement);
+        getRecord(key).updateField(fieldIndex, replacement);
     }
 
     /**
@@ -213,17 +213,20 @@ public class Table implements java.io.Serializable
     }
 
     /**
-     * Adds a column to the end of the table. The default value is added to the
-     * end of every Record.
+     * Adds a column the Table. The default value is added to every Record. Throws
+     * an exception if the index is out of bounds.
      * @param name       The name of the new column.
      * @param defaultVal The default value to be added to every Record for this
      *                   new field.
      */
-    public void addColumn(String name, String defaultVal)
+    public void addColumn(int index, String name, String defaultVal)
     {
-        fieldNames.add(name);
+        if (index < 0 || index > fieldNames.size())
+            throw new IndexOutOfBoundsException("Cannot insert new column at index " + Integer.toString(index));
+
+        fieldNames.add(index, name);
         for (Record r: table.values())
-            r.addField(defaultVal);
+            r.addField(index, defaultVal);
     }
 
     /**
@@ -325,7 +328,8 @@ public class Table implements java.io.Serializable
         {
             fields = new ArrayList<>();
             fields.add(Integer.toString(entry.getKey()));
-            fields.addAll(entry.getValue().getAllFields());
+            for (int i = 0; i < getNumFields(); i ++)
+                fields.add(entry.getValue().getField(i));
             tableData[counter++] = fields.toArray(new String[0]);
         }
         return tableData;
@@ -474,9 +478,17 @@ public class Table implements java.io.Serializable
     private void testGetRecord()
     {
         Record r = getRecord(0);
-        claim(r.getSize() == 2);
         claim(r.getField(0).equals("Dog"));
         claim(r.getField(1).equals("Corgi"));
+        try
+        {
+            r.getField(2);
+            claim(false);
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            // test passed
+        }
         try
         {
             Record r2 = getRecord(2);
@@ -547,10 +559,33 @@ public class Table implements java.io.Serializable
 
     private void testAddColumn()
     {
-        addColumn("NumLegs", "2");
+        try
+        {
+            addColumn(-1, "NumLegs", "2");
+            claim(false);
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            // test passed
+        }
+        try
+        {
+            addColumn(3, "NumLegs", "2");
+            claim(false);
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            // test passed
+        }
+        addColumn(2, "NumLegs", "2");
         claim(getNumFields() == 3);
         claim(getFieldNames().equals("Name, Breed, NumLegs"));
         claim(getRecord(1).getField(2).equals("2"));
+
+        addColumn(2, "Colour", "White");
+        claim(getNumFields() == 4);
+        claim(getFieldNames().equals("Name, Breed, Colour, NumLegs"));
+        claim(getRecord(1).getField(2).equals("White"));
     }
 
     private void testDeleteColumn()
@@ -566,11 +601,20 @@ public class Table implements java.io.Serializable
         }
 
         deleteColumn("Breed");
+        deleteColumn("Colour");
         claim(getNumFields() == 2);
         claim(getFieldNames().equals("Name, NumLegs"));
         for (Record r:table.values())
         {
-            claim(r.getSize() == 2);
+            try
+            {
+                r.getField(2);
+                claim(false);
+            }
+            catch (IndexOutOfBoundsException e)
+            {
+                // test passed
+            }
             claim(r.getField(1).equals("2"));
         }
     }

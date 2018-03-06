@@ -18,7 +18,7 @@ public class Record implements java.io.Serializable
      * Creates a Record storing the fields as Strings.
      * @param fs The list of Strings to be stored as fields.
      */
-    public Record(ArrayList<String> fs)
+    Record(ArrayList<String> fs)
     {
         fields = fs;
     }
@@ -26,18 +26,9 @@ public class Record implements java.io.Serializable
     /**
      * Creates an empty Record.
      */
-    public Record()
+    Record()
     {
         fields = new ArrayList<>();
-    }
-
-    /**
-     * Gets the number of fields stored in a Record.
-     * @return The number of fields.
-     */
-    public int getSize()
-    {
-        return fields.size();
     }
 
     /**
@@ -46,36 +37,38 @@ public class Record implements java.io.Serializable
      * @param  i The index of the field.
      * @return   The value of the field.
      */
-    public String getField(int i)
+    String getField(int i)
     {
-        if (i<0 || i >= getSize())
+        if (i<0 || i >= fields.size())
             throw new IndexOutOfBoundsException("No field " + Integer.toString(i) + " exists");
 
         return fields.get(i);
     }
 
     /**
-     * Sets the value of a particular field. Throws an exception if the index is
+     * Updates the value of a particular field. Throws an exception if the index is
      * out of bounds.
      * @param i The index of the field.
      * @param r The new value of the field.
      */
-    public void setField(int i, String r)
+    void updateField(int i, String r)
     {
-        if (i<0 || i >= getSize())
+        if (i<0 || i >= fields.size())
             throw new IndexOutOfBoundsException("No field " + Integer.toString(i) + " exists");
 
         fields.set(i, r);
     }
 
     /**
-     * Adds a field to the end of the Record. Shouldn't be used directly on a
-     * Record within a table.
+     * Adds a field to a Record. Throws an exception if the index is out of bounds.
+     * @param i   The index at which to add the new field.
      * @param val The field to be added.
      */
-    public void addField(String val)
+    void addField(int i, String val)
     {
-        fields.add(val);
+        if (i<0 || i > fields.size())
+            throw new IndexOutOfBoundsException("Cannot add field at index " + Integer.toString(i));
+        fields.add(i, val);
     }
 
     /**
@@ -83,18 +76,12 @@ public class Record implements java.io.Serializable
      * exception if the index is out of bounds.
      * @param i The index of the field.
      */
-    public void deleteField(int i)
+    void deleteField(int i)
     {
-        if (i<0 || i >= getSize())
+        if (i<0 || i >= fields.size())
             throw new IndexOutOfBoundsException("No field " + Integer.toString(i) + " exists");
 
         fields.remove(i);
-    }
-
-    // Method can only be accessed from within this package
-    ArrayList<String> getAllFields()
-    {
-        return fields;
     }
 
     /**
@@ -108,8 +95,8 @@ public class Record implements java.io.Serializable
         if (this == that) return true;
         if (!(that instanceof Record)) return false;
         Record thatRecord = (Record)that;
-        int size = getSize();
-        if (size != thatRecord.getSize()) return false;
+        int size = fields.size();
+        if (size != thatRecord.fields.size()) return false;
 
         // The Records are only equal if all their fields are the same.
         for (int i = 0; i < size; i++)
@@ -148,7 +135,7 @@ public class Record implements java.io.Serializable
 
     private void testEmpty(String args[])
     {
-        claim(getSize() == 0);
+        claim(fields.size() == 0);
         try
         {
             getField(0);
@@ -158,7 +145,6 @@ public class Record implements java.io.Serializable
         {
             // test pass
         }
-
         try
         {
             getField(-1);
@@ -168,9 +154,19 @@ public class Record implements java.io.Serializable
         {
             // test pass
         }
+
         try
         {
-            setField(0, "Anything");
+            updateField(0, "Anything");
+            claim(false);
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            // test pass
+        }
+        try
+        {
+            updateField(-1, "Anything");
             claim(false);
         }
         catch (IndexOutOfBoundsException e)
@@ -180,7 +176,16 @@ public class Record implements java.io.Serializable
 
         try
         {
-            setField(-1, "Anything");
+            addField(-1, "Anything");
+            claim(false);
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            // test pass
+        }
+        try
+        {
+            addField(1, "Anything");
             claim(false);
         }
         catch (IndexOutOfBoundsException e)
@@ -188,8 +193,8 @@ public class Record implements java.io.Serializable
             // test pass
         }
 
-        addField("First");
-        claim(getSize() == 1);
+        addField(0, "First");
+        claim(fields.size() == 1);
         claim(getField(0).equals("First"));
 
         try
@@ -201,7 +206,6 @@ public class Record implements java.io.Serializable
         {
             // test pass
         }
-
         try
         {
             deleteField(1);
@@ -213,7 +217,7 @@ public class Record implements java.io.Serializable
         }
 
         deleteField(0);
-        claim(getSize()==0);
+        claim(fields.size()==0);
         try
         {
             getField(0);
@@ -227,15 +231,13 @@ public class Record implements java.io.Serializable
         Record other = new Record();
         claim(this.equals(this));
         claim(this.equals(other));
-        other.addField("Nope");
+        other.addField(0, "Nope");
         claim(!this.equals(other));
-
-        claim(getAllFields().size() == 0);
     }
 
     private void testFilled(String args[])
     {
-        claim(getSize() == 3);
+        claim(fields.size() == 3);
         claim(getField(0).equals("These"));
         claim(getField(1).equals("are"));
         claim(getField(2).equals("entries"));
@@ -258,11 +260,11 @@ public class Record implements java.io.Serializable
             // test pass
         }
 
-        setField(2, "Anything");
+        updateField(2, "Anything");
         claim(getField(2).equals("Anything"));
         try
         {
-            setField(-1, "Anything");
+            updateField(-1, "Anything");
             claim(false);
         }
         catch (IndexOutOfBoundsException e)
@@ -271,7 +273,7 @@ public class Record implements java.io.Serializable
         }
         try
         {
-            setField(3, "Anything");
+            updateField(3, "Anything");
             claim(false);
         }
         catch (IndexOutOfBoundsException e)
@@ -279,9 +281,32 @@ public class Record implements java.io.Serializable
             // test pass
         }
 
-        addField("Things");
-        claim(getSize() == 4);
+        try
+        {
+            addField(-1, "Anything");
+            claim(false);
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            // test pass
+        }
+        try
+        {
+            addField(4, "Anything");
+            claim(false);
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            // test pass
+        }
+
+        addField(3, "Things");
+        claim(fields.size() == 4);
         claim(getField(3).equals("Things"));
+        addField(2, "all");
+        claim(fields.size() == 5);
+        claim(getField(2).equals("all"));
+        claim(getField(3).equals("Anything"));
 
         try
         {
@@ -292,10 +317,9 @@ public class Record implements java.io.Serializable
         {
             // test pass
         }
-
         try
         {
-            deleteField(4);
+            deleteField(5);
             claim(false);
         }
         catch (IndexOutOfBoundsException e)
@@ -304,7 +328,8 @@ public class Record implements java.io.Serializable
         }
 
         deleteField(2);
-        claim(getSize() == 3);
+        deleteField(2);
+        claim(fields.size() == 3);
         claim(getField(0).equals("These"));
         claim(getField(1).equals("are"));
         claim(getField(2).equals("Things"));
@@ -324,16 +349,14 @@ public class Record implements java.io.Serializable
         Record other = new Record();
         claim(this.equals(this));
         claim(!this.equals(other));
-        other.addField("These");
-        other.addField("are");
+        other.addField(0, "These");
+        other.addField(1, "are");
         claim(!this.equals(other));
-        other.addField("things");
+        other.addField(2, "things");
         claim(!this.equals(other));
-        other.setField(2,"Things");
+        other.updateField(2,"Things");
         claim(this.equals(other));
-        other.addField("Wait");
+        other.addField(3, "Wait");
         claim(!this.equals(other));
-
-        claim(getAllFields().equals(fields));
     }
 }
