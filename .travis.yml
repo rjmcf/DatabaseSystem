@@ -2,7 +2,6 @@ language: java
 install: true
 script:
 - javac fileutils/FileUtil.java
-- javac printutils/PrintInfo.java
 - javac dbcomponents/Record.java
 - javac dbcomponents/Table.java
 - javac fileutils/TableFileReadWriter.java
