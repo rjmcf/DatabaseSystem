@@ -114,9 +114,9 @@ public class Database
     public static void main(String[] args) {
         System.out.println("Testing Database");
         Database db = Database.createNewDatabase("dbTestFolderRjm", false);
-        db.test(args);
+        db.test("dbTestFolderRjm", false);
         db = Database.createNewDatabase("dbTestFolderSer", true);
-        db.test(args);
+        db.test("dbTestFolderSer", true);
         System.out.println("Testing complete");
     }
 
@@ -125,7 +125,7 @@ public class Database
         if (!b) throw new Error("Test failed");
     }
 
-    private void test(String[] args)
+    private void test(String folderName, boolean usingSync)
     {
         Table personTable = new Table("Person", "Name, Address");
         personTable.addRecord("Robyn, XX Nilfrod Avenue\nLoughborough");
@@ -168,7 +168,7 @@ public class Database
 
         try
         {
-            Database.loadDatabase("dbTestFolder", true);
+            Database.loadDatabase(folderName, !usingSync);
             claim(false);
         }
         catch (IllegalArgumentException e)
@@ -181,7 +181,7 @@ public class Database
         }
         try
         {
-            Database.loadDatabase("fakeFolderName", false);
+            Database.loadDatabase("fakeFolderName", usingSync);
             claim(false);
         }
         catch (IllegalArgumentException e)
@@ -195,7 +195,7 @@ public class Database
 
         try
         {
-            Database loaded = Database.loadDatabase("dbTestFolder", false);
+            Database loaded = Database.loadDatabase(folderName, usingSync);
             claim(personTable.equals(loaded.getTable("Person")));
             claim(animalTable.equals(loaded.getTable("Animal")));
         }
