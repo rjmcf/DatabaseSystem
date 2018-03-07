@@ -2,8 +2,7 @@ package printutils;
 
 import java.util.StringJoiner;
 import java.util.Collections;
-
-import dbcomponents.Table;
+import exceptions.TestsElsewhereException;
 
 /**
  * Utility class to pretty print a Table to the console.
@@ -31,14 +30,8 @@ public class TablePrinter
      * Prints the supplied Table to the console.
      * @param t The Table to be printed.
      */
-    public static void printTable(Table t)
+    public static void printTable(String tableName, String[][] tableData)
     {
-        // The Table needs to know whether to include the Field separator at
-        // the start and end of lines, so we pass the two booleans.
-        String[][] tableData = t.getTableData();
-
-        String tableName = tableData[0][0];
-
         // Stores some useful stats about the size of the table.
         int numCols = tableData[1].length;
         // -1 because of the table name.
@@ -143,11 +136,6 @@ public class TablePrinter
      * @param args Command line arguments.
      */
     public static void main(String[] args) {
-        System.out.println("Testing TablePrinter");
-        Table t = new Table("Person", "Name, Address");
-        t.addRecord(new String[]{"Robin", "XX Nilford Road\nLeicester\nLE3 3GF"});
-        t.addRecord(new String[]{"Laura\nCollins", "XX Mewton Avenue\nBodworth\nCV2 0UQ"});
-        TablePrinter.printTable(t);
-        System.out.println("Testing complete");
+        throw new TestsElsewhereException("TablePrinter", "Table");
     }
 }

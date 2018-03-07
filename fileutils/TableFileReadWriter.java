@@ -1,6 +1,7 @@
 package fileutils;
 
 import dbcomponents.Table;
+import exceptions.TestsElsewhereException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,37 +27,16 @@ public class TableFileReadWriter
     private static TableFileReadWriter instance;
 
     // The folder in which all Tables are saved.
-    private String parentDirPath;
+    private static String parentDirPath;
     // The file extension with which table files are saved.
-    private String fileExtension;
-    // Determines which method of reading and writing files to be used.
-    private boolean useSerialization;
+    private static String fileExtension;
     // The encoding used to convert between hex and String.
     private static final Charset ENCODING = StandardCharsets.UTF_8;
     // The String used to separate fields in files.
     private static final String FIELD_SEPARATOR = String.valueOf((char)0x1F);
 
-    private static final String SERIALIZATION_FILE_EXT = ".ser";
-    private static final String CUSTOM_METHOD_FILE_EXT = ".rjmTable";
-
-    private TableFileReadWriter() { }
-
-    /**
-     * Gets the TableFileReadWriter instance.
-     * @param  pDP The parent directory path under which to store all Table files.
-     * @param  uS  Whether to use the Serialization method or my own method.
-     * @return     The TableFileReadWriter instance.
-     */
-    public static TableFileReadWriter getInstance(String pDP, boolean uS)
-    {
-        if (instance == null)
-            instance = new TableFileReadWriter();
-
-        instance.parentDirPath = pDP;
-        instance.useSerialization = uS;
-        instance.fileExtension = uS ? SERIALIZATION_FILE_EXT : CUSTOM_METHOD_FILE_EXT;
-        return instance;
-    }
+    public static final String SERIALIZATION_FILE_EXT = ".ser";
+    public static final String CUSTOM_METHOD_FILE_EXT = ".rjmTable";
 
     /**
      * Gets the name of the Table from the supplied file name.
@@ -83,8 +63,10 @@ public class TableFileReadWriter
      * @param  t           The Table to write.
      * @throws IOException If an io exception occurred.
      */
-    public void writeToFile(Table t) throws IOException
+    public static void writeToFile(Table t, String pDP, boolean useSerialization) throws IOException
     {
+        parentDirPath = pDP;
+        fileExtension = useSerialization ? SERIALIZATION_FILE_EXT : CUSTOM_METHOD_FILE_EXT;
         if (useSerialization)
             serWriteToFile(t);
         else
@@ -97,8 +79,10 @@ public class TableFileReadWriter
      * @return             The Table instance that has been loaded.
      * @throws IOException If an io exception occurred.
      */
-    public Table readFromFile(String name) throws IOException
+    public static Table readFromFile(String name, String pDP, boolean useSerialization) throws IOException
     {
+        parentDirPath = pDP;
+        fileExtension = useSerialization ? SERIALIZATION_FILE_EXT : CUSTOM_METHOD_FILE_EXT;
         if (useSerialization)
             return serReadFromFile(name);
         else
@@ -106,7 +90,7 @@ public class TableFileReadWriter
     }
 
 
-    private void serWriteToFile(Table t) throws IOException
+    private static void serWriteToFile(Table t) throws IOException
     {
         String fPath = parentDirPath + t.getName() + fileExtension;
         // Need to make sure that the parent directories exist first.
@@ -119,7 +103,7 @@ public class TableFileReadWriter
         }
     }
 
-    private Table serReadFromFile(String tableName) throws IOException
+    private static Table serReadFromFile(String tableName) throws IOException
     {
         Table t = null;
         try
@@ -142,7 +126,7 @@ public class TableFileReadWriter
         }
     }
 
-    private void rjmWriteToFile(Table t) throws IOException
+    private static void rjmWriteToFile(Table t) throws IOException
     {
         String[][] tableData = t.getTableData();
 
@@ -167,7 +151,7 @@ public class TableFileReadWriter
         FileUtil.writeFile(filePath, lines);
     }
 
-    private Table rjmReadFromFile(String name) throws IOException
+    private static Table rjmReadFromFile(String name) throws IOException
     {
         ArrayList<String> lines = FileUtil.readFile(parentDirPath + name + fileExtension);
         String[][] tableData = new String[lines.size()][];
@@ -186,7 +170,7 @@ public class TableFileReadWriter
         return new String(bytes, ENCODING);
     }
 
-    private String convertStringToHex(String s)
+    private static String convertStringToHex(String s)
     {
         String result = String.format("%x", new BigInteger(1, s.getBytes(ENCODING)));
         // Remember to add a leading "0" if we need it.
@@ -199,79 +183,14 @@ public class TableFileReadWriter
      */
     public static void main(String[] args)
     {
-        System.out.println("Testing TableFileReadWriter");
-        TableFileReadWriter tfrw1 = TableFileReadWriter.getInstance("tableFiles/", true);
-        tfrw1.test(args);
-        TableFileReadWriter tfrw2 = TableFileReadWriter.getInstance("tableFiles/", false);
-        tfrw2.test(args);
-        TableFileReadWriter tfrw3 = TableFileReadWriter.getInstance("newTableFiles/", true);
-        tfrw3.test(args);
-        deleteDir(new File("newTableFiles/"));
-        TableFileReadWriter tfrw4 = TableFileReadWriter.getInstance("newTableFiles/", false);
-        tfrw4.test(args);
-        deleteDir(new File("newTableFiles/"));
-        System.out.println("Testing complete");
+        throw new TestsElsewhereException("TableFileReadWriter", "Table");
     }
 
-    private void claim(boolean b)
-    {
-        if (!b) throw new Error("Test Failed");
-    }
-
-    private void test(String args[])
-    {
-        Table t = new Table("TestTable", "Attr1, Attr2");
-        t.addRecord(new String[]{"Val1", "Val2"});
-        t.addRecord(new String[]{"Val, 3!\n", "  Val  4  \n"});
-        try
-        {
-            writeToFile(t);
-        }
-        catch (IOException e)
-        {
-            claim(false);
-        }
-        try
-        {
-            Table r = readFromFile(t.getName());
-            claim(t.equals(r));
-        }
-        catch (IOException e)
-        {
-            claim(false);
-        }
-        try
-        {
-            Table n = readFromFile("NotATable");
-            claim(false);
-        }
-        catch (IllegalArgumentException i)
-        {
-            // test passed
-        }
-        catch (IOException e)
-        {
-            // Should be the first, not the second exception type.
-            claim(false);
-        }
-
-        claim(TableFileReadWriter.getTableNameFromFileName(".DS_Store") == null);
-        try
-        {
-            TableFileReadWriter.getTableNameFromFileName("tableName.txt");
-            claim(false);
-        }
-        catch (IllegalArgumentException e)
-        {
-            // test passed
-        }
-
-        String tableName = "tableName";
-        claim(tableName.equals(TableFileReadWriter.getTableNameFromFileName(tableName + TableFileReadWriter.SERIALIZATION_FILE_EXT)));
-        claim(tableName.equals(TableFileReadWriter.getTableNameFromFileName(tableName + TableFileReadWriter.CUSTOM_METHOD_FILE_EXT)));
-    }
-
-    private static void deleteDir(File file)
+    /**
+     * Deletes the specified directory.
+     * @param file The name of the directory to be deleted.
+     */
+    public static void deleteDir(File file)
     {
         File[] contents = file.listFiles();
         if (contents != null) {

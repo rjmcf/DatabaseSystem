@@ -6,6 +6,11 @@ import java.util.Map;
 import java.util.Arrays;
 import java.util.StringJoiner;
 import java.util.Collections;
+import printutils.TablePrinter;
+import fileutils.TableFileReadWriter;
+import fileutils.FileUtil;
+import java.io.IOException;
+import java.io.File;
 
 
 /**
@@ -31,6 +36,38 @@ public class Table implements java.io.Serializable
     private HashMap<Integer, Record> table;
 
     /**
+     * Factory method to load a Table from the data read in from a file.
+     * @param  name The name of the Table.
+     * @param  data The data read from the Table file.
+     * @return      The Table instance.
+     */
+    public static Table createTableFromData(String name, String[][] data)
+    {
+        // The first line is the human readable field names. We build the
+        // comma separated list of field names for the Table constructor.
+        String[] keyAndAttrs = data[0];
+        StringJoiner joiner = new StringJoiner(", ");
+        for (int i = 1; i < keyAndAttrs.length; i++)
+            joiner.add(keyAndAttrs[i]);
+
+        // The new Table instance.
+        Table t = new Table(name, joiner.toString());
+
+        // Now add the Records one at a time.
+        for (int row = 1; row < data.length; row++)
+        {
+            String[] recordFields = data[row];
+            String[] fields = new String[recordFields.length - 1];
+            int key = Integer.parseInt(recordFields[0]);
+            for (int f = 1; f < recordFields.length; f++)
+                fields[f - 1] = recordFields[f];
+            t.insertRecord(key, fields);
+        }
+
+        return t;
+    }
+
+    /**
      * Creates a new Table with the specified name, and a comma separated list
      * of column names.
      * @param name  The name of the new Table.
@@ -53,11 +90,20 @@ public class Table implements java.io.Serializable
         return name;
     }
 
+    private String getFieldNames()
+    {
+        StringJoiner names = new StringJoiner(", ");
+        for (String name : fieldNames)
+            names.add(name);
+
+        return names.toString();
+    }
+
     /**
      * Gets the key that will be assigned to the next Record which is added.
      * @return The next key to be assigned.
      */
-    public int getNextKey()
+    private int getNextKey()
     {
         return nextKey;
     }
@@ -80,28 +126,16 @@ public class Table implements java.io.Serializable
      * not including the key column.
      * @return The number of fields.
      */
-    public int getNumFields()
+    int getNumFields()
     {
         return fieldNames.size();
-    }
-
-    /**
-     * Gets a comma separated list of the names of the fields stored by Records.
-     * @return The names of the fields.
-     */
-    public String getFieldNames()
-    {
-        StringJoiner joiner = new StringJoiner(", ");
-        for (String s: fieldNames)
-            joiner.add(s);
-        return joiner.toString();
     }
 
     /**
      * Gets the number of Records stored by the Table.
      * @return The number of Records.
      */
-    public int getNumRecords()
+    int getNumRecords()
     {
         return table.size();
     }
@@ -116,7 +150,7 @@ public class Table implements java.io.Serializable
      * ArrayList takes N + 1 lines.
      * @param fs The values of the fields to be saved.
      */
-    public void addRecord(String[] fs)
+    void addRecord(String[] fs)
     {
         ArrayList<String> fields = new ArrayList<>(Arrays.asList(fs));
         if (fields.size() != getNumFields())
@@ -137,7 +171,7 @@ public class Table implements java.io.Serializable
      * list of field values.
      * @param fs The comma separated list of field values.
      */
-    public void addRecord(String fs)
+    void addRecord(String fs)
     {
         addRecord(fs.split(", "));
     }
@@ -146,15 +180,10 @@ public class Table implements java.io.Serializable
      * Inserts a new Record at the given key, as long as it has not already been
      * assigned. Typically only for use by code that creates a Table from a file,
      * as there may be keys missing from such a Table.
-     * <p>
-     * An array is used rather than an
-     * ArrayList because arrays are easier to build inline on the fly, such as
-     * new String[]{"Field1", "Field2",..., "FieldN"}; The equivalent with
-     * ArrayList takes N + 1 lines.
      * @param key The key at which insertion is attempted.
      * @param fs  The fields to insert as a new Record.
      */
-    public void insertRecord(int key, String[] fs)
+    private void insertRecord(int key, String[] fs)
     {
         if (key < 0)
             throw new IllegalArgumentException("Key must be non-negative");
@@ -176,7 +205,7 @@ public class Table implements java.io.Serializable
      * @param  key They key of the Record.
      * @return     The Record itself.
      */
-    public Record getRecord(int key)
+    Record getRecord(int key)
     {
         if (!table.containsKey(key))
             throw new IndexOutOfBoundsException("No record found with that key");
@@ -191,7 +220,7 @@ public class Table implements java.io.Serializable
      * @param fieldName   The name of the field to update.
      * @param replacement The new value.
      */
-    public void updateRecord(int key, String fieldName, String replacement)
+    void updateRecord(int key, String fieldName, String replacement)
     {
         // Fields are accessed by index in records, so we need the index of the
         // field name to refer to it by.
@@ -206,7 +235,7 @@ public class Table implements java.io.Serializable
      * now on, unless insertRecord is called.
      * @param key The key of the Record to be deleted.
      */
-    public void deleteRecord(int key)
+    void deleteRecord(int key)
     {
         if (table.remove(key) == null)
             throw new IndexOutOfBoundsException("No record found with that key");
@@ -219,7 +248,7 @@ public class Table implements java.io.Serializable
      * @param defaultVal The default value to be added to every Record for this
      *                   new field.
      */
-    public void addColumn(int index, String name, String defaultVal)
+    void addColumn(int index, String name, String defaultVal)
     {
         if (index < 0 || index > fieldNames.size())
             throw new IndexOutOfBoundsException("Cannot insert new column at index " + Integer.toString(index));
@@ -235,7 +264,7 @@ public class Table implements java.io.Serializable
      * @param oldName The name of the column to be renamed.
      * @param newName The new name for the column.
      */
-    public void renameColumn(String oldName, String newName)
+    void renameColumn(String oldName, String newName)
     {
         if (fieldNames.contains(newName))
             throw new IllegalArgumentException("Already a column named " + newName);
@@ -249,7 +278,7 @@ public class Table implements java.io.Serializable
      * Deletes a column from the table, and the associated value from every Record.
      * @param name The name of the column to be deleted.
      */
-    public void deleteColumn(String name)
+    void deleteColumn(String name)
     {
         int index = fieldNames.indexOf(name);
         if (index == -1)
@@ -264,9 +293,52 @@ public class Table implements java.io.Serializable
      * Renames the Table.
      * @param newName The new name.
      */
-    public void rename(String newName)
+    void rename(String newName)
     {
         name = newName;
+    }
+
+    /**
+     * Builds a matrix of Strings that represent the Table. The first line
+     * gives the name of the Table. The second line gives the names of the
+     * fields. Every line after that gives the values of those fields for a
+     * particular Record.
+     * @return The PrintInfo instance.
+     */
+    public String[][] getTableData()
+    {
+        // We need space for all the Records, the name of the Table, and the names
+        // of the fields.
+        String[][] tableData = new String[getNumRecords() + 2][];
+        tableData[0] = new String[]{getName()};
+        // Need to have the first col name be the key col name.
+        ArrayList<String> colNames = new ArrayList<>();
+        colNames.add(KEY_COL_NAME);
+        colNames.addAll(fieldNames);
+        tableData[1] = colNames.toArray(new String[0]);
+
+        // Record 0 is row 2.
+        int counter = 2;
+        ArrayList<String> fields;
+        for (Map.Entry<Integer, Record> entry : table.entrySet())
+        {
+            fields = new ArrayList<>();
+            fields.add(Integer.toString(entry.getKey()));
+            for (int i = 0; i < getNumFields(); i ++)
+                fields.add(entry.getValue().getField(i));
+            tableData[counter++] = fields.toArray(new String[0]);
+        }
+        return tableData;
+    }
+
+    void printTable()
+    {
+        TablePrinter.printTable(name, getTableData());
+    }
+
+    void saveTableToFile(String parentFolderPath, boolean useSerialization) throws IOException
+    {
+        TableFileReadWriter.writeToFile(this, parentFolderPath, useSerialization);
     }
 
     /**
@@ -303,71 +375,6 @@ public class Table implements java.io.Serializable
     }
 
     /**
-     * Builds a matrix of Strings that represent the Table. The first line
-     * gives the name of the Table. The second line gives the names of the
-     * fields. Every line after that gives the values of those fields for a
-     * particular Record.
-     * @return The PrintInfo instance.
-     */
-    public String[][] getTableData()
-    {
-        // We need space for all the Records, the name of the Table, and the names
-        // of the fields.
-        String[][] tableData = new String[getNumRecords() + 2][];
-        tableData[0] = new String[]{getName()};
-        // Need to have the first col name be the key col name.
-        ArrayList<String> colNames = new ArrayList<>();
-        colNames.add(KEY_COL_NAME);
-        colNames.addAll(fieldNames);
-        tableData[1] = colNames.toArray(new String[0]);
-
-        // Record 0 is row 2.
-        int counter = 2;
-        ArrayList<String> fields;
-        for (Map.Entry<Integer, Record> entry : table.entrySet())
-        {
-            fields = new ArrayList<>();
-            fields.add(Integer.toString(entry.getKey()));
-            for (int i = 0; i < getNumFields(); i ++)
-                fields.add(entry.getValue().getField(i));
-            tableData[counter++] = fields.toArray(new String[0]);
-        }
-        return tableData;
-    }
-
-    /**
-     * Factory method to load a Table from the data read in from a file.
-     * @param  name The name of the Table.
-     * @param  data The data read from the Table file.
-     * @return      The Table instance.
-     */
-    public static Table createTableFromData(String name, String[][] data)
-    {
-        // The first line is the human readable field names. We build the
-        // comma separated list of field names for the Table constructor.
-        String[] keyAndAttrs = data[0];
-        StringJoiner joiner = new StringJoiner(", ");
-        for (int i = 1; i < keyAndAttrs.length; i++)
-            joiner.add(keyAndAttrs[i]);
-
-        // The new Table instance.
-        Table t = new Table(name, joiner.toString());
-
-        // Now add the Records one at a time.
-        for (int row = 1; row < data.length; row++)
-        {
-            String[] recordFields = data[row];
-            String[] fields = new String[recordFields.length - 1];
-            int key = Integer.parseInt(recordFields[0]);
-            for (int f = 1; f < recordFields.length; f++)
-                fields[f - 1] = recordFields[f];
-            t.insertRecord(key, fields);
-        }
-
-        return t;
-    }
-
-    /**
      * Runs the tests for this class.
      * @param args Command line args.
      */
@@ -399,6 +406,9 @@ public class Table implements java.io.Serializable
         testGetAllKeys();
         testAddRecordAsSingleString();
         testGetTableData();
+        testTablePrinter();
+        testTableFileReadWriter();
+        testSaveTableToFile();
     }
 
     private void testGetters()
@@ -709,6 +719,104 @@ public class Table implements java.io.Serializable
             Record record = getRecord(Integer.parseInt(tableData[row][0]));
             for (int field = 1; field < tableData[row].length; field++)
                 claim(record.getField(field - 1).equals(tableData[row][field]));
+        }
+    }
+
+    private void testTablePrinter()
+    {
+        System.out.println("Testing TablePrinter");
+        Table t = new Table("Person", "Name, Address");
+        t.addRecord(new String[]{"Robin", "XX Nilford Road\nLeicester\nLE3 3GF"});
+        t.addRecord(new String[]{"Laura\nCollins", "XX Mewton Avenue\nBodworth\nCV2 0UQ"});
+        TablePrinter.printTable(t.getName(), t.getTableData());
+        System.out.println("Testing complete");
+    }
+
+    private void testTableFileReadWriter()
+    {
+        System.out.println("Testing TableFileReadWriter");
+        runTestTableFileReadWriter("tableFiles/", true, false);
+        runTestTableFileReadWriter("tableFiles/", false, false);
+        runTestTableFileReadWriter("newTableFiles/", true, true);
+        runTestTableFileReadWriter("newTableFiles/", false, true);
+        System.out.println("Testing complete");
+    }
+
+    private void runTestTableFileReadWriter(String pDP, boolean uS, boolean deleteDir)
+    {
+        Table t = new Table("TestTable", "Attr1, Attr2");
+        t.addRecord(new String[]{"Val1", "Val2"});
+        t.addRecord(new String[]{"Val, 3!\n", "  Val  4  \n"});
+        try
+        {
+            TableFileReadWriter.writeToFile(t, pDP, uS);
+        }
+        catch (IOException e)
+        {
+            claim(false);
+        }
+        try
+        {
+            Table r = TableFileReadWriter.readFromFile(t.getName(), pDP, uS);
+            claim(t.equals(r));
+        }
+        catch (IOException e)
+        {
+            claim(false);
+        }
+        try
+        {
+            Table n = TableFileReadWriter.readFromFile("NotATable", pDP, uS);
+            claim(false);
+        }
+        catch (IllegalArgumentException i)
+        {
+            // test passed
+        }
+        catch (IOException e)
+        {
+            // Should be the first, not the second exception type.
+            claim(false);
+        }
+
+        claim(TableFileReadWriter.getTableNameFromFileName(".DS_Store") == null);
+        try
+        {
+            TableFileReadWriter.getTableNameFromFileName("tableName.txt");
+            claim(false);
+        }
+        catch (IllegalArgumentException e)
+        {
+            // test passed
+        }
+
+        String tableName = "tableName";
+        claim(tableName.equals(TableFileReadWriter.getTableNameFromFileName(tableName + TableFileReadWriter.SERIALIZATION_FILE_EXT)));
+        claim(tableName.equals(TableFileReadWriter.getTableNameFromFileName(tableName + TableFileReadWriter.CUSTOM_METHOD_FILE_EXT)));
+        if (deleteDir)
+            TableFileReadWriter.deleteDir(new File(pDP));
+    }
+
+    private void testSaveTableToFile()
+    {
+        String parentDirPath = "dbTestFolderTable/";
+        try
+        {
+            saveTableToFile(parentDirPath, true);
+            claim(equals(TableFileReadWriter.readFromFile(getName(), parentDirPath, true)));
+        }
+        catch (IOException e)
+        {
+            claim (false);
+        }
+        try
+        {
+            saveTableToFile(parentDirPath, false);
+            claim(equals(TableFileReadWriter.readFromFile(getName(), parentDirPath, false)));
+        }
+        catch (IOException e)
+        {
+            claim(false);
         }
     }
 }
