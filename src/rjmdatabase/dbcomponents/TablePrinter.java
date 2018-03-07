@@ -1,9 +1,8 @@
-package rjmdatabase.printutils;
+package rjmdatabase.dbcomponents;
 
 import java.util.StringJoiner;
 import java.util.Collections;
 
-import rjmdatabase.dbcomponents.Table;
 import rjmdatabase.exceptions.TestsElsewhereException;
 
 /**
@@ -128,7 +127,7 @@ public class TablePrinter
     // Gets the StringJoiner used to build up lines to print.
     private static StringJoiner getLineStringJoiner()
     {
-        String prefix = INCLUDE_FIRST_COL_LINE ? FIELD_SEPARATOR.replaceFirst("^\\s++", "") : "";
+        String prefix = INCLUDE_FIRST_COL_LINE ? FIELD_SEPARATOR.replaceFirst("\\s++", "") : "";
         String suffix = INCLUDE_FINAL_COL_LINE ? FIELD_SEPARATOR.replaceFirst("\\s++$", "") : "";
         return new StringJoiner(FIELD_SEPARATOR, prefix, suffix);
     }

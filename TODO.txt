@@ -1,0 +1,2 @@
+Implement a dirty flag on Tables to indicate they need to be saved.
+Use this to implement incremental saving.

@@ -1,5 +1,3 @@
-*.class
-*/*.class
-tableFiles/*
-testDir/*
-dbTestFolder*/*
+**/*.class
+Brief.txt
+test/dbTestFolders/*

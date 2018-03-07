@@ -1,11 +1,11 @@
 package rjmdatabase;
 
-import rjmdatabase.dbcomponents.Record;
-import rjmdatabase.dbcomponents.Table;
-import rjmdatabase.dbcomponents.Database;
-import rjmdatabase.fileutils.FileUtil;
-import rjmdatabase.fileutils.TableFileReadWriter;
-import rjmdatabase.printutils.TablePrinter;
+import rjmdatabase.dbcomponents.RecordTest;
+import rjmdatabase.dbcomponents.TableTest;
+import rjmdatabase.dbcomponents.DatabaseTest;
+import rjmdatabase.dbcomponents.TableFileReadWriterTest;
+import rjmdatabase.dbcomponents.TablePrinterTest;
+import rjmdatabase.fileutils.FileUtilTest;
 import rjmdatabase.exceptions.TestsElsewhereException;
 
 /**
@@ -27,17 +27,17 @@ public class TestRunner
 
     private static void runAllTests(String[] args)
     {
-        FileUtil.main(args);
+        FileUtilTest.main(args);
         try
-        { TableFileReadWriter.main(args); }
+        { TableFileReadWriterTest.main(args); }
         catch (TestsElsewhereException e)
         { }
         try
-        { TablePrinter.main(args); }
+        { TablePrinterTest.main(args); }
         catch (TestsElsewhereException e)
         { }
-        Record.main(args);
-        Table.main(args);
-        Database.main(args);
+        RecordTest.main(args);
+        TableTest.main(args);
+        DatabaseTest.main(args);
     }
 }

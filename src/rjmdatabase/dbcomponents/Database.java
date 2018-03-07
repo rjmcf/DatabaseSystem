@@ -1,7 +1,6 @@
 package rjmdatabase.dbcomponents;
 
 import java.util.HashMap;
-import rjmdatabase.fileutils.TableFileReadWriter;
 import rjmdatabase.fileutils.FileUtil;
 import java.io.File;
 import java.io.IOException;
@@ -115,107 +114,5 @@ public class Database
                 continue;
             addTable(TableFileReadWriter.readFromFile(tableName, parentDirPath, useSerialization));
         }
-    }
-
-    /**
-     * Runs tests for this class.
-     * @param args Command line arguments
-     */
-    public static void main(String[] args) {
-        String serTestFolder = "dbTestFolders/databaseSer";
-        String rjmTestFolder = "dbTestFolders/databaseRjm";
-        System.out.println("Testing Database");
-        Database db = Database.createNewDatabase(rjmTestFolder, false);
-        db.test(rjmTestFolder, false);
-        db = Database.createNewDatabase(serTestFolder, true);
-        db.test(serTestFolder, true);
-        System.out.println("Testing complete");
-    }
-
-    private void claim(boolean b)
-    {
-        if (!b) throw new Error("Test failed");
-    }
-
-    private void test(String folderName, boolean usingSync)
-    {
-        Table personTable = new Table("Person", "Name, Address");
-        personTable.addRecord("Robyn, XX Nilfrod Avenue\nLoughborough");
-        Table animalTable = new Table("Animal", "Name, Type, Owner");
-        animalTable.addRecord("Minnie, Cat, 0");
-
-        addTable(personTable);
-        addTable(animalTable);
-        claim(personTable.equals(getTable("Person")));
-        claim(animalTable.equals(getTable("Animal")));
-
-        try
-        {
-            addTable(personTable);
-            claim(false);
-        }
-        catch (IllegalArgumentException e)
-        {
-            // test passed
-        }
-
-        try
-        {
-            getTable("Random");
-            claim(false);
-        }
-        catch (IndexOutOfBoundsException e)
-        {
-            // test passed
-        }
-
-        try
-        {
-            saveDatabase();
-        }
-        catch (IOException e)
-        {
-            claim(false);
-        }
-
-        try
-        {
-            Database.loadDatabase(folderName, !usingSync);
-            claim(false);
-        }
-        catch (IllegalArgumentException e)
-        {
-            // test passed
-        }
-        catch (IOException e)
-        {
-            claim(false);
-        }
-        try
-        {
-            Database.loadDatabase("fakeFolderName", usingSync);
-            claim(false);
-        }
-        catch (IllegalArgumentException e)
-        {
-            // test passed
-        }
-        catch (IOException e)
-        {
-            claim(false);
-        }
-
-        try
-        {
-            Database loaded = Database.loadDatabase(folderName, usingSync);
-            claim(personTable.equals(loaded.getTable("Person")));
-            claim(animalTable.equals(loaded.getTable("Animal")));
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            claim(false);
-        }
-
     }
 }
