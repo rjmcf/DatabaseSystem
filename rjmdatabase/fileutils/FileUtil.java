@@ -1,4 +1,4 @@
-package fileutils;
+package rjmdatabase.fileutils;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -105,7 +105,7 @@ public class FileUtil
 
     private void test(String args[])
     {
-        String fName = "testDir/testFile.txt";
+        String fName = "dbTestFolders/testDir/testFile.txt";
         try
         {
             FileUtil.writeFile(fName, new String[] {"This is the first line", "This is the second line"});

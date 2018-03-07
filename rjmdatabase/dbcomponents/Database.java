@@ -1,7 +1,8 @@
-package dbcomponents;
+package rjmdatabase.dbcomponents;
 
 import java.util.HashMap;
-import fileutils.TableFileReadWriter;
+import rjmdatabase.fileutils.TableFileReadWriter;
+import rjmdatabase.fileutils.FileUtil;
 import java.io.File;
 import java.io.IOException;
 
@@ -18,7 +19,8 @@ public class Database
     private HashMap<String, Table> tables;
     // The path to where all the Table files will be saved.
     private String parentDirPath;
-    private TableFileReadWriter tableFileReadWriter;
+    private boolean useSerialization;
+
 
     private Database()
     { }
@@ -31,12 +33,20 @@ public class Database
      */
     public static Database createNewDatabase(String fN, boolean uS)
     {
+        instance = initialiseOldDatabase(fN, uS);
+        FileUtil.makeParentDirsIfNeeded(instance.parentDirPath + "dummy.txt");
+
+        return instance;
+    }
+
+    private static Database initialiseOldDatabase(String fN, boolean uS)
+    {
         if (instance == null)
             instance = new Database();
 
         instance.tables = new HashMap<>();
         instance.parentDirPath = fN + "/";
-        instance.tableFileReadWriter = TableFileReadWriter.getInstance(instance.parentDirPath, uS);
+        instance.useSerialization = uS;
 
         return instance;
     }
@@ -74,7 +84,7 @@ public class Database
     {
         for (Table table : tables.values())
         {
-            tableFileReadWriter.writeToFile(table);
+            table.saveTableToFile(parentDirPath, useSerialization);
         }
     }
 
@@ -87,7 +97,7 @@ public class Database
      */
     public static Database loadDatabase(String fN, boolean uS) throws IOException
     {
-        Database result = Database.createNewDatabase(fN, uS);
+        Database result = Database.initialiseOldDatabase(fN, uS);
         result.loadTablesFromFile();
         return result;
     }
@@ -103,7 +113,7 @@ public class Database
             tableName = TableFileReadWriter.getTableNameFromFileName(tableFile.getName());
             if (tableName == null)
                 continue;
-            addTable(tableFileReadWriter.readFromFile(tableName));
+            addTable(TableFileReadWriter.readFromFile(tableName, parentDirPath, useSerialization));
         }
     }
 
@@ -112,11 +122,13 @@ public class Database
      * @param args Command line arguments
      */
     public static void main(String[] args) {
+        String serTestFolder = "dbTestFolders/databaseSer";
+        String rjmTestFolder = "dbTestFolders/databaseRjm";
         System.out.println("Testing Database");
-        Database db = Database.createNewDatabase("dbTestFolderRjm", false);
-        db.test("dbTestFolderRjm", false);
-        db = Database.createNewDatabase("dbTestFolderSer", true);
-        db.test("dbTestFolderSer", true);
+        Database db = Database.createNewDatabase(rjmTestFolder, false);
+        db.test(rjmTestFolder, false);
+        db = Database.createNewDatabase(serTestFolder, true);
+        db.test(serTestFolder, true);
         System.out.println("Testing complete");
     }
 
@@ -201,6 +213,7 @@ public class Database
         }
         catch (IOException e)
         {
+            e.printStackTrace();
             claim(false);
         }
 
