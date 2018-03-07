@@ -1,11 +1,4 @@
 language: java
 install: true
 script:
-- javac rjmdatabase/fileutils/FileUtil.java
-- javac rjmdatabase/dbcomponents/Record.java
-- javac rjmdatabase/dbcomponents/Table.java
-- javac rjmdatabase/fileutils/TableFileReadWriter.java
-- javac rjmdatabase/printutils/TablePrinter.java
-- javac rjmdatabase/dbcomponents/Database.java
-- javac rjmdatabase/TestRunner.java
-- java rjmdatabase/TestRunner
+- make -s runTests
