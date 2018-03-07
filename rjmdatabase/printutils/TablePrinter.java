@@ -1,9 +1,9 @@
-package printutils;
+package rjmdatabase.printutils;
 
 import java.util.StringJoiner;
 import java.util.Collections;
 
-import dbcomponents.Table;
+import rjmdatabase.dbcomponents.Table;
 
 /**
  * Utility class to pretty print a Table to the console.

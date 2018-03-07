@@ -1,4 +1,4 @@
-package dbcomponents;
+package rjmdatabase.dbcomponents;
 
 import java.util.ArrayList;
 import java.util.HashMap;

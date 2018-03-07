@@ -1,6 +1,6 @@
-package fileutils;
+package rjmdatabase.fileutils;
 
-import dbcomponents.Table;
+import rjmdatabase.dbcomponents.Table;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -199,17 +199,19 @@ public class TableFileReadWriter
      */
     public static void main(String[] args)
     {
+        String oldFolder = "dbTestFolders/tableFiles/";
+        String newFolder = "dbTestFolders/newTableFiles/";
         System.out.println("Testing TableFileReadWriter");
-        TableFileReadWriter tfrw1 = TableFileReadWriter.getInstance("tableFiles/", true);
+        TableFileReadWriter tfrw1 = TableFileReadWriter.getInstance(oldFolder, true);
         tfrw1.test(args);
-        TableFileReadWriter tfrw2 = TableFileReadWriter.getInstance("tableFiles/", false);
+        TableFileReadWriter tfrw2 = TableFileReadWriter.getInstance(oldFolder, false);
         tfrw2.test(args);
-        TableFileReadWriter tfrw3 = TableFileReadWriter.getInstance("newTableFiles/", true);
+        TableFileReadWriter tfrw3 = TableFileReadWriter.getInstance(newFolder, true);
         tfrw3.test(args);
-        deleteDir(new File("newTableFiles/"));
-        TableFileReadWriter tfrw4 = TableFileReadWriter.getInstance("newTableFiles/", false);
+        deleteDir(new File(newFolder));
+        TableFileReadWriter tfrw4 = TableFileReadWriter.getInstance(newFolder, false);
         tfrw4.test(args);
-        deleteDir(new File("newTableFiles/"));
+        deleteDir(new File(newFolder));
         System.out.println("Testing complete");
     }
 
