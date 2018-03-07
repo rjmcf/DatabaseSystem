@@ -3,27 +3,20 @@ package rjmdatabase.fileutils;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class FileUtilTest
+public class FileUtilTest extends rjmdatabase.TestBase
 {
     /**
      * Tests this class by writing to a reading from a file and comparing the
      * results.
      * @param args Command line arguments.
      */
-    public static void main(String[] args)
-    {
-        System.out.println("Testing FileUtil");
-        FileUtilTest fT = new FileUtilTest();
-        fT.test();
-        System.out.println("Testing FileUtil complete");
-    }
+     public static void main(String[] args) {
+         FileUtilTest tester = new FileUtilTest();
+         tester.startTest(args);
+     }
 
-    private void claim(boolean b)
-    {
-        if (!b) throw new Error("Test Failed");
-    }
-
-    private void test()
+    @Override
+    protected void test(String[] args)
     {
         String fName = "dbTestFolders/testDir/testFile.txt";
         try

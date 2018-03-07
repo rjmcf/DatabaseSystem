@@ -1,29 +1,24 @@
 package rjmdatabase.dbcomponents;
 
 import rjmdatabase.dbcomponents.Table;
+import rjmdatabase.fileutils.FileUtil;
 
 import java.io.IOException;
 import java.io.File;
 
-public class TableFileReadWriterTest
+public class TableFileReadWriterTest extends rjmdatabase.TestBase
 {
     /**
      * Run tests for TableFileReadWriter.
      * @param args Command line arguments.
      */
-    public static void main(String[] args) {
-        System.out.println("Testing TableFileReadWriter");
-        TableFileReadWriterTest tfrwt = new TableFileReadWriterTest();
-        tfrwt.test();
-        System.out.println("Testing TableFileReadWriter complete");
-    }
+     public static void main(String[] args) {
+         TableFileReadWriterTest tester = new TableFileReadWriterTest();
+         tester.startTest(args);
+     }
 
-    private void claim(boolean b)
-    {
-        if (!b) throw new Error("Test Failed");
-    }
-
-    private void test()
+    @Override
+    protected void test(String[] args)
     {
         String oldFolder = "dbTestFolders/tableFiles";
         String newFolder = "dbTestFolders/newTableFiles";
@@ -85,6 +80,6 @@ public class TableFileReadWriterTest
         claim(tableName.equals(TableFileReadWriter.getTableNameFromFileName(tableName + TableFileReadWriter.SERIALIZATION_FILE_EXT)));
         claim(tableName.equals(TableFileReadWriter.getTableNameFromFileName(tableName + TableFileReadWriter.CUSTOM_METHOD_FILE_EXT)));
         if (deleteDir)
-            TableFileReadWriter.deleteDir(new File(pDP));
+            FileUtil.deleteDir(new File(pDP));
     }
 }

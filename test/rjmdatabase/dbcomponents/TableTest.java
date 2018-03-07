@@ -1,20 +1,18 @@
 package rjmdatabase.dbcomponents;
 
-public class TableTest
+public class TableTest extends rjmdatabase.TestBase
 {
+    /**
+     * Runs all the tests for Table.
+     * @param args Command line arguments.
+     */
     public static void main(String[] args) {
-        System.out.println("Testing Table");
-        TableTest tt = new TableTest();
-        tt.test();
-        System.out.println("Testing Table complete");
+        TableTest tester = new TableTest();
+        tester.startTest(args);
     }
 
-    private void claim(boolean b)
-    {
-        if (!b) throw new Error("Test failed");
-    }
-
-    private void test()
+    @Override
+    protected void test(String[] args)
     {
         Table t = new Table("Animal", "Name, Breed");
         testGetters(t);
@@ -28,10 +26,6 @@ public class TableTest
         testRenameColumn(t);
         testEquals(t);
         testAddRecordAsSingleString(t);
-        //testGetTableData(t);
-        //testTablePrinter(t);
-        //testTableFileReadWriter(t);
-        //testSaveTableToFile(t);
     }
 
     private void testGetters(Table t)

@@ -3,8 +3,6 @@ package rjmdatabase.dbcomponents;
 import java.util.StringJoiner;
 import java.util.Collections;
 
-import rjmdatabase.exceptions.TestsElsewhereException;
-
 /**
  * Utility class to pretty print a Table to the console.
  * @author Rjmcf
@@ -130,13 +128,5 @@ public class TablePrinter
         String prefix = INCLUDE_FIRST_COL_LINE ? FIELD_SEPARATOR.replaceFirst("\\s++", "") : "";
         String suffix = INCLUDE_FINAL_COL_LINE ? FIELD_SEPARATOR.replaceFirst("\\s++$", "") : "";
         return new StringJoiner(FIELD_SEPARATOR, prefix, suffix);
-    }
-
-    /**
-     * Runs the tests on this class.
-     * @param args Command line arguments.
-     */
-    public static void main(String[] args) {
-        throw new TestsElsewhereException("TablePrinter", "Table");
     }
 }

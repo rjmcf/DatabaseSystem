@@ -3,26 +3,19 @@ package rjmdatabase.dbcomponents;
 import rjmdatabase.dbcomponents.Record;
 import java.util.ArrayList;
 
-public class RecordTest
+public class RecordTest extends rjmdatabase.TestBase
 {
     /**
      * Runs tests on the Record class.
      * @param args Command line arguments.
      */
-    public static void main(String[] args)
-    {
-        System.out.println("Testing Record");
-        RecordTest rT = new RecordTest();
-        rT.test();
-        System.out.println("Testing Record complete");
-    }
+     public static void main(String[] args) {
+         RecordTest tester = new RecordTest();
+         tester.startTest(args);
+     }
 
-    private void claim(boolean b)
-    {
-        if (!b) throw new Error("Test failure");
-    }
-
-    private void test()
+    @Override
+    protected  void test(String[] args)
     {
         Record r1 = new Record();
         testEmpty(r1);

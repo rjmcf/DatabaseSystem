@@ -1,6 +1,5 @@
 package rjmdatabase.dbcomponents;
 
-import rjmdatabase.exceptions.TestsElsewhereException;
 import rjmdatabase.fileutils.FileUtil;
 
 import java.io.IOException;
@@ -175,29 +174,5 @@ public class TableFileReadWriter
         String result = String.format("%x", new BigInteger(1, s.getBytes(ENCODING)));
         // Remember to add a leading "0" if we need it.
         return result.length() % 2 == 0 ? result : "0" + result;
-    }
-
-    /**
-     * Runs the tests on this class.
-     * @param args Command line arguments.
-     */
-    public static void main(String[] args)
-    {
-        throw new TestsElsewhereException("TableFileReadWriter", "Table");
-    }
-
-    /**
-     * Deletes the specified directory.
-     * @param file The name of the directory to be deleted.
-     */
-    public static void deleteDir(File file)
-    {
-        File[] contents = file.listFiles();
-        if (contents != null) {
-            for (File f : contents) {
-                deleteDir(f);
-            }
-        }
-        file.delete();
     }
 }

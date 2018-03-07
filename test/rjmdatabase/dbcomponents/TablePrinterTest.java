@@ -1,19 +1,18 @@
 package rjmdatabase.dbcomponents;
 
-public class TablePrinterTest
+public class TablePrinterTest extends rjmdatabase.TestBase
 {
     /**
      * Run tests for TablePrinter
      * @param args Command line args
      */
-    public static void main(String[] args) {
-        System.out.println("Testing TablePrinter");
-        TablePrinterTest tpt = new TablePrinterTest();
-        tpt.test();
-        System.out.println("Testing TablePrinter complete");
-    }
+     public static void main(String[] args) {
+         TablePrinterTest tester = new TablePrinterTest();
+         tester.startTest(args);
+     }
 
-    private void test()
+    @Override
+    protected void test(String[] args)
     {
         Table t = new Table("Person", "Name, Address");
         t.addRecord(new String[]{"Robin", "XX Nilford Road\nLeicester\nLE3 3GF"});

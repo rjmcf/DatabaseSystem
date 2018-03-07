@@ -2,20 +2,19 @@ package rjmdatabase.dbcomponents;
 
 import java.io.IOException;
 
-public class DatabaseTest
+public class DatabaseTest extends rjmdatabase.TestBase
 {
     /**
      * Run tests for Database.
      * @param args Command line args
      */
     public static void main(String[] args) {
-        System.out.println("Testing Database");
-        DatabaseTest dT = new DatabaseTest();
-        dT.test();
-        System.out.println("Testing Database complete");
+        DatabaseTest tester = new DatabaseTest();
+        tester.startTest(args);
     }
 
-    private void test()
+    @Override
+    protected void test(String[] args)
     {
         String serTestFolder = "dbTestFolders/databaseSer";
         String rjmTestFolder = "dbTestFolders/databaseRjm";
@@ -23,11 +22,6 @@ public class DatabaseTest
         testDatabase(db, rjmTestFolder, false);
         db = Database.createNewDatabase(serTestFolder, true);
         testDatabase(db, serTestFolder, true);
-    }
-
-    private void claim(boolean b)
-    {
-        if (!b) throw new Error("Test failed");
     }
 
     private void testDatabase(Database db, String folderName, boolean usingSync)

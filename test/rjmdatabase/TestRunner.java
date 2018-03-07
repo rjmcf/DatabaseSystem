@@ -6,7 +6,6 @@ import rjmdatabase.dbcomponents.DatabaseTest;
 import rjmdatabase.dbcomponents.TableFileReadWriterTest;
 import rjmdatabase.dbcomponents.TablePrinterTest;
 import rjmdatabase.fileutils.FileUtilTest;
-import rjmdatabase.exceptions.TestsElsewhereException;
 
 /**
  * Runs all the tests for all the classes in this project.
@@ -14,8 +13,6 @@ import rjmdatabase.exceptions.TestsElsewhereException;
  */
 public class TestRunner
 {
-    private TestRunner() {}
-
     /**
      * Entry point to the TestRunner. Simply runs all the tests.
      * @param args Command line arguments.
@@ -27,17 +24,18 @@ public class TestRunner
 
     private static void runAllTests(String[] args)
     {
-        FileUtilTest.main(args);
-        try
-        { TableFileReadWriterTest.main(args); }
-        catch (TestsElsewhereException e)
-        { }
-        try
-        { TablePrinterTest.main(args); }
-        catch (TestsElsewhereException e)
-        { }
-        RecordTest.main(args);
-        TableTest.main(args);
-        DatabaseTest.main(args);
+        TestBase[] testers = new TestBase[]
+                                {
+                                    new FileUtilTest(),
+                                    new RecordTest(),
+                                    new TablePrinterTest(),
+                                    new TableFileReadWriterTest(),
+                                    new TableTest(),
+                                    new DatabaseTest(),
+                                };
+        for (TestBase tester : testers)
+        {
+            tester.startTest(new String[0]);
+        }
     }
 }

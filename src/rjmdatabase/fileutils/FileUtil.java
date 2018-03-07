@@ -84,4 +84,19 @@ public class FileUtil
             throw new IllegalArgumentException("File " + fName + " not found");
         }
     }
+
+    /**
+     * Deletes the specified directory.
+     * @param file The name of the directory to be deleted.
+     */
+    public static void deleteDir(File file)
+    {
+        File[] contents = file.listFiles();
+        if (contents != null) {
+            for (File f : contents) {
+                deleteDir(f);
+            }
+        }
+        file.delete();
+    }
 }
