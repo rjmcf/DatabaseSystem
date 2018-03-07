@@ -1,10 +1,12 @@
-import dbcomponents.Record;
-import dbcomponents.Table;
-import dbcomponents.Database;
-import fileutils.FileUtil;
-import fileutils.TableFileReadWriter;
-import printutils.TablePrinter;
-import exceptions.TestsElsewhereException;
+package rjmdatabase;
+
+import rjmdatabase.dbcomponents.Record;
+import rjmdatabase.dbcomponents.Table;
+import rjmdatabase.dbcomponents.Database;
+import rjmdatabase.fileutils.FileUtil;
+import rjmdatabase.fileutils.TableFileReadWriter;
+import rjmdatabase.printutils.TablePrinter;
+import rjmdatabase.exceptions.TestsElsewhereException;
 
 /**
  * Runs all the tests for all the classes in this project.

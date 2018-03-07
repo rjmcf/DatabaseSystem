@@ -1,4 +1,4 @@
-package exceptions;
+package rjmdatabase.exceptions;
 
 public class TestsElsewhereException extends RuntimeException
 {

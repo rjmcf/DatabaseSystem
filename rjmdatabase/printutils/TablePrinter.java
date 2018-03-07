@@ -1,8 +1,10 @@
-package printutils;
+package rjmdatabase.printutils;
 
 import java.util.StringJoiner;
 import java.util.Collections;
-import exceptions.TestsElsewhereException;
+
+import rjmdatabase.dbcomponents.Table;
+import rjmdatabase.exceptions.TestsElsewhereException;
 
 /**
  * Utility class to pretty print a Table to the console.

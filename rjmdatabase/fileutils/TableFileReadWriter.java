@@ -1,7 +1,7 @@
-package fileutils;
+package rjmdatabase.fileutils;
 
-import dbcomponents.Table;
-import exceptions.TestsElsewhereException;
+import rjmdatabase.dbcomponents.Table;
+import rjmdatabase.exceptions.TestsElsewhereException;
 
 import java.io.IOException;
 import java.util.ArrayList;

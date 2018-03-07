@@ -1,4 +1,4 @@
-package dbcomponents;
+package rjmdatabase.dbcomponents;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.Arrays;
 import java.util.StringJoiner;
 import java.util.Collections;
-import printutils.TablePrinter;
-import fileutils.TableFileReadWriter;
-import fileutils.FileUtil;
+import rjmdatabase.printutils.TablePrinter;
+import rjmdatabase.fileutils.TableFileReadWriter;
+import rjmdatabase.fileutils.FileUtil;
 import java.io.IOException;
 import java.io.File;
 
@@ -734,11 +734,13 @@ public class Table implements java.io.Serializable
 
     private void testTableFileReadWriter()
     {
+        String oldFolder = "dbTestFolders/tableFiles";
+        String newFolder = "dbTestFolders/newTableFiles";
         System.out.println("Testing TableFileReadWriter");
-        runTestTableFileReadWriter("tableFiles/", true, false);
-        runTestTableFileReadWriter("tableFiles/", false, false);
-        runTestTableFileReadWriter("newTableFiles/", true, true);
-        runTestTableFileReadWriter("newTableFiles/", false, true);
+        runTestTableFileReadWriter(oldFolder, true, false);
+        runTestTableFileReadWriter(oldFolder, false, false);
+        runTestTableFileReadWriter(newFolder, true, true);
+        runTestTableFileReadWriter(newFolder, false, true);
         System.out.println("Testing complete");
     }
 
@@ -799,7 +801,7 @@ public class Table implements java.io.Serializable
 
     private void testSaveTableToFile()
     {
-        String parentDirPath = "dbTestFolderTable/";
+        String parentDirPath = "dbTestFolders/table/";
         try
         {
             saveTableToFile(parentDirPath, true);

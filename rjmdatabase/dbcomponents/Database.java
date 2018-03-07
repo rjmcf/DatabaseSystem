@@ -1,10 +1,10 @@
-package dbcomponents;
+package rjmdatabase.dbcomponents;
 
 import java.util.HashMap;
-import fileutils.TableFileReadWriter;
+import rjmdatabase.fileutils.TableFileReadWriter;
+import rjmdatabase.fileutils.FileUtil;
 import java.io.File;
 import java.io.IOException;
-import fileutils.FileUtil;
 
 /**
  * Represents a database. Currently a collection of Tables with some utility
@@ -122,11 +122,13 @@ public class Database
      * @param args Command line arguments
      */
     public static void main(String[] args) {
+        String serTestFolder = "dbTestFolders/databaseSer";
+        String rjmTestFolder = "dbTestFolders/databaseRjm";
         System.out.println("Testing Database");
-        Database db = Database.createNewDatabase("dbTestFolderRjm", false);
-        db.test("dbTestFolderRjm", false);
-        db = Database.createNewDatabase("dbTestFolderSer", true);
-        db.test("dbTestFolderSer", true);
+        Database db = Database.createNewDatabase(rjmTestFolder, false);
+        db.test(rjmTestFolder, false);
+        db = Database.createNewDatabase(serTestFolder, true);
+        db.test(serTestFolder, true);
         System.out.println("Testing complete");
     }
 
