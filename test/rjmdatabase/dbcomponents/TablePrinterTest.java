@@ -1,6 +1,7 @@
 package rjmdatabase.dbcomponents;
 
 import rjmdatabase.testutils.TestBase;
+import rjmdatabase.testutils.Test;
 
 public class TablePrinterTest extends TestBase
 {
@@ -10,11 +11,11 @@ public class TablePrinterTest extends TestBase
      */
      public static void main(String[] args) {
          TablePrinterTest tester = new TablePrinterTest();
-         tester.startTest(args);
+         tester.startTest();
      }
 
-    @Override
-    protected void test(String[] args)
+    @Test
+    public void test()
     {
         Table t = new Table("Person", "Name, Address");
         t.addRecord(new String[]{"Robin", "XX Nilford Road\nLeicester\nLE3 3GF"});

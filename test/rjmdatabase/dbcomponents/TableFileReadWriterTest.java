@@ -1,6 +1,7 @@
 package rjmdatabase.dbcomponents;
 
 import rjmdatabase.testutils.TestBase;
+import rjmdatabase.testutils.Test;
 import rjmdatabase.dbcomponents.Table;
 import rjmdatabase.fileutils.FileUtil;
 
@@ -15,21 +16,21 @@ public class TableFileReadWriterTest extends TestBase
      */
      public static void main(String[] args) {
          TableFileReadWriterTest tester = new TableFileReadWriterTest();
-         tester.startTest(args);
+         tester.startTest();
      }
 
-    @Override
-    protected void test(String[] args)
+    @Test
+    public void test()
     {
         String oldFolder = "dbTestFolders/tableFiles";
         String newFolder = "dbTestFolders/newTableFiles";
-        runTestTableFileReadWriter(oldFolder, true, false);
-        runTestTableFileReadWriter(oldFolder, false, false);
-        runTestTableFileReadWriter(newFolder, true, true);
-        runTestTableFileReadWriter(newFolder, false, true);
+        repeatableTableFileReadWriter(oldFolder, true, false);
+        repeatableTableFileReadWriter(oldFolder, false, false);
+        repeatableTableFileReadWriter(newFolder, true, true);
+        repeatableTableFileReadWriter(newFolder, false, true);
     }
 
-    private void runTestTableFileReadWriter(String pDP, boolean uS, boolean deleteDir)
+    private void repeatableTableFileReadWriter(String pDP, boolean uS, boolean deleteDir)
     {
         Table t = new Table("TestTable", "Attr1, Attr2");
         t.addRecord(new String[]{"Val1", "Val2"});

@@ -1,21 +1,31 @@
 package rjmdatabase.dbcomponents;
 
 import rjmdatabase.testutils.TestBase;
+import rjmdatabase.testutils.Test;
 import java.io.IOException;
 
 public class TableTest extends TestBase
 {
+    static String tableTestFolderPath = "dbTestFolders/table/";
+    static Table emptyTable;
+    static Table filledTable;
     /**
      * Runs all the tests for Table.
      * @param args Command line arguments.
      */
     public static void main(String[] args) {
         TableTest tester = new TableTest();
-        tester.startTest(args);
+        tester.startTest();
     }
 
     @Override
-    protected void test(String[] args)
+    public void beforeTest()
+    {
+
+    }
+
+    @Test
+    public void test()
     {
         Table t = new Table("Animal", "Name, Breed");
         testGetters(t);

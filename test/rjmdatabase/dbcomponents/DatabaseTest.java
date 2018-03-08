@@ -1,36 +1,50 @@
 package rjmdatabase.dbcomponents;
 
 import rjmdatabase.testutils.TestBase;
+import rjmdatabase.testutils.Test;
 import java.io.IOException;
 
 public class DatabaseTest extends TestBase
 {
+    static String serTestFolder = "dbTestFolders/databaseSer";
+    static String rjmTestFolder = "dbTestFolders/databaseRjm";
+    static Table personTable;
+    static Table animalTable;
+
     /**
      * Run tests for Database.
      * @param args Command line args
      */
     public static void main(String[] args) {
         DatabaseTest tester = new DatabaseTest();
-        tester.startTest(args);
+        tester.startTest();
     }
 
     @Override
-    protected void test(String[] args)
+    protected void beforeTest()
     {
-        String serTestFolder = "dbTestFolders/databaseSer";
-        String rjmTestFolder = "dbTestFolders/databaseRjm";
-        Database db = Database.createNewDatabase(rjmTestFolder, false);
-        testDatabase(db, rjmTestFolder, false);
-        db = Database.createNewDatabase(serTestFolder, true);
-        testDatabase(db, serTestFolder, true);
+        personTable = new Table("Person", "Name, Address");
+        personTable.addRecord("Robyn, XX Nilfrod Avenue\nLoughborough");
+        animalTable = new Table("Animal", "Name, Type, Owner");
+        animalTable.addRecord("Minnie, Cat, 0");
     }
 
-    private void testDatabase(Database db, String folderName, boolean usingSync)
+    @Test
+    public void testDatabaseSer()
     {
-        Table personTable = new Table("Person", "Name, Address");
-        personTable.addRecord("Robyn, XX Nilfrod Avenue\nLoughborough");
-        Table animalTable = new Table("Animal", "Name, Type, Owner");
-        animalTable.addRecord("Minnie, Cat, 0");
+        Database db = Database.createNewDatabase(rjmTestFolder, false);
+        repeatableDatabaseTest(db, rjmTestFolder, false);
+    }
+
+    @Test
+    public void testDatabaseRjm()
+    {
+        Database db = Database.createNewDatabase(serTestFolder, true);
+        repeatableDatabaseTest(db, serTestFolder, true);
+    }
+
+    private void repeatableDatabaseTest(Database db, String folderName, boolean usingSync)
+    {
 
         db.addTable(personTable);
         db.addTable(animalTable);

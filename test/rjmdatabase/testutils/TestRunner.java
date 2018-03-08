@@ -19,10 +19,10 @@ public class TestRunner
      */
     public static void main(String[] args)
     {
-        runAllTests(args);
+        runAllTests();
     }
 
-    private static void runAllTests(String[] args)
+    private static void runAllTests()
     {
         TestBase[] testers = new TestBase[]
                                 {
@@ -35,7 +35,7 @@ public class TestRunner
                                 };
         for (TestBase tester : testers)
         {
-            tester.startTest(new String[0]);
+            tester.startTest();
         }
     }
 }

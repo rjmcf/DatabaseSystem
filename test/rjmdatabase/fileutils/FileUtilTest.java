@@ -1,6 +1,7 @@
 package rjmdatabase.fileutils;
 
 import rjmdatabase.testutils.TestBase;
+import rjmdatabase.testutils.Test;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -13,11 +14,11 @@ public class FileUtilTest extends TestBase
      */
      public static void main(String[] args) {
          FileUtilTest tester = new FileUtilTest();
-         tester.startTest(args);
+         tester.startTest();
      }
 
-    @Override
-    protected void test(String[] args)
+    @Test
+    public void test()
     {
         String fName = "dbTestFolders/testDir/testFile.txt";
         try

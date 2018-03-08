@@ -1,38 +1,41 @@
 package rjmdatabase.dbcomponents;
 
 import rjmdatabase.testutils.TestBase;
+import rjmdatabase.testutils.Test;
 import rjmdatabase.dbcomponents.Record;
 import java.util.ArrayList;
 
 public class RecordTest extends TestBase
 {
+    static Record emptyRecord;
+    static Record filledRecord;
+
     /**
      * Runs tests on the Record class.
      * @param args Command line arguments.
      */
-     public static void main(String[] args) {
+    public static void main(String[] args) {
          RecordTest tester = new RecordTest();
-         tester.startTest(args);
-     }
-
-    @Override
-    protected  void test(String[] args)
-    {
-        Record r1 = new Record();
-        testEmpty(r1);
-        ArrayList<String> entries = new ArrayList<String>();
-        entries.add("These");
-        entries.add("are");
-        entries.add("entries");
-        Record r2 = new Record(entries);
-        testFilled(r2);
+         tester.startTest();
     }
 
-    private void testEmpty(Record record)
+    @Override
+    public void beforeTest()
+    {
+        emptyRecord = new Record();
+        ArrayList<String> entries = new ArrayList<String>();
+        entries.add("Field0");
+        entries.add("Field1");
+        entries.add("Field2");
+        filledRecord = new Record(entries);
+    }
+
+    @Test
+    public void testGetField()
     {
         try
         {
-            record.getField(0);
+            emptyRecord.getField(-1);
             claim(false);
         }
         catch (IndexOutOfBoundsException e)
@@ -41,36 +44,16 @@ public class RecordTest extends TestBase
         }
         try
         {
-            record.getField(-1);
+            emptyRecord.getField(0);
             claim(false);
         }
         catch (IndexOutOfBoundsException e)
         {
-            // test pass
-        }
-
-        try
-        {
-            record.updateField(0, "Anything");
-            claim(false);
-        }
-        catch (IndexOutOfBoundsException e)
-        {
-            // test pass
+            // test passed
         }
         try
         {
-            record.updateField(-1, "Anything");
-            claim(false);
-        }
-        catch (IndexOutOfBoundsException e)
-        {
-            // test pass
-        }
-
-        try
-        {
-            record.addField(-1, "Anything");
+            filledRecord.getField(-1);
             claim(false);
         }
         catch (IndexOutOfBoundsException e)
@@ -79,19 +62,7 @@ public class RecordTest extends TestBase
         }
         try
         {
-            record.addField(1, "Anything");
-            claim(false);
-        }
-        catch (IndexOutOfBoundsException e)
-        {
-            // test pass
-        }
-
-        record.addField(0, "First");
-        claim(record.getField(0).equals("First"));
-        try
-        {
-            record.getField(1);
+            filledRecord.getField(3);
             claim(false);
         }
         catch (IndexOutOfBoundsException e)
@@ -99,51 +70,17 @@ public class RecordTest extends TestBase
             // test passed
         }
 
-        try
-        {
-            record.deleteField(-1);
-            claim(false);
-        }
-        catch (IndexOutOfBoundsException e)
-        {
-            // test pass
-        }
-        try
-        {
-            record.deleteField(1);
-            claim(false);
-        }
-        catch (IndexOutOfBoundsException e)
-        {
-            // test pass
-        }
-
-        record.deleteField(0);
-        try
-        {
-            record.getField(0);
-            claim(false);
-        }
-        catch (IndexOutOfBoundsException e)
-        {
-            // test pass
-        }
-
-        Record other = new Record();
-        claim(record.equals(record));
-        claim(record.equals(other));
-        other.addField(0, "Nope");
-        claim(!record.equals(other));
+        claim("Field0".equals(filledRecord.getField(0)));
+        claim("Field1".equals(filledRecord.getField(1)));
+        claim("Field2".equals(filledRecord.getField(2)));
     }
 
-    private void testFilled(Record record)
+    @Test
+    public void testAddField()
     {
-        claim(record.getField(0).equals("These"));
-        claim(record.getField(1).equals("are"));
-        claim(record.getField(2).equals("entries"));
         try
         {
-            record.getField(-1);
+            emptyRecord.addField(-1, "Anything");
             claim(false);
         }
         catch (IndexOutOfBoundsException e)
@@ -152,7 +89,63 @@ public class RecordTest extends TestBase
         }
         try
         {
-            record.getField(3);
+            emptyRecord.addField(1, "Anything");
+            claim(false);
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            // test pass
+        }
+        emptyRecord.addField(0, "Field0");
+        claim("Field0".equals(emptyRecord.getField(0)));
+
+        try
+        {
+            filledRecord.addField(-1, "Anything");
+            claim(false);
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            // test pass
+        }
+        try
+        {
+            filledRecord.addField(4, "Anything");
+            claim(false);
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            // test pass
+        }
+        filledRecord.addField(3, "Field3");
+        claim("Field3".equals(filledRecord.getField(3)));
+        filledRecord.addField(2, "NewField2");
+        for (int i = 0; i < 5; i++)
+        {
+            if (i == 2)
+                claim("NewField2".equals(filledRecord.getField(i)));
+            else if (i > 2)
+                claim(("Field"+Integer.toString(i-1)).equals(filledRecord.getField(i)));
+            else
+                claim(("Field"+Integer.toString(i)).equals(filledRecord.getField(i)));
+        }
+    }
+
+    @Test
+    public void testUpdateField()
+    {
+        try
+        {
+            emptyRecord.updateField(-1, "Anything");
+            claim(false);
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            // test pass
+        }
+        try
+        {
+            emptyRecord.updateField(0, "Anything");
             claim(false);
         }
         catch (IndexOutOfBoundsException e)
@@ -160,11 +153,9 @@ public class RecordTest extends TestBase
             // test pass
         }
 
-        record.updateField(2, "Anything");
-        claim(record.getField(2).equals("Anything"));
         try
         {
-            record.updateField(-1, "Anything");
+            filledRecord.updateField(-1, "Anything");
             claim(false);
         }
         catch (IndexOutOfBoundsException e)
@@ -173,7 +164,36 @@ public class RecordTest extends TestBase
         }
         try
         {
-            record.updateField(3, "Anything");
+            filledRecord.updateField(3, "Anything");
+            claim(false);
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            // test pass
+        }
+        filledRecord.updateField(1, "NewField1");
+        for (int i = 0; i < 3; i++)
+        {
+            String prefix = i == 1 ? "New" : "";
+            claim((prefix+"Field"+Integer.toString(i)).equals(filledRecord.getField(i)));
+        }
+    }
+
+    @Test
+    public void testDeleteField()
+    {
+        try
+        {
+            emptyRecord.deleteField(-1);
+            claim(false);
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            // test pass
+        }
+        try
+        {
+            emptyRecord.deleteField(0);
             claim(false);
         }
         catch (IndexOutOfBoundsException e)
@@ -183,7 +203,7 @@ public class RecordTest extends TestBase
 
         try
         {
-            record.addField(-1, "Anything");
+            filledRecord.deleteField(-1);
             claim(false);
         }
         catch (IndexOutOfBoundsException e)
@@ -192,68 +212,43 @@ public class RecordTest extends TestBase
         }
         try
         {
-            record.addField(4, "Anything");
+            filledRecord.deleteField(3);
             claim(false);
         }
         catch (IndexOutOfBoundsException e)
         {
             // test pass
         }
+        filledRecord.deleteField(1);
+        claim("Field0".equals(filledRecord.getField(0)));
+        claim("Field2".equals(filledRecord.getField(1)));
+    }
 
-        record.addField(3, "Things");
-        claim(record.getField(3).equals("Things"));
-        record.addField(2, "all");
-        claim(record.getField(2).equals("all"));
-        claim(record.getField(3).equals("Anything"));
+    @Test
+    public void testEquals()
+    {
+        claim(!emptyRecord.equals("Not a Record"));
+        claim(emptyRecord.equals(emptyRecord));
+        Record otherRecord = new Record();
+        claim(emptyRecord.equals(otherRecord));
+        otherRecord.addField(0, "A Field");
+        claim(!emptyRecord.equals(otherRecord));
 
-        try
-        {
-            record.deleteField(-1);
-            claim(false);
-        }
-        catch (IndexOutOfBoundsException e)
-        {
-            // test pass
-        }
-        try
-        {
-            record.deleteField(5);
-            claim(false);
-        }
-        catch (IndexOutOfBoundsException e)
-        {
-            // test pass
-        }
-
-        record.deleteField(2);
-        record.deleteField(2);
-        claim(record.getField(0).equals("These"));
-        claim(record.getField(1).equals("are"));
-        claim(record.getField(2).equals("Things"));
-        try
-        {
-            record.getField(3);
-            claim(false);
-        }
-        catch (IndexOutOfBoundsException e)
-        {
-            // test pass
-        }
-
-        claim(!record.equals(null));
-        String s = new String();
-        claim(!record.equals(s));
-        Record other = new Record();
-        claim(record.equals(record));
-        claim(!record.equals(other));
-        other.addField(0, "These");
-        other.addField(1, "are");
-        claim(!record.equals(other));
-        other.addField(2, "things");
-        claim(!record.equals(other));
-        other.updateField(2,"Things");
-        claim(record.equals(other));
-        other.addField(3, "Wait");
-        claim(!record.equals(other));
+        claim(!filledRecord.equals("Not a Record"));
+        claim(filledRecord.equals(filledRecord));
+        ArrayList<String> entries = new ArrayList<String>();
+        entries.add("Field0");
+        entries.add("Field1");
+        otherRecord = new Record(entries);
+        claim(!filledRecord.equals(otherRecord));
+        otherRecord.addField(2, "Field2");
+        claim(filledRecord.equals(otherRecord));
+        otherRecord.updateField(0, "NotField0");
+        claim(!filledRecord.equals(otherRecord));
+        otherRecord.updateField(0, "Field0");
+        otherRecord.addField(3, "Field3");
+        claim(!filledRecord.equals(otherRecord));
+        otherRecord.deleteField(3);
+        claim(filledRecord.equals(otherRecord));
     }
 }
