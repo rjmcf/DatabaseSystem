@@ -7,8 +7,7 @@ import java.util.HashMap;
 
 /**
  * Represents a database. Currently a collection of Tables with some utility
- * methods. Singleton class to ensure that Singleton TableFileReadWriter is not
- * abused, and to restrict number of Database sessions to 1.
+ * methods. Singleton class to restrict number of Database sessions to 1.
  * @author Rjmcf
  */
 public class Database
@@ -32,13 +31,13 @@ public class Database
      */
     public static Database createNewDatabase(String fN, boolean uS)
     {
-        instance = initialiseOldDatabase(fN, uS);
+        instance = initialiseDatabase(fN, uS);
         FileUtil.makeParentDirsIfNeeded(instance.parentDirPath + "dummy.txt");
 
         return instance;
     }
 
-    private static Database initialiseOldDatabase(String fN, boolean uS)
+    private static Database initialiseDatabase(String fN, boolean uS)
     {
         if (instance == null)
             instance = new Database();
@@ -96,7 +95,7 @@ public class Database
      */
     public static Database loadDatabase(String fN, boolean uS) throws IOException
     {
-        Database result = Database.initialiseOldDatabase(fN, uS);
+        Database result = Database.initialiseDatabase(fN, uS);
         result.loadTablesFromFile();
         return result;
     }

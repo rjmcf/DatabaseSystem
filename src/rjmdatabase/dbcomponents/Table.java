@@ -20,7 +20,7 @@ public class Table implements java.io.Serializable
     /**
      * The actual name of the first column, representing the Key for the table.
      */
-    public static final String KEY_COL_NAME = "KeyTable";
+    static final String KEY_COL_NAME = "KeyTable";
 
     // The name of this table.
     private String name;
@@ -38,7 +38,7 @@ public class Table implements java.io.Serializable
      * @param  data The data read from the Table file.
      * @return      The Table instance.
      */
-    public static Table createTableFromData(String name, String[][] data)
+    static Table createTableFromData(String name, String[][] data)
     {
         // The first line is the human readable field names. We build the
         // comma separated list of field names for the Table constructor.
@@ -70,7 +70,7 @@ public class Table implements java.io.Serializable
      * @param name  The name of the new Table.
      * @param fNames A comma separated list of the Table's new column names.
      */
-    public Table(String name, String fNames)
+    Table(String name, String fNames)
     {
         this.name = name;
         nextKey = 0;
@@ -82,7 +82,7 @@ public class Table implements java.io.Serializable
      * Gets the name of the Table.
      * @return The Table's name.
      */
-    public String getName()
+    String getName()
     {
         return name;
     }
@@ -302,7 +302,7 @@ public class Table implements java.io.Serializable
      * particular Record.
      * @return The PrintInfo instance.
      */
-    public String[][] getTableData()
+    String[][] getTableData()
     {
         // We need space for all the Records, the name of the Table, and the names
         // of the fields.

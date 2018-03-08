@@ -29,7 +29,7 @@ public class TablePrinter
      * Prints the supplied Table to the console.
      * @param t The Table to be printed.
      */
-    public static void printTable(String tableName, String[][] tableData)
+    static void printTable(String tableName, String[][] tableData)
     {
         // Stores some useful stats about the size of the table.
         int numCols = tableData[1].length;
