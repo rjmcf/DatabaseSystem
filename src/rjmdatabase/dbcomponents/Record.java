@@ -2,7 +2,6 @@ package rjmdatabase.dbcomponents;
 
 import java.util.ArrayList;
 import java.util.StringJoiner;
-import java.lang.IndexOutOfBoundsException;
 
 /**
  * Represents a Record. Implements Serializable in order to allow saving to a

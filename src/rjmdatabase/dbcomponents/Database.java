@@ -1,9 +1,9 @@
 package rjmdatabase.dbcomponents;
 
-import java.util.HashMap;
 import rjmdatabase.fileutils.FileUtil;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * Represents a database. Currently a collection of Tables with some utility

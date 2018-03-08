@@ -1,17 +1,17 @@
 package rjmdatabase.fileutils;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.io.File;
-import java.nio.file.Paths;
-import java.nio.file.Path;
-import java.io.BufferedWriter;
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.io.IOException;
+import java.io.BufferedWriter;
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 /**
@@ -20,7 +20,7 @@ import java.util.ArrayList;
  */
 public class FileUtil
 {
-    private final static Charset ENCODING = StandardCharsets.UTF_8;
+    public final static Charset ENCODING = StandardCharsets.UTF_8;
 
     /**
      * Makes the parent directories of a new file if they don't yet exist.

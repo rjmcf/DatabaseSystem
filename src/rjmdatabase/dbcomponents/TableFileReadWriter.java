@@ -1,21 +1,17 @@
 package rjmdatabase.dbcomponents;
 
 import rjmdatabase.fileutils.FileUtil;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.StringJoiner;
 import java.io.File;
-import java.math.BigInteger;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import javax.xml.bind.DatatypeConverter;
-
 import java.io.FileNotFoundException;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.StringJoiner;
+import javax.xml.bind.DatatypeConverter;
 
 /**
  * A utility class that reads and writes Tables to files. A Singleton class.
@@ -29,8 +25,6 @@ public class TableFileReadWriter
     private static String parentDirPath;
     // The file extension with which table files are saved.
     private static String fileExtension;
-    // The encoding used to convert between hex and String.
-    private static final Charset ENCODING = StandardCharsets.UTF_8;
     // The String used to separate fields in files.
     private static final String FIELD_SEPARATOR = String.valueOf((char)0x1F);
 
@@ -166,12 +160,12 @@ public class TableFileReadWriter
     private static String convertHexToString(String h)
     {
         byte[] bytes = DatatypeConverter.parseHexBinary(h);
-        return new String(bytes, ENCODING);
+        return new String(bytes, FileUtil.ENCODING);
     }
 
     private static String convertStringToHex(String s)
     {
-        String result = String.format("%x", new BigInteger(1, s.getBytes(ENCODING)));
+        String result = String.format("%x", new BigInteger(1, s.getBytes(FileUtil.ENCODING)));
         // Remember to add a leading "0" if we need it.
         return result.length() % 2 == 0 ? result : "0" + result;
     }
