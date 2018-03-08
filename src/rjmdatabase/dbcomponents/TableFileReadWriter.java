@@ -123,11 +123,11 @@ public class TableFileReadWriter
         String[][] tableData = t.getTableData();
 
         // The lines to write.
-        String[] lines = new String[tableData.length-1];
+        String[] lines = new String[tableData.length];
         StringJoiner joiner = new StringJoiner(FIELD_SEPARATOR);
 
         // Build the line to print for each row.
-        for (int row = 1; row < tableData.length; row++)
+        for (int row = 0; row < tableData.length; row++)
         {
             String[] rowFields = tableData[row];
             joiner = new StringJoiner(FIELD_SEPARATOR);
@@ -136,7 +136,7 @@ public class TableFileReadWriter
                 // We convert to hex to allow strange characters in these fields.
                 joiner.add(convertStringToHex(rowFields[f]));
             }
-            lines[row - 1] = joiner.toString();
+            lines[row] = joiner.toString();
         }
 
         String filePath = parentDirPath + t.getName() + fileExtension;

@@ -31,6 +31,8 @@ public class Table implements java.io.Serializable
     private ArrayList<String> fieldNames;
     // The map of keys to Records constituing the actual Table.
     private HashMap<Integer, Record> table;
+    // Whether the Table needs saving back to file
+    private boolean isDirty;
 
     /**
      * Factory method to load a Table from the data read in from a file.
@@ -48,7 +50,7 @@ public class Table implements java.io.Serializable
             joiner.add(keyAndAttrs[i]);
 
         // The new Table instance.
-        Table t = new Table(name, joiner.toString());
+        Table t = new Table(name, joiner.toString(), false);
 
         // Now add the Records one at a time.
         for (int row = 1; row < data.length; row++)
@@ -67,15 +69,22 @@ public class Table implements java.io.Serializable
     /**
      * Creates a new Table with the specified name, and a comma separated list
      * of column names.
-     * @param name  The name of the new Table.
+     * @param name   The name of the new Table.
      * @param fNames A comma separated list of the Table's new column names.
+     * @param isNew  Whether or not the Table is completely new or has been loaded.
      */
-    Table(String name, String fNames)
+    Table(String name, String fNames, boolean isNew)
     {
         this.name = name;
         nextKey = 0;
         fieldNames = new ArrayList<>(Arrays.asList(fNames.split(", ")));
         table = new HashMap<>();
+        isDirty = isNew;
+    }
+
+    Table(String name, String fNames)
+    {
+        this(name, fNames, true);
     }
 
     /**
@@ -103,6 +112,11 @@ public class Table implements java.io.Serializable
     private int getNextKey()
     {
         return nextKey;
+    }
+
+    boolean getIsDirty()
+    {
+        return isDirty;
     }
 
     // Finds the largest key assigned so far, and sets the next key to be one
@@ -161,6 +175,8 @@ public class Table implements java.io.Serializable
         while (table.putIfAbsent(nextKey, new Record(fields)) != null)
             setNextKeyBasedOnRecords();
         nextKey++;
+
+        isDirty = true;
     }
 
     /**
@@ -195,6 +211,7 @@ public class Table implements java.io.Serializable
         if (table.putIfAbsent(key, new Record(fields)) != null)
             throw new IllegalArgumentException("There already exists a record with that key");
         nextKey = key + 1;
+        isDirty = true;
     }
 
     /**
@@ -225,6 +242,7 @@ public class Table implements java.io.Serializable
         if (fieldIndex == -1)
             throw new IndexOutOfBoundsException("No attribute: " + fieldName + " exists");
         getRecord(key).updateField(fieldIndex, replacement);
+        isDirty = true;
     }
 
     /**
@@ -236,6 +254,7 @@ public class Table implements java.io.Serializable
     {
         if (table.remove(key) == null)
             throw new IndexOutOfBoundsException("No record found with that key");
+        isDirty = true;
     }
 
     /**
@@ -253,6 +272,7 @@ public class Table implements java.io.Serializable
         fieldNames.add(index, name);
         for (Record r: table.values())
             r.addField(index, defaultVal);
+        isDirty = true;
     }
 
     /**
@@ -269,6 +289,7 @@ public class Table implements java.io.Serializable
         if (index == -1)
             throw new IllegalArgumentException("No column with name " + oldName);
         fieldNames.set(index, newName);
+        isDirty = true;
     }
 
     /**
@@ -284,6 +305,7 @@ public class Table implements java.io.Serializable
         fieldNames.remove(index);
         for (Record r: table.values())
             r.deleteField(index);
+        isDirty = true;
     }
 
     /**
@@ -293,29 +315,28 @@ public class Table implements java.io.Serializable
     void rename(String newName)
     {
         name = newName;
+        isDirty = true;
     }
 
     /**
-     * Builds a matrix of Strings that represent the Table. The first line
-     * gives the name of the Table. The second line gives the names of the
-     * fields. Every line after that gives the values of those fields for a
-     * particular Record.
+     * Builds a matrix of Strings that represent the Table. The first line gives
+     * the names of the fields. Every line after that gives the values of those
+     * fields for a particular Record.
      * @return The PrintInfo instance.
      */
     String[][] getTableData()
     {
-        // We need space for all the Records, the name of the Table, and the names
+        // We need space for all the Records and the names
         // of the fields.
-        String[][] tableData = new String[getNumRecords() + 2][];
-        tableData[0] = new String[]{getName()};
+        String[][] tableData = new String[getNumRecords() + 1][];
         // Need to have the first col name be the key col name.
         ArrayList<String> colNames = new ArrayList<>();
         colNames.add(KEY_COL_NAME);
         colNames.addAll(fieldNames);
-        tableData[1] = colNames.toArray(new String[0]);
+        tableData[0] = colNames.toArray(new String[0]);
 
-        // Record 0 is row 2.
-        int counter = 2;
+        // Record 0 is row 1.
+        int counter = 1;
         ArrayList<String> fields;
         for (Map.Entry<Integer, Record> entry : table.entrySet())
         {
@@ -335,7 +356,19 @@ public class Table implements java.io.Serializable
 
     void saveTableToFile(String parentFolderPath, boolean useSerialization) throws IOException
     {
-        TableFileReadWriter.writeToFile(this, parentFolderPath, useSerialization);
+        if (isDirty)
+        {
+            isDirty = false;
+            try
+            {
+                TableFileReadWriter.writeToFile(this, parentFolderPath, useSerialization);
+            }
+            catch (IOException e)
+            {
+                isDirty = true;
+                throw e;
+            }
+        }
     }
 
     /**

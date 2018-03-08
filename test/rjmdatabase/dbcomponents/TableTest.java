@@ -1,5 +1,7 @@
 package rjmdatabase.dbcomponents;
 
+import java.io.IOException;
+
 public class TableTest extends rjmdatabase.TestBase
 {
     /**
@@ -26,6 +28,10 @@ public class TableTest extends rjmdatabase.TestBase
         testRenameColumn(t);
         testEquals(t);
         testAddRecordAsSingleString(t);
+        testPrintTable(t);
+        testSaveTableToFile(t);
+        testIsDirty(t);
+        testCreateTableFromDataTest(t);
     }
 
     private void testGetters(Table t)
@@ -277,43 +283,108 @@ public class TableTest extends rjmdatabase.TestBase
         claim(r.getField(1).equals("2"));
     }
 
-    /*private void testGetTableData(Table t)
+    private void testPrintTable(Table t)
     {
-        String[][] tableData = t.getTableData();
-        claim(tableData[0][0].equals(t.getName()));
-        claim(tableData[1][0].equals(KEY_COL_NAME));
-        String[] fieldNames = t.getFieldNames().split(", ");
-        for (int i = 1; i < tableData[1].length; i++)
-            tableData[1][i].equals(fieldNames[i-1]);
-        for (int row = 2; row < tableData.length; row++)
-        {
-            Record record = t.getRecord(Integer.parseInt(tableData[row][0]));
-            for (int field = 1; field < tableData[row].length; field++)
-                claim(record.getField(field - 1).equals(tableData[row][field]));
-        }
-    }*/
+        t.printTable();
+    }
 
-    /*
-    private void testSaveTableToFile()
+    private void testSaveTableToFile(Table t)
     {
+        claim(t.getIsDirty());
         String parentDirPath = "dbTestFolders/table/";
         try
         {
-            saveTableToFile(parentDirPath, true);
-            claim(equals(TableFileReadWriter.readFromFile(getName(), parentDirPath, true)));
+            t.saveTableToFile(parentDirPath, true);
+            claim(t.equals(TableFileReadWriter.readFromFile(t.getName(), parentDirPath, true)));
+            claim(!t.getIsDirty());
         }
         catch (IOException e)
         {
             claim (false);
         }
+        t.addRecord("Joe, 3");
+        claim(t.getIsDirty());
         try
         {
-            saveTableToFile(parentDirPath, false);
-            claim(equals(TableFileReadWriter.readFromFile(getName(), parentDirPath, false)));
+            t.saveTableToFile(parentDirPath, false);
+            claim(t.equals(TableFileReadWriter.readFromFile(t.getName(), parentDirPath, false)));
+            claim(!t.getIsDirty());
         }
         catch (IOException e)
         {
             claim(false);
         }
-    }*/
+    }
+
+    private void testIsDirty(Table t)
+    {
+        String parentDirPath = "dbTestFolders/table/";
+        claim(!t.getIsDirty());
+
+        // Rename Table
+        t.rename("NewName");
+        claim(t.getIsDirty());
+        try {t.saveTableToFile(parentDirPath, true);}
+        catch (IOException e) { claim(false); }
+        claim(!t.getIsDirty());
+
+        // Rename column
+        t.renameColumn("NumPets", "SomeNum");
+        claim(t.getIsDirty());
+        try {t.saveTableToFile(parentDirPath, true);}
+        catch (IOException e) { claim(false); }
+        claim(!t.getIsDirty());
+
+        // Add column
+        t.addColumn(1, "NewColumn", "Blah");
+        claim(t.getIsDirty());
+        try {t.saveTableToFile(parentDirPath, true);}
+        catch (IOException e) { claim(false); }
+        claim(!t.getIsDirty());
+
+        // Delete column
+        t.deleteColumn("NewColumn");
+        claim(t.getIsDirty());
+        try {t.saveTableToFile(parentDirPath, true);}
+        catch (IOException e) { claim(false); }
+        claim(!t.getIsDirty());
+
+        // Add Record
+        t.addRecord("Another, test");
+        claim(t.getIsDirty());
+        try {t.saveTableToFile(parentDirPath, true);}
+        catch (IOException e) { claim(false); }
+        claim(!t.getIsDirty());
+
+        // Update Record
+        t.updateRecord(6, "Name", "Elliot");
+        claim(t.getIsDirty());
+        try {t.saveTableToFile(parentDirPath, true);}
+        catch (IOException e) { claim(false); }
+        claim(!t.getIsDirty());
+
+        // Delete Record
+        t.deleteRecord(6);
+        claim(t.getIsDirty());
+        try {t.saveTableToFile(parentDirPath, true);}
+        catch (IOException e) { claim(false); }
+        claim(!t.getIsDirty());
+
+        // Load Table
+        try
+        {
+            Table o = TableFileReadWriter.readFromFile(t.getName(), parentDirPath, true);
+            claim(!o.getIsDirty());
+        }
+        catch (IOException e)
+        {
+            claim(false);
+        }
+    }
+
+    private void testCreateTableFromDataTest(Table t)
+    {
+        String[][] tableData = t.getTableData();
+        claim(t.equals(Table.createTableFromData(t.getName(), tableData)));
+    }
 }
