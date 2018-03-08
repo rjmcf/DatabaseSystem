@@ -1,8 +1,9 @@
 package rjmdatabase.dbcomponents;
 
+import rjmdatabase.testutils.TestBase;
 import java.io.IOException;
 
-public class TableTest extends rjmdatabase.TestBase
+public class TableTest extends TestBase
 {
     /**
      * Runs all the tests for Table.

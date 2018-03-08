@@ -1,6 +1,8 @@
 package rjmdatabase.dbcomponents;
 
-public class TablePrinterTest extends rjmdatabase.TestBase
+import rjmdatabase.testutils.TestBase;
+
+public class TablePrinterTest extends TestBase
 {
     /**
      * Run tests for TablePrinter

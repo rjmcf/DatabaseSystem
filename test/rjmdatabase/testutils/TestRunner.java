@@ -1,4 +1,4 @@
-package rjmdatabase;
+package rjmdatabase.testutils;
 
 import rjmdatabase.dbcomponents.RecordTest;
 import rjmdatabase.dbcomponents.TableTest;

@@ -1,4 +1,4 @@
-package rjmdatabase;
+package rjmdatabase.testutils;
 
 public abstract class TestBase
 {

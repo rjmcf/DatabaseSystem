@@ -1,9 +1,10 @@
 package rjmdatabase.dbcomponents;
 
+import rjmdatabase.testutils.TestBase;
 import rjmdatabase.dbcomponents.Record;
 import java.util.ArrayList;
 
-public class RecordTest extends rjmdatabase.TestBase
+public class RecordTest extends TestBase
 {
     /**
      * Runs tests on the Record class.
