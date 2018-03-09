@@ -1,17 +1,22 @@
+SRCDIR = src
+TESTDIR = test
+PACKDIR = rjmdatabase
+
 allSources :
-	javac -sourcepath src src/rjmdatabase/*/*.java
+	javac -sourcepath ${SRCDIR} ${SRCDIR}/${PACKDIR}/*/*.java
 
-allTests :
-	javac -sourcepath src:test test/rjmdatabase/*/*.java
+allTests : allSources
+	javac -sourcepath ${SRCDIR}:${TESTDIR} ${TESTDIR}/${PACKDIR}/*/*.java
 
-theTest :
-	javac -sourcepath src:test test/rjmdatabase/${FILE}Test.java
-	cd test; \
-	java -cp ../src:./ rjmdatabase/${FILE}Test
+runTheTest : allSources
+	FNAME=`echo ${TEST} | tr . /` ; \
+	javac -sourcepath ${SRCDIR}:${TESTDIR} ${TESTDIR}/${PACKDIR}/$${FNAME}Test.java; \
+	cd ${TESTDIR}; \
+	java -cp ../${SRCDIR}:./ ${PACKDIR}/$${FNAME}Test
 
-runTests : allSources allTests
-	cd test; \
-	java -cp ../src:./ rjmdatabase/testutils/TestRunner
+runTests : allTests
+	cd ${TESTDIR}; \
+	java -cp ../${SRCDIR}:./ ${PACKDIR}/testutils/TestRunner
 
 clean :
 	find . -name "*.class" -type f -delete
