@@ -6,9 +6,9 @@ import java.io.IOException;
 
 public class TableTest extends TestBase
 {
-    static String tableTestFolderPath = "dbTestFolders/table/";
-    static Table emptyTable;
-    static Table filledTable;
+    private String tableTestFolderPath = "dbTestFolders/table/";
+    private Table emptyTable;
+    private Table filledTable;
     /**
      * Runs all the tests for Table.
      * @param args Command line arguments.
@@ -21,17 +21,141 @@ public class TableTest extends TestBase
     @Override
     public void beforeTest()
     {
-
+        emptyTable = new Table("EmptyTable", "");
+        filledTable = new Table("Person", "Name, Age, NumberOfPets");
+        filledTable.addRecord("Susan, 21, 1");
+        filledTable.addRecord("James, 47, 3");
+        filledTable.addRecord("Alex, 17, 0");
     }
 
     @Test
+    public void testGetters()
+    {
+        claim("EmptyTable".equals(emptyTable.getName()), "Table name does not match original.");
+        claim("Person".equals(filledTable.getName()), "Table name does not match original.");
+        claim(emptyTable.getNumFields() == 0, "Number of fields incorrect.");
+        claim(filledTable.getNumFields() == 3, "Number of fields incorrect.");
+        claim("".equals(emptyTable.getFieldNames()), "Field names do not match original.");
+        claim("Name, Age, NumberOfPets".equals(filledTable.getFieldNames()), "Field names do not match original.");
+        claim(emptyTable.getNumRecords() == 0, "Number of records incorrect.");
+        claim(filledTable.getNumRecords() == 3, "Number of records incorrect.");
+    }
+
+    @Test
+    public void testAddRecord()
+    {
+        try
+        {
+            emptyTable.addRecord(new String[]{"Dog"});
+            claim(false, "Too many fields supplied.");
+        }
+        catch(IllegalArgumentException e) { /* test passed */ }
+        try
+        {
+            filledTable.addRecord(new String[]{"Dog"});
+            claim(false, "Too few fields supplied.");
+        }
+        catch(IllegalArgumentException e) { /* test passed */ }
+
+        filledTable.addRecord(new String[] {"Cat", "Bengal"});
+        claim(t.getNumRecords() == 2, "Number of records hasn't changed after add.");
+    }
+
+    @Test
+    public void testGetRecord()
+    {
+        try
+        {
+            emptyTable.getRecord(-1);
+            claim(false, "Invalid index -1");
+        }
+        catch (IllegalArgumentException e)
+        { /* test passed */ }
+        try
+        {
+            emptyTable.getRecord(0);
+            claim(false, "Invalid index 0");
+        }
+        catch (IllegalArgumentException e)
+        { /* test passed */ }
+
+        try
+        {
+            filledTable.getRecord(-1);
+            claim(false, "Invalid index -1");
+        }
+        catch (IllegalArgumentException e)
+        { /* test passed */ }
+        try
+        {
+            filledTable.getRecord(3);
+            claim(false, "Invalid index 3");
+        }
+        catch (IllegalArgumentException e)
+        { /* test passed */ }
+
+        Record r0 = filledTable.getRecord(0);
+        String[] fields = new String[]{"Susan", "21", "1"};
+        for (int i = 0; i < 3; i++)
+            claim(fields[i].equals(r0.getField(i)), "Incorrect Field" + Integer.toString(i) + " value");
+        try
+        {
+            r0.getField(3);
+            claim(false, "Invalid index 3");
+        }
+        catch (IOException e)
+        { /* test passed */ }
+    }
+
+    @Test
+    public void testDeleteRecord()
+    {
+        try
+        {
+            emptyTable.deleteRecord(-1);
+            claim(false, "Invalid index -1");
+        }
+        catch (InvalidArgumentException e)
+        { /* test passed */ }
+        try
+        {
+            emptyTable.deleteRecord(0);
+            claim(false, "Invalid index 0");
+        }
+        catch (InvalidArgumentException e)
+        { /* test passed */ }
+
+        try
+        {
+            filledTable.deleteRecord(-1);
+            claim(false, "Invalid index -1");
+        }
+        catch (InvalidArgumentException e)
+        { /* test passed */ }
+        try
+        {
+            filledTable.deleteRecord(3);
+            claim(false, "Invalid index 3");
+        }
+        catch (InvalidArgumentException e)
+        { /* test passed */ }
+
+
+        filledTable.deleteRecord(0);
+        claim(filledTable.getNumRecords() == 2, "Incorrect number of records after deletion.");
+        try
+        {
+            filledTable.deleteRecord(0);
+            claim(false, "Should not be able to re-delete Records.");
+        }
+        catch(IndexOutOfBoundsException e)
+        { /* test passed */ }
+        Record r1 = filledTable.getRecord(1);
+        claim("James".equals(filledTable.getRecord(1).getField(0)), "Incorrect record returned after deletion");
+    }
+
     public void test()
     {
-        Table t = new Table("Animal", "Name, Breed");
-        testGetters(t);
-        testAddRecord(t);
-        testGetRecord(t);
-        testDeleteRecord(t);
         testUpdateRecord(t);
         testAddColumn(t);
         testDeleteColumn(t);
@@ -43,101 +167,6 @@ public class TableTest extends TestBase
         testSaveTableToFile(t);
         testIsDirty(t);
         testCreateTableFromDataTest(t);
-    }
-
-    private void testGetters(Table t)
-    {
-        claim(t.getName().equals("Animal"));
-        claim(t.getNumFields() == 2);
-        claim(t.getFieldNames().equals("Name, Breed"));
-        claim(t.getNumRecords() == 0);
-    }
-
-    private void testAddRecord(Table t)
-    {
-        t.addRecord(new String[] {"Dog", "Corgi"});
-        claim(t.getNumRecords() == 1);
-        try
-        {
-            t.addRecord(new String[]{"Dog"});
-            claim(false);
-        }
-        catch(IllegalArgumentException e)
-        {
-            // test passed
-        }
-        try
-        {
-            t.addRecord(new String[]{"Dog", "Corgi", "Cute"});
-            claim(false);
-        }
-        catch(IllegalArgumentException e)
-        {
-            // test passed
-        }
-        t.addRecord(new String[] {"Cat", "Bengal"});
-        claim(t.getNumRecords() == 2);
-    }
-
-    private void testGetRecord(Table t)
-    {
-        Record r = t.getRecord(0);
-        claim(r.getField(0).equals("Dog"));
-        claim(r.getField(1).equals("Corgi"));
-        try
-        {
-            r.getField(2);
-            claim(false);
-        }
-        catch (IndexOutOfBoundsException e)
-        {
-            // test passed
-        }
-        try
-        {
-            t.getRecord(2);
-            claim(false);
-        }
-        catch(IndexOutOfBoundsException e)
-        {
-            // test passed
-        }
-        try
-        {
-            t.getRecord(-1);
-            claim(false);
-        }
-        catch(IndexOutOfBoundsException e)
-        {
-            // test passed
-        }
-        r = t.getRecord(1);
-        claim(r.getField(0).equals("Cat"));
-        claim(r.getField(1).equals("Bengal"));
-    }
-
-    private void testDeleteRecord(Table t)
-    {
-        try
-        {
-            t.deleteRecord(2);
-            claim(false);
-        }
-        catch(IndexOutOfBoundsException e)
-        {
-            // test passed
-        }
-        t.deleteRecord(0);
-        claim(t.getNumRecords() == 1);
-        try
-        {
-            t.deleteRecord(0);
-            claim(false);
-        }
-        catch(IndexOutOfBoundsException e)
-        {
-            // test passed
-        }
     }
 
     private void testUpdateRecord(Table t)

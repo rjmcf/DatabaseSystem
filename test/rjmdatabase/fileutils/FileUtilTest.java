@@ -27,35 +27,33 @@ public class FileUtilTest extends TestBase
         }
         catch (IOException e)
         {
-            claim(false);
+            claim(false, "IOException when writing.");
         }
         try
         {
             ArrayList<String> lines = FileUtil.readFile(fName);
-            claim(lines != null);
-            claim(lines.size() == 2);
-            claim(lines.get(0).equals("This is the first line"));
-            claim(lines.get(1).equals("This is the second line"));
+            claim(lines != null, "readFile returns null.");
+            claim(lines.size() == 2, "readFile returns wrong number of lines.");
+            claim(lines.get(0).equals("This is the first line"), "First line doesn't match.");
+            claim(lines.get(1).equals("This is the second line"), "Second line doesn't match.");
         }
         catch (IOException e)
         {
-            claim(false);
+            claim(false, "IOException when reading.");
         }
 
         try
         {
             FileUtil.readFile("fakeFile");
-            claim(false);
+            claim(false, "Should not be able to read from fakeFile");
         }
         catch (IllegalArgumentException e)
-        {
-            // test passed
-        }
+        { /* test passed */ }
         catch (IOException e)
         {
-            // If it's not an IllegalArgumentException, it means it tried to
-            // read from a file that doesn't exist!
-            claim(false);
+            claim(false, "Should not have tried to read fakeFile.");
         }
+
+        claim(false, "Make more tests!");
     }
 }

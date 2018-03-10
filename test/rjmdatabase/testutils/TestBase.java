@@ -11,7 +11,7 @@ public abstract class TestBase
         JUST_ERRORS, JUST_CLASSES, WITH_MESSAGES, ALL
     }
 
-    protected Verbosity verbosity = Verbosity.ALL;
+    protected Verbosity verbosity = Verbosity.WITH_MESSAGES;
     /**
      * Runs the tests in this class. Needs to be called from main method in
      * derived classes.
@@ -84,9 +84,9 @@ public abstract class TestBase
 
     protected void beforeTest() {}
     protected void afterTest() {}
-
-    protected void claim(boolean b)
+        
+    protected void claim(boolean b, String message)
     {
-        if (!b) throw new Error("Test failure");
+        if (!b) throw new Error("Test failure: " + message);
     }
 }

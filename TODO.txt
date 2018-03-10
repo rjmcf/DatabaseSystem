@@ -1,3 +1,5 @@
 Refactoring Tests to use new TestBase stuff.
-Implement a dirty flag on Tables to indicate they need to be saved.
+Remove newlines from catch statements.
+Count number of failed tests and throw error if more than 0.
+Remove need to add new tests to TestRunner.
 Use this to implement incremental saving.

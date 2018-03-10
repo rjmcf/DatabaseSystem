@@ -48,28 +48,24 @@ public class DatabaseTest extends TestBase
 
         db.addTable(personTable);
         db.addTable(animalTable);
-        claim(personTable.equals(db.getTable("Person")));
-        claim(animalTable.equals(db.getTable("Animal")));
+        claim(personTable.equals(db.getTable("Person")), "Stored Table does not equal original.");
+        claim(animalTable.equals(db.getTable("Animal")), "Stored Table does not equal original.");
 
         try
         {
             db.addTable(personTable);
-            claim(false);
+            claim(false, "Table already in Database, add should fail.");
         }
         catch (IllegalArgumentException e)
-        {
-            // test passed
-        }
+        { /* test passed */ }
 
         try
         {
             db.getTable("Random");
-            claim(false);
+            claim(false, "Table not in Database, get should fail.");
         }
         catch (IndexOutOfBoundsException e)
-        {
-            // test passed
-        }
+        { /* test passed */ }
 
         try
         {
@@ -77,18 +73,16 @@ public class DatabaseTest extends TestBase
         }
         catch (IOException e)
         {
-            claim(false);
+            claim(false, "IOException whle saving Database.");
         }
 
         try
         {
             Database.loadDatabase(folderName, !usingSync);
-            claim(false);
+            claim(false, "Incorrect method used to load files.");
         }
         catch (IllegalArgumentException e)
-        {
-            // test passed
-        }
+        { /* test passed */ }
         catch (IOException e)
         {
             claim(false);
@@ -96,27 +90,24 @@ public class DatabaseTest extends TestBase
         try
         {
             Database.loadDatabase("fakeFolderName", usingSync);
-            claim(false);
+            claim(false, "Folder name does not exist, loading should fail.");
         }
         catch (IllegalArgumentException e)
-        {
-            // test passed
-        }
+        { /* test passed */ }
         catch (IOException e)
         {
-            claim(false);
+            claim(false, "IOException while loading Database, should not be trying to load fake Database.");
         }
 
         try
         {
             Database loaded = Database.loadDatabase(folderName, usingSync);
-            claim(personTable.equals(loaded.getTable("Person")));
-            claim(animalTable.equals(loaded.getTable("Animal")));
+            claim(personTable.equals(loaded.getTable("Person")), "Loaded Table does not match original.");
+            claim(animalTable.equals(loaded.getTable("Animal")), "Loaded Table does not match original.");
         }
         catch (IOException e)
         {
-            e.printStackTrace();
-            claim(false);
+            claim(false, "IOException while loading Database.");
         }
     }
 }

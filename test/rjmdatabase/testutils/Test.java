@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Test{
     //should ignore this test?
-	public boolean testEnabled() default true;
+	public boolean value() default true;
 }
