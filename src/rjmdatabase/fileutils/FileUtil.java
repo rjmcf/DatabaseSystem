@@ -26,12 +26,10 @@ public class FileUtil
      * Makes the parent directories of a new file if they don't yet exist.
      * @param fName The path to the file containing any parent directories.
      */
-    public static void makeParentDirsIfNeeded(String fName)
+    public static void makeDirsIfNeeded(File directories)
     {
-        File file = new File(fName);
-        File parent = file.getParentFile();
-        if (parent != null && !parent.exists())
-            parent.mkdirs();
+        if (!directories.exists())
+            directories.mkdirs();
     }
 
     /**
@@ -44,9 +42,11 @@ public class FileUtil
     {
         // If this file is in directories that don't exist, make those
         // directories first.
-        makeParentDirsIfNeeded(fName);
-
         Path path = Paths.get(fName);
+        Path pathToParent = path.getParent();
+        makeDirsIfNeeded(pathToParent.toFile());
+
+
         try (BufferedWriter writer = Files.newBufferedWriter(path, ENCODING))
         {
             for (String line: lines)

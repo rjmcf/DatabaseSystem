@@ -32,7 +32,7 @@ public class Database
     public static Database createNewDatabase(String fN, boolean uS)
     {
         instance = initialiseDatabase(fN, uS);
-        FileUtil.makeParentDirsIfNeeded(instance.parentDirPath + "dummy.txt");
+        FileUtil.makeDirsIfNeeded(new File(instance.parentDirPath));
 
         return instance;
     }

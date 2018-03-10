@@ -84,9 +84,10 @@ public class TableFileReadWriter
 
     private static void serWriteToFile(Table t) throws IOException
     {
-        String fPath = parentDirPath + t.getName() + fileExtension;
         // Need to make sure that the parent directories exist first.
-        FileUtil.makeParentDirsIfNeeded(fPath);
+        FileUtil.makeDirsIfNeeded(new File(parentDirPath));
+
+        String fPath = parentDirPath + t.getName() + fileExtension;
         try(FileOutputStream fileOut = new FileOutputStream(fPath);
             ObjectOutputStream out = new ObjectOutputStream(fileOut);)
         {
