@@ -77,7 +77,8 @@ public class Table implements java.io.Serializable
     {
         this.name = name;
         nextKey = 0;
-        fieldNames = new ArrayList<>(Arrays.asList(fNames.split(", ")));
+        String[] nonEmptyStrings = Arrays.stream(fNames.split(", ")).filter(s -> !s.equals("")).toArray(String[]::new);
+        fieldNames = new ArrayList<>(Arrays.asList(nonEmptyStrings));
         table = new HashMap<>();
         isDirty = isNew;
     }
@@ -240,7 +241,7 @@ public class Table implements java.io.Serializable
         // field name to refer to it by.
         int fieldIndex = fieldNames.indexOf(fieldName);
         if (fieldIndex == -1)
-            throw new IndexOutOfBoundsException("No attribute: " + fieldName + " exists");
+            throw new IllegalArgumentException("No attribute: " + fieldName + " exists");
         getRecord(key).updateField(fieldIndex, replacement);
         isDirty = true;
     }

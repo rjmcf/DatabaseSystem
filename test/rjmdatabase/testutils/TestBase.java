@@ -3,6 +3,9 @@ package rjmdatabase.testutils;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.Throwable;
+import java.lang.StackTraceElement;
+import java.lang.Thread;
 
 public abstract class TestBase
 {
@@ -35,28 +38,38 @@ public abstract class TestBase
             Annotation annotation = test.getAnnotation(Test.class);
             Test testAnn = (Test) annotation;
             String toPrint = "    " + test.getName() + ": ";
-            boolean wasError = false;
+            boolean wasError = true;
 
             if (testAnn.testEnabled())
             {
                 beforeTest();
-                try { test.invoke(this); }
+                try { test.invoke(this); wasError = false;}
                 catch (IllegalAccessException iAccessE)
                 {
                     toPrint += "Must be made public";
-                    wasError = true;
                 }
                 catch (IllegalArgumentException iArgE)
                 {
                     toPrint += "Must take no arguments";
-                    wasError = true;
                 }
                 catch (InvocationTargetException ite)
                 {
                     toPrint += "Failed";
+
                     if (verbosity == Verbosity.WITH_MESSAGES || verbosity == Verbosity.ALL)
-                        toPrint += "\n" + ite.getCause().getMessage();
-                    wasError = true;
+                    {
+                        Throwable exceptionThrown = ite.getCause();
+                        if (!(exceptionThrown instanceof TestFailedException))
+                        {
+                            StackTraceElement claimStackTraceElement = exceptionThrown.getStackTrace()[1];
+                            String fullClassNameForClaim = claimStackTraceElement.getClassName();
+                            String[] packagePathToClass = fullClassNameForClaim.split("\\.");
+                            String classNameForClaim = packagePathToClass[packagePathToClass.length - 1];
+                            int claimLineNumber = claimStackTraceElement.getLineNumber();
+                            toPrint += String.format(", %s threw an exception on line %d", classNameForClaim, claimLineNumber);
+                        }
+                        toPrint += String.format("\n    %s\n", exceptionThrown.getMessage());
+                    }
                 }
                 afterTest();
             }
@@ -84,9 +97,10 @@ public abstract class TestBase
 
     protected void beforeTest() {}
     protected void afterTest() {}
-        
+
     protected void claim(boolean b, String message)
     {
-        if (!b) throw new Error("Test failure: " + message);
+        int callersLineNumber = Thread.currentThread().getStackTrace()[2].getLineNumber();
+        if (!b) throw new TestFailedException(callersLineNumber, message);
     }
 }

@@ -85,7 +85,7 @@ public class DatabaseTest extends TestBase
         { /* test passed */ }
         catch (IOException e)
         {
-            claim(false);
+            claim(false, "Shouldn't have tried to load files with wrong method.");
         }
         try
         {
