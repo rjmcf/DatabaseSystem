@@ -47,8 +47,7 @@ public class FileUtilTest extends TestBase
             FileUtil.readFile("fakeFile");
             claim(false, "Should not be able to read from fakeFile");
         }
-        catch (IllegalArgumentException e)
-        { /* test passed */ }
+        catch (IllegalArgumentException e) { /* test passed */ }
         catch (IOException e)
         {
             claim(false, "Should not have tried to read fakeFile.");

@@ -56,16 +56,14 @@ public class DatabaseTest extends TestBase
             db.addTable(personTable);
             claim(false, "Table already in Database, add should fail.");
         }
-        catch (IllegalArgumentException e)
-        { /* test passed */ }
+        catch (IllegalArgumentException e) { /* test passed */ }
 
         try
         {
             db.getTable("Random");
             claim(false, "Table not in Database, get should fail.");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
 
         try
         {
@@ -81,8 +79,7 @@ public class DatabaseTest extends TestBase
             Database.loadDatabase(folderName, !usingSync);
             claim(false, "Incorrect method used to load files.");
         }
-        catch (IllegalArgumentException e)
-        { /* test passed */ }
+        catch (IllegalArgumentException e) { /* test passed */ }
         catch (IOException e)
         {
             claim(false, "Shouldn't have tried to load files with wrong method.");
@@ -92,8 +89,7 @@ public class DatabaseTest extends TestBase
             Database.loadDatabase("fakeFolderName", usingSync);
             claim(false, "Folder name does not exist, loading should fail.");
         }
-        catch (IllegalArgumentException e)
-        { /* test passed */ }
+        catch (IllegalArgumentException e) { /* test passed */ }
         catch (IOException e)
         {
             claim(false, "IOException while loading Database, should not be trying to load fake Database.");

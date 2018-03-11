@@ -1,4 +1,3 @@
-Remove newlines from catch statements.
 Implement interactive method to help find where exceptions where thrown.
 Count number of failed tests and throw error if more than 0.
 Remove need to add new tests to TestRunner.

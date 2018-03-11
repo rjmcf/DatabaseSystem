@@ -80,8 +80,7 @@ public class TableFileReadWriterTest extends TestBase
             TableFileReadWriter.readFromFile("NotATable", pDP, uS);
             claim(false, "Should not be able to read from a Table file that doesn't exist.");
         }
-        catch (IllegalArgumentException i)
-        { /* test passed */ }
+        catch (IllegalArgumentException i) { /* test passed */ }
         catch (IOException e)
         {
             claim(false, "Should not be trying to read from Table file that doesn't exist.");
@@ -93,8 +92,7 @@ public class TableFileReadWriterTest extends TestBase
             TableFileReadWriter.getTableNameFromFileName("tableName.txt");
             claim(false, "Incorrect file extension.");
         }
-        catch (IllegalArgumentException e)
-        { /* test passed */ }
+        catch (IllegalArgumentException e) { /* test passed */ }
 
         String tableName = "tableName";
         claim(tableName.equals(TableFileReadWriter.getTableNameFromFileName(tableName + TableFileReadWriter.SERIALIZATION_FILE_EXT)), "Table name does not match.");
