@@ -17,34 +17,31 @@ public class Database
     private HashMap<String, Table> tables;
     // The path to where all the Table files will be saved.
     private String parentDirPath;
-    private boolean useSerialization;
 
 
     private Database()
     { }
 
     /**
-     * Creates a new Database using the supplied folder name and saving method.
+     * Creates a new Database using the supplied folder name.
      * @param  fN The name of the folder to store all tables under.
-     * @param  uS Whether to use serialization to store the files.
      * @return    The Database instance.
      */
-    public static Database createNewDatabase(String fN, boolean uS)
+    public static Database createNewDatabase(String fN)
     {
-        instance = initialiseDatabase(fN, uS);
+        instance = initialiseDatabase(fN);
         FileUtil.makeDirsIfNeeded(new File(instance.parentDirPath));
 
         return instance;
     }
 
-    private static Database initialiseDatabase(String fN, boolean uS)
+    private static Database initialiseDatabase(String fN)
     {
         if (instance == null)
             instance = new Database();
 
         instance.tables = new HashMap<>();
         instance.parentDirPath = fN + "/";
-        instance.useSerialization = uS;
 
         return instance;
     }
@@ -82,20 +79,19 @@ public class Database
     {
         for (Table table : tables.values())
         {
-            table.saveTableToFile(parentDirPath, useSerialization);
+            table.saveTableToFile(parentDirPath);
         }
     }
 
     /**
      * Loads the database Tables from the given folder name.
      * @param  fN          The folder name to load the Tables from.
-     * @param  uS          Whether to use serialization when loading the Tables.
      * @return             The loaded Database instance.
      * @throws IOException If an io exception occurred.
      */
-    public static Database loadDatabase(String fN, boolean uS) throws IOException
+    public static Database loadDatabase(String fN) throws IOException
     {
-        Database result = Database.initialiseDatabase(fN, uS);
+        Database result = Database.initialiseDatabase(fN);
         result.loadTablesFromFile();
         return result;
     }
@@ -111,7 +107,7 @@ public class Database
             tableName = TableFileReadWriter.getTableNameFromFileName(tableFile.getName());
             if (tableName == null)
                 continue;
-            addTable(TableFileReadWriter.readFromFile(tableName, parentDirPath, useSerialization));
+            addTable(TableFileReadWriter.readFromFile(tableName, parentDirPath));
         }
     }
 }

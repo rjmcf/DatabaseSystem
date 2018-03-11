@@ -11,17 +11,17 @@ import java.util.StringJoiner;
 import java.util.Collections;
 
 /**
- * Represents a Table, which stores Records. Implements Serializable in order to
- * allow saving to a file by serialization.
+ * Represents a Table, which stores Records.
  * @author Rjmcf
  */
-public class Table implements java.io.Serializable
+public class Table
 {
-    /**
-     * The actual name of the first column, representing the Key for the table.
-     */
+    // The actual name of the first column, representing the Key for the table.
     static final String KEY_COL_NAME = "KeyTable";
 
+    // The version number of this table. Will change when new code needs to be
+    // written to save and load from file.
+    private String version = "1.0";
     // The name of this table.
     private String name;
     // The next key that will be assigned to a Record. All keys are unique within
@@ -32,7 +32,7 @@ public class Table implements java.io.Serializable
     // The map of keys to Records constituing the actual Table.
     private HashMap<Integer, Record> table;
     // Whether the Table needs saving back to file
-    private boolean isDirty;
+    private boolean isDirty = true;
 
     /**
      * Factory method to load a Table from the data read in from a file.
@@ -50,7 +50,7 @@ public class Table implements java.io.Serializable
             joiner.add(keyAndAttrs[i]);
 
         // The new Table instance.
-        Table t = new Table(name, joiner.toString(), false);
+        Table t = new Table(name, joiner.toString());
 
         // Now add the Records one at a time.
         for (int row = 1; row < data.length; row++)
@@ -63,6 +63,8 @@ public class Table implements java.io.Serializable
             t.insertRecord(key, fields);
         }
 
+        // We have just read from file, so no need to save it again right now.
+        t.isDirty = false;
         return t;
     }
 
@@ -71,21 +73,14 @@ public class Table implements java.io.Serializable
      * of column names.
      * @param name   The name of the new Table.
      * @param fNames A comma separated list of the Table's new column names.
-     * @param isNew  Whether or not the Table is completely new or has been loaded.
      */
-    Table(String name, String fNames, boolean isNew)
+    Table(String name, String fNames)
     {
         this.name = name;
         nextKey = 0;
         String[] nonEmptyStrings = Arrays.stream(fNames.split(", ")).filter(s -> !s.equals("")).toArray(String[]::new);
         fieldNames = new ArrayList<>(Arrays.asList(nonEmptyStrings));
         table = new HashMap<>();
-        isDirty = isNew;
-    }
-
-    Table(String name, String fNames)
-    {
-        this(name, fNames, true);
     }
 
     /**
@@ -355,14 +350,14 @@ public class Table implements java.io.Serializable
         TablePrinter.printTable(name, getTableData());
     }
 
-    void saveTableToFile(String parentFolderPath, boolean useSerialization) throws IOException
+    void saveTableToFile(String parentFolderPath) throws IOException
     {
         if (isDirty)
         {
             isDirty = false;
             try
             {
-                TableFileReadWriter.writeToFile(this, parentFolderPath, useSerialization);
+                TableFileReadWriter.writeToFile(this, parentFolderPath);
             }
             catch (IOException e)
             {

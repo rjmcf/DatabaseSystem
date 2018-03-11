@@ -6,8 +6,7 @@ import java.io.IOException;
 
 public class DatabaseTest extends TestBase
 {
-    static String serTestFolder = "dbTestFolders/databaseSer";
-    static String rjmTestFolder = "dbTestFolders/databaseRjm";
+    static String testFolder = "dbTestFolders/databaseTest";
     static Table personTable;
     static Table animalTable;
 
@@ -30,20 +29,13 @@ public class DatabaseTest extends TestBase
     }
 
     @Test
-    public void testDatabaseSer()
+    public void testDatabase()
     {
-        Database db = Database.createNewDatabase(rjmTestFolder, false);
-        repeatableDatabaseTest(db, rjmTestFolder, false);
+        Database db = Database.createNewDatabase(testFolder);
+        repeatableDatabaseTest(db, testFolder);
     }
 
-    @Test
-    public void testDatabaseRjm()
-    {
-        Database db = Database.createNewDatabase(serTestFolder, true);
-        repeatableDatabaseTest(db, serTestFolder, true);
-    }
-
-    private void repeatableDatabaseTest(Database db, String folderName, boolean usingSync)
+    private void repeatableDatabaseTest(Database db, String folderName)
     {
 
         db.addTable(personTable);
@@ -76,17 +68,7 @@ public class DatabaseTest extends TestBase
 
         try
         {
-            Database.loadDatabase(folderName, !usingSync);
-            claim(false, "Incorrect method used to load files.");
-        }
-        catch (IllegalArgumentException e) { /* test passed */ }
-        catch (IOException e)
-        {
-            claim(false, "Shouldn't have tried to load files with wrong method.");
-        }
-        try
-        {
-            Database.loadDatabase("fakeFolderName", usingSync);
+            Database.loadDatabase("fakeFolderName");
             claim(false, "Folder name does not exist, loading should fail.");
         }
         catch (IllegalArgumentException e) { /* test passed */ }
@@ -97,7 +79,7 @@ public class DatabaseTest extends TestBase
 
         try
         {
-            Database loaded = Database.loadDatabase(folderName, usingSync);
+            Database loaded = Database.loadDatabase(folderName);
             claim(personTable.equals(loaded.getTable("Person")), "Loaded Table does not match original.");
             claim(animalTable.equals(loaded.getTable("Animal")), "Loaded Table does not match original.");
         }

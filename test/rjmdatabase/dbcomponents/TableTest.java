@@ -366,49 +366,25 @@ public class TableTest extends TestBase
         claim(emptyTable.getIsDirty(), "Should be dirty when first created.");
         try
         {
-            emptyTable.saveTableToFile(tableTestFolderPath, true);
+            emptyTable.saveTableToFile(tableTestFolderPath);
             claim(!emptyTable.getIsDirty(), "Should not be dirty after saving.");
-            claim(emptyTable.equals(TableFileReadWriter.readFromFile(emptyTable.getName(), tableTestFolderPath, true)), "Serialization loaded table does not equal original.");
+            claim(emptyTable.equals(TableFileReadWriter.readFromFile(emptyTable.getName(), tableTestFolderPath)), "Loaded table does not equal original.");
         }
         catch (IOException e)
         {
-            claim (false, "IOException while reading or writing by serialization.");
-        }
-        emptyTable.rename("NewEmptyTable");
-        claim(emptyTable.getIsDirty(), "Should be dirty after rename.");
-        try
-        {
-            emptyTable.saveTableToFile(tableTestFolderPath, false);
-            claim(!emptyTable.getIsDirty(), "Should not be dirty after saving.");
-            claim(emptyTable.equals(TableFileReadWriter.readFromFile(emptyTable.getName(), tableTestFolderPath, false)), "RjmMethod loaded table does not equal original.");
-        }
-        catch (IOException e)
-        {
-            claim (false, "IOException while reading or writing by RjmMethod.");
+            claim (false, "IOException while reading or writing.");
         }
 
         claim(filledTable.getIsDirty(), "Should be dirty when first created.");
         try
         {
-            filledTable.saveTableToFile(tableTestFolderPath, true);
+            filledTable.saveTableToFile(tableTestFolderPath);
             claim(!filledTable.getIsDirty(), "Should not be dirty after saving.");
-            claim(filledTable.equals(TableFileReadWriter.readFromFile(filledTable.getName(), tableTestFolderPath, true)), "Serialization loaded table does not equal original.");
+            claim(filledTable.equals(TableFileReadWriter.readFromFile(filledTable.getName(), tableTestFolderPath)), "Loaded table does not equal original.");
         }
         catch (IOException e)
         {
-            claim (false, "IOException while reading or writing by serialization.");
-        }
-        filledTable.rename("NewFilledTable");
-        claim(filledTable.getIsDirty(), "Should be dirty after rename.");
-        try
-        {
-            filledTable.saveTableToFile(tableTestFolderPath, false);
-            claim(!filledTable.getIsDirty(), "Should not be dirty after saving.");
-            claim(filledTable.equals(TableFileReadWriter.readFromFile(filledTable.getName(), tableTestFolderPath, false)), "RjmMethod loaded table does not equal original.");
-        }
-        catch (IOException e)
-        {
-            claim (false, "IOException while reading or writing by RjmMethod.");
+            claim (false, "IOException while reading or writing.");
         }
     }
 
@@ -430,74 +406,74 @@ public class TableTest extends TestBase
         // Rename Table
         emptyTable.rename("NewEmptyName");
         claim(emptyTable.getIsDirty(), "Should be dirty after rename.");
-        try {emptyTable.saveTableToFile(tableTestFolderPath, true);}
+        try {emptyTable.saveTableToFile(tableTestFolderPath);}
         catch (IOException e) { claim(false, "IOException while saving to file."); }
         claim(!emptyTable.getIsDirty(), "Shouldn't be dirty after saving.");
 
         filledTable.rename("NewFilledName");
         claim(filledTable.getIsDirty(), "Should be dirty after rename.");
-        try {filledTable.saveTableToFile(tableTestFolderPath, true);}
+        try {filledTable.saveTableToFile(tableTestFolderPath);}
         catch (IOException e) { claim(false, "IOException while saving to file."); }
         claim(!filledTable.getIsDirty(), "Shouldn't be dirty after saving.");
 
         // Rename column
         filledTable.renameColumn("Name", "AString");
         claim(filledTable.getIsDirty(), "Should be dirty after renameColumn.");
-        try {filledTable.saveTableToFile(tableTestFolderPath, true);}
+        try {filledTable.saveTableToFile(tableTestFolderPath);}
         catch (IOException e) { claim(false, "IOException while saving to file."); }
         claim(!filledTable.getIsDirty(), "Shouldn't be dirty after saving.");
 
         // Add column
         emptyTable.addColumn(0, "NewColumn", "Blah");
         claim(emptyTable.getIsDirty(), "Should be dirty after addColumn.");
-        try {emptyTable.saveTableToFile(tableTestFolderPath, true);}
+        try {emptyTable.saveTableToFile(tableTestFolderPath);}
         catch (IOException e) { claim(false, "IOException while saving to file."); }
         claim(!emptyTable.getIsDirty(), "Shouldn't be dirty after saving.");
 
         filledTable.addColumn(0, "NewColumn", "Blah");
         claim(filledTable.getIsDirty(), "Shouldn't be dirty after addColumn.");
-        try {filledTable.saveTableToFile(tableTestFolderPath, true);}
+        try {filledTable.saveTableToFile(tableTestFolderPath);}
         catch (IOException e) { claim(false, "IOException while saving to file."); }
         claim(!filledTable.getIsDirty(), "Shouldn't be dirty after saving.");
 
         // Delete column
         emptyTable.deleteColumn("NewColumn");
         claim(emptyTable.getIsDirty(), "Should be dirty after deleting column.");
-        try {emptyTable.saveTableToFile(tableTestFolderPath, true);}
+        try {emptyTable.saveTableToFile(tableTestFolderPath);}
         catch (IOException e) { claim(false, "IOException while saving to file."); }
         claim(!emptyTable.getIsDirty(), "Shouldn't be dirty after saving.");
 
         filledTable.deleteColumn("NewColumn");
         claim(filledTable.getIsDirty(), "Should be dirty after deleting column.");
-        try {filledTable.saveTableToFile(tableTestFolderPath, true);}
+        try {filledTable.saveTableToFile(tableTestFolderPath);}
         catch (IOException e) { claim(false, "IOException while saving to file."); }
         claim(!filledTable.getIsDirty(), "Shouldn't be dirty after saving.");
 
         // Add Record
         filledTable.addRecord("Somebody, 30, 10");
         claim(filledTable.getIsDirty(), "Should b dirty after adding Record.");
-        try {filledTable.saveTableToFile(tableTestFolderPath, true);}
+        try {filledTable.saveTableToFile(tableTestFolderPath);}
         catch (IOException e) { claim(false, "IOException while saving to file."); }
         claim(!filledTable.getIsDirty(), "Shouldn't be dirty after saving.");
 
         // Update Record
         filledTable.updateRecord(3, "AString", "Elliot");
         claim(filledTable.getIsDirty(), "Should be dirty after updating Record.");
-        try {filledTable.saveTableToFile(tableTestFolderPath, true);}
+        try {filledTable.saveTableToFile(tableTestFolderPath);}
         catch (IOException e) { claim(false, "IOException while saving to file."); }
         claim(!filledTable.getIsDirty(), "Shouldn't be dirty after saving.");
 
         // Delete Record
         filledTable.deleteRecord(3);
         claim(filledTable.getIsDirty(), "Should be dirty after deleting Record.");
-        try {filledTable.saveTableToFile(tableTestFolderPath, true);}
+        try {filledTable.saveTableToFile(tableTestFolderPath);}
         catch (IOException e) { claim(false, "IOException while saving to file."); }
         claim(!filledTable.getIsDirty(), "Shouldn't be dirty after saving.");
 
         // Load Table
         try
         {
-            Table o = TableFileReadWriter.readFromFile(filledTable.getName(), tableTestFolderPath, true);
+            Table o = TableFileReadWriter.readFromFile(filledTable.getName(), tableTestFolderPath);
             claim(!o.getIsDirty(), "Shouldn't be dirty after loading.");
         }
         catch (IOException e)
