@@ -10,8 +10,8 @@ import java.io.File;
 
 public class TableFileReadWriterTest extends TestBase
 {
-    private String oldFolder = "dbTestFolders/tableFiles";
-    private String newFolder = "dbTestFolders/newTableFiles";
+    private String oldFolder = "dbTestFolders/tableFiles/";
+    private String newFolder = "dbTestFolders/newTableFiles/";
 
     /**
      * Run tests for TableFileReadWriter.
@@ -26,7 +26,12 @@ public class TableFileReadWriterTest extends TestBase
     public void beforeTest()
     {
         FileUtil.makeDirsIfNeeded(new File(oldFolder));
-        FileUtil.deleteDir(new File(newFolder));
+    }
+
+    @Override
+    public void afterTest()
+    {
+        FileUtil.deleteDirIfExists(new File(newFolder));
     }
 
     @Test

@@ -61,7 +61,7 @@ public abstract class TestBase
                         Throwable exceptionThrown = ite.getCause();
                         if (!(exceptionThrown instanceof TestFailedException))
                         {
-                            StackTraceElement claimStackTraceElement = exceptionThrown.getStackTrace()[1];
+                            StackTraceElement claimStackTraceElement = exceptionThrown.getStackTrace()[0];
                             String fullClassNameForClaim = claimStackTraceElement.getClassName();
                             String[] packagePathToClass = fullClassNameForClaim.split("\\.");
                             String classNameForClaim = packagePathToClass[packagePathToClass.length - 1];

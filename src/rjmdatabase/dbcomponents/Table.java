@@ -18,10 +18,10 @@ public class Table
 {
     // The actual name of the first column, representing the Key for the table.
     static final String KEY_COL_NAME = "KeyTable";
-
     // The version number of this table. Will change when new code needs to be
     // written to save and load from file.
-    private String version = "1.0";
+    static final String version = "1.0";
+
     // The name of this table.
     private String name;
     // The next key that will be assigned to a Record. All keys are unique within
@@ -42,9 +42,14 @@ public class Table
      */
     static Table createTableFromData(String name, String[][] data)
     {
-        // The first line is the human readable field names. We build the
+        // The first line is the version number.
+        if (!version.equals(data[0][0]))
+        {
+            throw new Error("Attempted to load old version of Table. This is not possible at present.");
+        }
+        // The second line is the human readable field names. We build the
         // comma separated list of field names for the Table constructor.
-        String[] keyAndAttrs = data[0];
+        String[] keyAndAttrs = data[1];
         StringJoiner joiner = new StringJoiner(", ");
         for (int i = 1; i < keyAndAttrs.length; i++)
             joiner.add(keyAndAttrs[i]);
@@ -53,7 +58,7 @@ public class Table
         Table t = new Table(name, joiner.toString());
 
         // Now add the Records one at a time.
-        for (int row = 1; row < data.length; row++)
+        for (int row = 2; row < data.length; row++)
         {
             String[] recordFields = data[row];
             String[] fields = new String[recordFields.length - 1];
@@ -322,17 +327,19 @@ public class Table
      */
     String[][] getTableData()
     {
-        // We need space for all the Records and the names
-        // of the fields.
-        String[][] tableData = new String[getNumRecords() + 1][];
+        // We need space for all the Records, the names of the fields, and the
+        // version number.
+        String[][] tableData = new String[getNumRecords() + 2][];
+        // First line stores our version number.
+        tableData[0] = new String[]{version};
         // Need to have the first col name be the key col name.
         ArrayList<String> colNames = new ArrayList<>();
         colNames.add(KEY_COL_NAME);
         colNames.addAll(fieldNames);
-        tableData[0] = colNames.toArray(new String[0]);
+        tableData[1] = colNames.toArray(new String[0]);
 
-        // Record 0 is row 1.
-        int counter = 1;
+        // Record 0 is row 2.
+        int counter = 2;
         ArrayList<String> fields;
         for (Map.Entry<Integer, Record> entry : table.entrySet())
         {

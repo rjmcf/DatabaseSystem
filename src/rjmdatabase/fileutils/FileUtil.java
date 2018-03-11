@@ -89,12 +89,14 @@ public class FileUtil
      * Deletes the specified directory.
      * @param file The name of the directory to be deleted.
      */
-    public static void deleteDir(File file)
+    public static void deleteDirIfExists(File file)
     {
+        if (!file.exists())
+            return;
         File[] contents = file.listFiles();
         if (contents != null) {
             for (File f : contents) {
-                deleteDir(f);
+                deleteDirIfExists(f);
             }
         }
         file.delete();
