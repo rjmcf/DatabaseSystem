@@ -1,10 +1,10 @@
 SRCDIR = src
 TESTDIR = test
 PACKDIR = rjmdatabase
+DBDIR = databases
 GREP_COLORS='mt=1;41;37'
 
 .SILENT:
-.PHONY: help
 
 ## Compiles the sourcefiles.
 allSources:
@@ -25,6 +25,11 @@ runTheTest: allSources
 runTests: allTests
 	cd ${TESTDIR}; \
 	java -cp ../${SRCDIR}:./ ${PACKDIR}/testutils/TestRunner
+
+## Start the textual interface, with name of database equal to DBNAME argument.
+textInterface: allSources
+	java -cp ${SRCDIR} ${PACKDIR}/userinterface/TextInterface ${DBDIR}/${NAME}
+
 
 ## Removes all the .class files.
 clean:

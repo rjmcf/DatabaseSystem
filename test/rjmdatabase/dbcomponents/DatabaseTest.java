@@ -2,7 +2,9 @@ package rjmdatabase.dbcomponents;
 
 import rjmdatabase.testutils.TestBase;
 import rjmdatabase.testutils.Test;
+import rjmdatabase.fileutils.FileUtil;
 import java.io.IOException;
+import java.io.File;
 
 public class DatabaseTest extends TestBase
 {
@@ -28,15 +30,16 @@ public class DatabaseTest extends TestBase
         animalTable.addRecord("Minnie, Cat, 0");
     }
 
+    @Override
+    protected void afterTest()
+    {
+        FileUtil.deleteDirIfExists(new File(testFolder));
+    }
+
     @Test
     public void testDatabase()
     {
-        Database db = Database.createNewDatabase(testFolder);
-        repeatableDatabaseTest(db, testFolder);
-    }
-
-    private void repeatableDatabaseTest(Database db, String folderName)
-    {
+        Database db = new Database(testFolder);
 
         db.addTable(personTable);
         db.addTable(animalTable);
@@ -66,26 +69,8 @@ public class DatabaseTest extends TestBase
             claim(false, "IOException whle saving Database.");
         }
 
-        try
-        {
-            Database.loadDatabase("fakeFolderName");
-            claim(false, "Folder name does not exist, loading should fail.");
-        }
-        catch (IllegalArgumentException e) { /* test passed */ }
-        catch (IOException e)
-        {
-            claim(false, "IOException while loading Database, should not be trying to load fake Database.");
-        }
-
-        try
-        {
-            Database loaded = Database.loadDatabase(folderName);
-            claim(personTable.equals(loaded.getTable("Person")), "Loaded Table does not match original.");
-            claim(animalTable.equals(loaded.getTable("Animal")), "Loaded Table does not match original.");
-        }
-        catch (IOException e)
-        {
-            claim(false, "IOException while loading Database.");
-        }
+        Database loaded = new Database(testFolder);
+        claim(personTable.equals(loaded.getTable("Person")), "Loaded Table does not match original.");
+        claim(animalTable.equals(loaded.getTable("Animal")), "Loaded Table does not match original.");
     }
 }

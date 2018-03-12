@@ -1,3 +1,4 @@
 **/*.class
 Brief.txt
 test/dbTestFolders/*
+databases/*

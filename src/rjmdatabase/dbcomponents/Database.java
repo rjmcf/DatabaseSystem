@@ -7,43 +7,42 @@ import java.util.HashMap;
 
 /**
  * Represents a database. Currently a collection of Tables with some utility
- * methods. Singleton class to restrict number of Database sessions to 1.
+ * methods.
  * @author Rjmcf
  */
 public class Database
 {
-    private static Database instance;
-
     private HashMap<String, Table> tables;
     // The path to where all the Table files will be saved.
     private String parentDirPath;
 
-
-    private Database()
-    { }
-
     /**
      * Creates a new Database using the supplied folder name.
-     * @param  fN The name of the folder to store all tables under.
-     * @return    The Database instance.
+     * @param fN The name of the folder to store all tables under.
      */
-    public static Database createNewDatabase(String fN)
+    public Database(String fN)
     {
-        instance = initialiseDatabase(fN);
-        FileUtil.makeDirsIfNeeded(new File(instance.parentDirPath));
-
-        return instance;
+        tables = new HashMap<>();
+        parentDirPath = fN + "/";
+        FileUtil.makeDirsIfNeeded(new File(parentDirPath));
+        try
+        {
+            loadTablesFromFile();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            throw new Error("Unable to load table files.");
+        }
     }
 
-    private static Database initialiseDatabase(String fN)
+    /**
+     * Gets an array containing the names of the Tables stored in this database.
+     * @return The array of table names.
+     */
+    public String[] getTableNames()
     {
-        if (instance == null)
-            instance = new Database();
-
-        instance.tables = new HashMap<>();
-        instance.parentDirPath = fN + "/";
-
-        return instance;
+        return tables.keySet().toArray(new String[0]);
     }
 
     /**
@@ -81,19 +80,6 @@ public class Database
         {
             table.saveTableToFile(parentDirPath);
         }
-    }
-
-    /**
-     * Loads the database Tables from the given folder name.
-     * @param  fN          The folder name to load the Tables from.
-     * @return             The loaded Database instance.
-     * @throws IOException If an io exception occurred.
-     */
-    public static Database loadDatabase(String fN) throws IOException
-    {
-        Database result = Database.initialiseDatabase(fN);
-        result.loadTablesFromFile();
-        return result;
     }
 
     private void loadTablesFromFile() throws IOException
