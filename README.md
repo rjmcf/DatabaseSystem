@@ -1,5 +1,5 @@
 # Database System
-[![Build Status](https://travis-ci.org/rjmcf/DatabaseSystem.svg?branch=testBench)](https://travis-ci.org/rjmcf/DatabaseSystem)
+[![Build Status](https://travis-ci.org/rjmcf/DatabaseSystem.svg?branch=interactive)](https://travis-ci.org/rjmcf/DatabaseSystem)
 
 An exercise in development, I have tried to emulate a database system in Java.
 
