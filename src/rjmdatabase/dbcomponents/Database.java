@@ -50,7 +50,13 @@ public class Database
      * already present.
      * @param t The Table to be added.
      */
-    public void addTable(Table t)
+    public void addTable(String tableName, String fieldNames)
+    {
+        Table t = new Table(tableName, fieldNames);
+        addTable(t);
+    }
+
+    private void addTable(Table t)
     {
         String tableName = t.getName();
         if (tables.putIfAbsent(tableName, t) != null)
@@ -62,12 +68,33 @@ public class Database
      * @param  tableName The name of the Table to be retrieved.
      * @return           The Table instance desired.
      */
-    public Table getTable(String tableName)
+    Table getTable(String tableName)
     {
         Table t = tables.get(tableName);
         if (t == null)
             throw new IndexOutOfBoundsException("No table " + tableName + " in database");
         return t;
+    }
+
+    /**
+     * Gets whether a named Table appears in this database.
+     * @param  tableName The name of the Table to search for.
+     * @return           Whether the Table is present.
+     */
+    public boolean hasTable(String tableName)
+    {
+        return tables.keySet().contains(tableName);
+    }
+
+    public String getFieldNames(String tableName)
+    {
+        return getTable(tableName).getFieldNames();
+    }
+
+    public void addRecord(String tableName, String fields)
+    {
+        Table table = getTable(tableName);
+        table.addRecord(fields);
     }
 
     /**

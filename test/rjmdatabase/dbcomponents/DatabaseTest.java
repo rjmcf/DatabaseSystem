@@ -8,9 +8,10 @@ import java.io.File;
 
 public class DatabaseTest extends TestBase
 {
-    static String testFolder = "dbTestFolders/databaseTest";
-    static Table personTable;
-    static Table animalTable;
+    String testFolder = "dbTestFolders/databaseTest";
+    Table personTable;
+    Table animalTable;
+    Database db;
 
     /**
      * Run tests for Database.
@@ -25,9 +26,11 @@ public class DatabaseTest extends TestBase
     protected void beforeTest()
     {
         personTable = new Table("Person", "Name, Address");
-        personTable.addRecord("Robyn, XX Nilfrod Avenue\nLoughborough");
         animalTable = new Table("Animal", "Name, Type, Owner");
-        animalTable.addRecord("Minnie, Cat, 0");
+
+        db = new Database(testFolder);
+        db.addTable("Person", "Name, Address");
+        db.addTable("Animal", "Name, Type, Owner");
     }
 
     @Override
@@ -37,18 +40,22 @@ public class DatabaseTest extends TestBase
     }
 
     @Test
-    public void testDatabase()
+    public void testHasTable()
     {
-        Database db = new Database(testFolder);
+        claim(db.hasTable(personTable.getName()));
+        claim(db.hasTable(animalTable.getName()));
+        claim(!db.hasTable("NotATable"));
+    }
 
-        db.addTable(personTable);
-        db.addTable(animalTable);
-        claim(personTable.equals(db.getTable("Person")), "Stored Table does not equal original.");
-        claim(animalTable.equals(db.getTable("Animal")), "Stored Table does not equal original.");
+    @Test
+    public void testGetTable()
+    {
+        claim(personTable.equals(db.getTable(personTable.getName())), "Stored Table does not equal original.");
+        claim(animalTable.equals(db.getTable(animalTable.getName())), "Stored Table does not equal original.");
 
         try
         {
-            db.addTable(personTable);
+            db.addTable(personTable.getName(), personTable.getFieldNames());
             claim(false, "Table already in Database, add should fail.");
         }
         catch (IllegalArgumentException e) { /* test passed */ }
@@ -59,18 +66,57 @@ public class DatabaseTest extends TestBase
             claim(false, "Table not in Database, get should fail.");
         }
         catch (IndexOutOfBoundsException e) { /* test passed */ }
+    }
 
+    @Test
+    public void testAddRecord()
+    {
+        try
+        {
+            db.addRecord("Random", "Some, Values");
+            claim(false, "Can't add Record to Table that doesn't exist.");
+        }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
+        try
+        {
+            db.addRecord(personTable.getName(), "Too, Many, Fields");
+            claim(false, "Too many fields for Table.");
+        }
+        catch (IllegalArgumentException e) { /* test passed */ }
+        try
+        {
+            db.addRecord(animalTable.getName(), "Too, Few");
+            claim(false, "Too few fields for Table.");
+        }
+        catch (IllegalArgumentException e) { /* test passed */ }
+
+        db.addRecord(personTable.getName(), "Kenneth, Some Place");
+        Table theTable = db.getTable(personTable.getName());
+        Record newRecord = theTable.getRecord(0);
+        claim("Kenneth".equals(newRecord.getField(0)), "Incorrect field values.");
+        claim("Some Place".equals(newRecord.getField(1)), "Incorrect field values.");
+        try
+        {
+            newRecord.getField(2);
+            claim(false, "Should only have 2 fields.");
+        }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
+    }
+
+    /*@Test
+    public void testSaveDatabase()
+    {
         try
         {
             db.saveDatabase();
         }
         catch (IOException e)
         {
-            claim(false, "IOException whle saving Database.");
+            claim(false, "IOException while saving Database.");
         }
 
         Database loaded = new Database(testFolder);
         claim(personTable.equals(loaded.getTable("Person")), "Loaded Table does not match original.");
         claim(animalTable.equals(loaded.getTable("Animal")), "Loaded Table does not match original.");
-    }
+    }*/
 }

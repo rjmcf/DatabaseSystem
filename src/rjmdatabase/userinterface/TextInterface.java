@@ -66,17 +66,7 @@ public class TextInterface
                     editTable();
                     break;
                 case 4:
-                    println("Which table do you want to print?");
-                    String tableName = in.next();
-                    try
-                    {
-                        database.getTable(tableName);
-                        println("Error: cannot yet print tables.");
-                    }
-                    catch (IndexOutOfBoundsException e)
-                    {
-                        println("No table named " + tableName + " present.");
-                    }
+                    println("Error: cannot yet print tables.");
                     break;
                 case 5:
                     try
@@ -118,9 +108,8 @@ public class TextInterface
 
         try
         {
-            println("Error: cannot yet add table.");
-            //database.addTable(name, fieldNames.toString());
-            //println(String.format("Table %s added.", name));
+            database.addTable(name, fieldNames.toString());
+            println(String.format("Table %s added.", name));
         }
         catch (IllegalArgumentException e)
         {
@@ -136,14 +125,72 @@ public class TextInterface
         if (name.equals(""))
             return;
 
-        try
+        if (!database.hasTable(name))
         {
-            database.getTable(name);
-            println("Error: cannot yet edit tables.");
+            println(String.format("No table %s present in database.", name));
+            return;
         }
-        catch (IllegalArgumentException e)
+
+        int choice;
+        while (true)
         {
-            println(String.format("No table named %s present.", name));
+            println(String.format("What would you like to do with table %s?", name));
+            println("1). Add a new record.");
+            println("2). Search the table.");
+            println("3). Update a record.");
+            println("4). Add a new column.");
+            println("5). Delete a column.");
+            println("6). Rename a column.");
+            println("7). Rename the table.");
+            println("8). Return to the main menu.");
+
+            while (!in.hasNextInt()) {
+                in.next();
+            }
+            choice = in.nextInt();
+
+            switch (choice)
+            {
+                case 1:
+                    addRecordToTable(name);
+                    break;
+                case 2:
+                    println("Cannot yet search tables.");
+                    break;
+                case 3:
+                    println("Cannot yet update records.");
+                    break;
+                case 4:
+                    println("Cannot yet add a new column.");
+                    break;
+                case 5:
+                    println("Cannot yet delete columns.");
+                    break;
+                case 6:
+                    println("Cannot yet rename columns.");
+                    break;
+                case 7:
+                    println("Cannot yet rename tables.");
+                    break;
+                case 8:
+                    return;
+                default:
+                    println("Please enter one of the options listed.");
+            }
         }
+    }
+
+    private static void addRecordToTable(String tableName)
+    {
+        StringJoiner fieldJoiner = new StringJoiner(", ");
+        println("Enter the value you want to store under each field name.");
+        for (String fieldName : database.getFieldNames(tableName).split(", "))
+        {
+            println(String.format("%s:", fieldName));
+            fieldJoiner.add(in.nextLine());
+        }
+
+        database.addRecord(tableName, fieldJoiner.toString());
+        println("Record added successfully.");
     }
 }
