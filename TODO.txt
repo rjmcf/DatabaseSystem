@@ -1,6 +1,3 @@
-Make it so failed tests cause travis to fail.
 Implement interactive method to help find where exceptions where thrown.
-Count number of failed tests and throw error if more than 0.
-Add more tests to FileUtil.
 Remove need to add new tests to TestRunner.
-Use this to implement incremental saving.
+Use Table dirty flag to implement incremental saving.
