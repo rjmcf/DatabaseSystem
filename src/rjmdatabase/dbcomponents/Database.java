@@ -31,7 +31,6 @@ public class Database
         }
         catch (IOException e)
         {
-            e.printStackTrace();
             throw new Error("Unable to load table files.");
         }
     }
@@ -95,6 +94,18 @@ public class Database
     {
         Table table = getTable(tableName);
         table.addRecord(fields);
+    }
+
+    public void printTable(String tableName)
+    {
+        Table t = getTable(tableName);
+        t.printTable();
+    }
+
+    public void renameColumn(String tableName, String oldColumnName, String newColumnName)
+    {
+        Table t = getTable(tableName);
+        t.renameColumn(oldColumnName, newColumnName);
     }
 
     /**

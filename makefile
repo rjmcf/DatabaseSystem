@@ -26,7 +26,7 @@ runTests: allTests
 	cd ${TESTDIR}; \
 	java -cp ../${SRCDIR}:./ ${PACKDIR}/testutils/TestRunner
 
-## Start the textual interface, with name of database equal to DBNAME argument.
+## Start the textual interface, with name of database equal to NAME argument.
 textInterface: allSources
 	java -cp ${SRCDIR} ${PACKDIR}/userinterface/TextInterface ${DBDIR}/${NAME}
 

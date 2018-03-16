@@ -66,7 +66,10 @@ public class TextInterface
                     editTable();
                     break;
                 case 4:
-                    println("Error: cannot yet print tables.");
+                    println("Enter the name of the table you'd like to print");
+                    in.nextLine();
+                    String tableName = in.nextLine();
+                    database.printTable(tableName);
                     break;
                 case 5:
                     try
@@ -99,7 +102,6 @@ public class TextInterface
         while (true)
         {
             println("Input the name of a column to add, or leave blank if done:");
-            in.nextLine();
             fieldName = in.nextLine().replaceAll("\\s","");
             if (fieldName.equals(""))
                 break;
@@ -167,7 +169,7 @@ public class TextInterface
                     println("Cannot yet delete columns.");
                     break;
                 case 6:
-                    println("Cannot yet rename columns.");
+                    renameColumn(name);
                     break;
                 case 7:
                     println("Cannot yet rename tables.");
@@ -187,10 +189,30 @@ public class TextInterface
         for (String fieldName : database.getFieldNames(tableName).split(", "))
         {
             println(String.format("%s:", fieldName));
+            in.nextLine();
             fieldJoiner.add(in.nextLine());
         }
 
         database.addRecord(tableName, fieldJoiner.toString());
         println("Record added successfully.");
+    }
+
+    private static void renameColumn(String tableName)
+    {
+        println("What is the current name of the column?");
+        in.nextLine();
+        String oldColumnName = in.nextLine();
+        println("What will the new column name be?");
+        in.nextLine();
+        String newColumnName = in.nextLine();
+
+        try
+        {
+            database.renameColumn(tableName, oldColumnName, newColumnName);
+        }
+        catch (IllegalArgumentException e)
+        {
+            println(e.getMessage());
+        }
     }
 }
