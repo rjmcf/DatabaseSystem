@@ -42,9 +42,9 @@ public class DatabaseTest extends TestBase
     @Test
     public void testHasTable()
     {
-        claim(db.hasTable(personTable.getName()));
-        claim(db.hasTable(animalTable.getName()));
-        claim(!db.hasTable("NotATable"));
+        claim(db.hasTable(personTable.getName()), "Should have this table.");
+        claim(db.hasTable(animalTable.getName()), "Should have this table.");
+        claim(!db.hasTable("NotATable"), "Shouldn't have this table.");
     }
 
     @Test

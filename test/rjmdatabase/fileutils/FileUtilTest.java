@@ -3,6 +3,7 @@ package rjmdatabase.fileutils;
 import rjmdatabase.testutils.TestBase;
 import rjmdatabase.testutils.Test;
 import java.io.IOException;
+import java.io.File;
 import java.util.ArrayList;
 
 public class FileUtilTest extends TestBase
@@ -18,7 +19,7 @@ public class FileUtilTest extends TestBase
      }
 
     @Test
-    public void test()
+    public void testReadingAndWritingFiles()
     {
         String fName = "dbTestFolders/testDir/testFile.txt";
         try
@@ -52,7 +53,31 @@ public class FileUtilTest extends TestBase
         {
             claim(false, "Should not have tried to read fakeFile.");
         }
+    }
 
-        claim(false, "Make more tests!");
+    @Test
+    public void testMakeAndDeleteDirs()
+    {
+        String parentDir = "fileUtilTest/innerFolder1/innerFolder2";
+        String fileName = parentDir + "/test.txt";
+        String testLine = "Test Line.";
+        File dir = new File(parentDir);
+        claim(!dir.exists(), "Folder needs to not exist before start of test.");
+
+        FileUtil.makeDirsIfNeeded(dir);
+        claim(dir.exists(), "Folder should exist after creation.");
+
+        try
+        {
+            FileUtil.writeFile(fileName, new String[]{testLine});
+            claim(FileUtil.readFile(fileName).get(0).equals(testLine), "Incorrect file contents.");
+        }
+        catch (IOException e)
+        {
+            claim(false, "IOException thrown while reading or writing to file.");
+        }
+
+        FileUtil.deleteDirIfExists(dir);
+        claim(!dir.exists(), "Folder needs to not exist after deletion.");
     }
 }
