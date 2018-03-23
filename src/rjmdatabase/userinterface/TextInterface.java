@@ -28,6 +28,47 @@ public class TextInterface
         System.out.println(s);
     }
 
+    private static void println()
+    {
+        System.out.println();
+    }
+
+    private static String getLineOfInput()
+    {
+        String result = in.nextLine();
+        if (result.equals(""))
+            return null;
+        return result;
+    }
+
+    private static String getLineOfInputNoSpaces()
+    {
+        String input = getLineOfInput();
+        if (input == null)
+            return null;
+
+        input = input.replaceAll("\\s", "");
+        return input.equals("") ? null : input;
+    }
+
+    private static int getIntInput()
+    {
+        int result; String input; boolean success = false;
+        while (true)
+        {
+            input = in.nextLine();
+            try
+            {
+                result = Integer.parseInt(input);
+                return result;
+            }
+            catch (NumberFormatException e)
+            {
+                println("Please enter a valid number.");
+            }
+        }
+    }
+
     private static void mainMenu()
     {
         in = new Scanner(System.in);
@@ -41,10 +82,7 @@ public class TextInterface
             println("4). Print table.");
             println("5). Quit.");
 
-            while (!in.hasNextInt()) {
-                in.next();
-            }
-            choice = in.nextInt();
+            choice = getIntInput();
 
             switch (choice)
             {
@@ -53,11 +91,13 @@ public class TextInterface
                     if (tableNames.length == 0)
                     {
                         println("Currently no tables present.");
+                        println();
                         break;
                     }
                     println("Tables:");
                     for (String tableName : tableNames)
                         println("    " + tableName);
+                    println();
                     break;
                 case 2:
                     addTable();
@@ -67,8 +107,9 @@ public class TextInterface
                     break;
                 case 4:
                     println("Enter the name of the table you'd like to print");
-                    in.nextLine();
-                    String tableName = in.nextLine();
+                    String tableName = getLineOfInputNoSpaces();
+                    if (tableName == null)
+                        break;
                     database.printTable(tableName);
                     break;
                 case 5:
@@ -93,17 +134,17 @@ public class TextInterface
     private static void addTable()
     {
         println("Enter table name, or leave blank to return to menu:");
-        in.nextLine();
-        String name = in.nextLine().replaceAll("\\s","");
-        if (name.equals(""))
+        String name = getLineOfInputNoSpaces();
+        if (name == null)
             return;
+
         StringJoiner fieldNames = new StringJoiner(", ");
         String fieldName;
         while (true)
         {
-            println("Input the name of a column to add, or leave blank if done:");
-            fieldName = in.nextLine().replaceAll("\\s","");
-            if (fieldName.equals(""))
+            println("Input the name of a column to add, or leave blank if you're done:");
+            fieldName = getLineOfInputNoSpaces();
+            if (fieldName == null)
                 break;
             fieldNames.add(fieldName);
         }
@@ -122,9 +163,8 @@ public class TextInterface
     private static void editTable()
     {
         println("Enter table name to edit, or leave blank to return to menu:");
-        in.nextLine();
-        String name = in.nextLine().replaceAll("\\s","");
-        if (name.equals(""))
+        String name = getLineOfInputNoSpaces();
+        if (name == null)
             return;
 
         if (!database.hasTable(name))
@@ -146,10 +186,7 @@ public class TextInterface
             println("7). Rename the table.");
             println("8). Return to the main menu.");
 
-            while (!in.hasNextInt()) {
-                in.next();
-            }
-            choice = in.nextInt();
+            choice = getIntInput();
 
             switch (choice)
             {
@@ -189,8 +226,14 @@ public class TextInterface
         for (String fieldName : database.getFieldNames(tableName).split(", "))
         {
             println(String.format("%s:", fieldName));
-            in.nextLine();
-            fieldJoiner.add(in.nextLine());
+            String fieldValue;
+            do
+            {
+                fieldValue = getLineOfInput();
+            }
+            while (fieldValue == null);
+
+            fieldJoiner.add(fieldValue);
         }
 
         database.addRecord(tableName, fieldJoiner.toString());
@@ -200,11 +243,17 @@ public class TextInterface
     private static void renameColumn(String tableName)
     {
         println("What is the current name of the column?");
-        in.nextLine();
-        String oldColumnName = in.nextLine();
+        String oldColumnName;
+        do
+        {
+            oldColumnName = getLineOfInput();
+        } while (oldColumnName == null);
         println("What will the new column name be?");
-        in.nextLine();
-        String newColumnName = in.nextLine();
+        String newColumnName;
+        do
+        {
+            newColumnName = getLineOfInput();
+        } while (newColumnName == null);
 
         try
         {
