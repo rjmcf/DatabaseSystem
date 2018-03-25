@@ -14,7 +14,7 @@ public abstract class TestBase
         JUST_ERRORS, JUST_CLASSES, WITH_MESSAGES, ALL
     }
 
-    protected Verbosity verbosity = Verbosity.WITH_MESSAGES;
+    protected Verbosity verbosity = Verbosity.ALL;
     /**
      * Runs the tests in this class. Needs to be called from main method in
      * derived classes.
@@ -63,14 +63,15 @@ public abstract class TestBase
                         Throwable exceptionThrown = ite.getCause();
                         if (!(exceptionThrown instanceof TestFailedException))
                         {
-                            StackTraceElement claimStackTraceElement = exceptionThrown.getStackTrace()[1];
+                            StackTraceElement claimStackTraceElement = exceptionThrown.getStackTrace()[2];
                             String fullClassNameForClaim = claimStackTraceElement.getClassName();
                             String[] packagePathToClass = fullClassNameForClaim.split("\\.");
                             String classNameForClaim = packagePathToClass[packagePathToClass.length - 1];
                             int claimLineNumber = claimStackTraceElement.getLineNumber();
                             toPrint += String.format(", %s threw an exception on line %d", classNameForClaim, claimLineNumber);
                         }
-                        toPrint += String.format("\n    %s\n", exceptionThrown.getMessage());
+                        if (exceptionThrown.getMessage() != null)
+                            toPrint += String.format("\n    %s\n", exceptionThrown.getMessage());
                     }
                 }
                 afterTest();

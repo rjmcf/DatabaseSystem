@@ -42,6 +42,12 @@ public class TableFileReadWriter
         return parts[0];
     }
 
+    static void deleteTableFile(String tableName, String parentDirPath)
+    {
+        File tableFile = new File(parentDirPath + tableName + FILE_EXT);
+        FileUtil.deleteFileIfExists(tableFile);
+    }
+
     /**
      * Writes the given table to a file, using the chosen method.
      * @param  t           The Table to write.

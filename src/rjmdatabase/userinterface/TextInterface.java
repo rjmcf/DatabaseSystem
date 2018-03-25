@@ -209,7 +209,7 @@ public class TextInterface
                     renameColumn(name);
                     break;
                 case 7:
-                    println("Cannot yet rename tables.");
+                    name = renameTable(name);
                     break;
                 case 8:
                     return;
@@ -223,7 +223,7 @@ public class TextInterface
     {
         StringJoiner fieldJoiner = new StringJoiner(", ");
         println("Enter the value you want to store under each field name.");
-        for (String fieldName : database.getFieldNames(tableName).split(", "))
+        for (String fieldName : database.getFieldNames(tableName))
         {
             println(String.format("%s:", fieldName));
             String fieldValue;
@@ -242,26 +242,37 @@ public class TextInterface
 
     private static void renameColumn(String tableName)
     {
-        println("What is the current name of the column?");
-        String oldColumnName;
-        do
-        {
-            oldColumnName = getLineOfInput();
-        } while (oldColumnName == null);
+        println("What is the current name of the column? Leave blank to cancel.");
+        String oldColumnName = getLineOfInputNoSpaces();
+        if (oldColumnName == null)
+            return;
         println("What will the new column name be?");
         String newColumnName;
         do
         {
-            newColumnName = getLineOfInput();
+            newColumnName = getLineOfInputNoSpaces();
         } while (newColumnName == null);
 
         try
         {
             database.renameColumn(tableName, oldColumnName, newColumnName);
+            println("Column renamed successfully.");
         }
         catch (IllegalArgumentException e)
         {
             println(e.getMessage());
         }
+    }
+
+    private static String renameTable(String tableName)
+    {
+        println(String.format("What would you like to rename %s to? Leave blank to cancel.", tableName));
+        String newTableName = getLineOfInputNoSpaces();
+        if (newTableName == null)
+            return tableName;
+
+        database.renameTable(tableName, newTableName);
+        println("Table renamed successfully.");
+        return newTableName;
     }
 }

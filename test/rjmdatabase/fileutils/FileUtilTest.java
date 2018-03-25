@@ -58,11 +58,14 @@ public class FileUtilTest extends TestBase
     @Test
     public void testMakeAndDeleteDirs()
     {
-        String parentDir = "fileUtilTest/innerFolder1/innerFolder2";
+        String topLevel = "fileUtilTest";
+        String parentDir = topLevel + "/innerFolder1/innerFolder2";
         String fileName = parentDir + "/test.txt";
         String testLine = "Test Line.";
+        File topLevelDir = new File(topLevel);
         File dir = new File(parentDir);
-        claim(!dir.exists(), "Folder needs to not exist before start of test.");
+        claim(!topLevelDir.exists(), "Top level folder needs to not exist before start of test.");
+        claim(!dir.exists(), "Parent folder needs to not exist before start of test.");
 
         FileUtil.makeDirsIfNeeded(dir);
         claim(dir.exists(), "Folder should exist after creation.");
@@ -77,7 +80,29 @@ public class FileUtilTest extends TestBase
             claim(false, "IOException thrown while reading or writing to file.");
         }
 
-        FileUtil.deleteDirIfExists(dir);
-        claim(!dir.exists(), "Folder needs to not exist after deletion.");
+        FileUtil.deleteDirIfExists(topLevelDir);
+        claim(!topLevelDir.exists(), "Folder needs to not exist after deletion.");
+    }
+
+    @Test
+    public void testDeleteFiles()
+    {
+        String fileName = "test.txt";
+        String testLine = "Test Line.";
+        File f = new File(fileName);
+        claim(!f.exists(), "File should not exist before creation.");
+
+        try
+        {
+            FileUtil.writeFile(fileName, new String[]{testLine});
+            claim(FileUtil.readFile(fileName).get(0).equals(testLine), "Incorrect file contents.");
+        }
+        catch (IOException e)
+        {
+            claim(false, "IOException thrown while reading or writing to file.");
+        }
+
+        FileUtil.deleteFileIfExists(f);
+        claim(!f.exists(), "File should not exist after deletion.");
     }
 }

@@ -296,14 +296,14 @@ public class TableTest extends TestBase
             emptyTable.renameColumn("Any", "Other");
             claim(false, "No column with that name.");
         }
-        catch (IllegalArgumentException e) { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
 
         try
         {
             filledTable.renameColumn("NotAColumn", "Other");
             claim(false, "No column with that name.");
         }
-        catch (IllegalArgumentException e) { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
         try
         {
             filledTable.renameColumn("Name", "Age");

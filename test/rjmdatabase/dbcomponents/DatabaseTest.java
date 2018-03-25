@@ -5,6 +5,8 @@ import rjmdatabase.testutils.Test;
 import rjmdatabase.fileutils.FileUtil;
 import java.io.IOException;
 import java.io.File;
+import java.util.stream.Stream;
+import java.util.function.Predicate;
 
 public class DatabaseTest extends TestBase
 {
@@ -40,11 +42,25 @@ public class DatabaseTest extends TestBase
     }
 
     @Test
-    public void testHasTable()
+    public void testGetTableNames()
     {
-        claim(db.hasTable(personTable.getName()), "Should have this table.");
-        claim(db.hasTable(animalTable.getName()), "Should have this table.");
-        claim(!db.hasTable("NotATable"), "Shouldn't have this table.");
+        String[] tableNames = db.getTableNames();
+        claim(Stream.of(tableNames).anyMatch(Predicate.isEqual("Person")), "Person table not present");
+        claim(Stream.of(tableNames).anyMatch(Predicate.isEqual("Animal")), "Animal table not present");
+    }
+
+    @Test
+    public void testAddTable()
+    {
+        try
+        {
+            db.addTable("Person", "This, Shouldnt, Work");
+            claim(false, "Table already exists.");
+        }
+        catch (IllegalArgumentException e) { /* test passed */ }
+
+        db.addTable("NewTable","Some, New, Fields");
+        claim(db.hasTable("NewTable"), "Newable not present.");
     }
 
     @Test
@@ -66,6 +82,55 @@ public class DatabaseTest extends TestBase
             claim(false, "Table not in Database, get should fail.");
         }
         catch (IndexOutOfBoundsException e) { /* test passed */ }
+    }
+
+    @Test
+    public void testRenameTable()
+    {
+        try
+        {
+            db.renameTable("NotATable", "NewTableName");
+            claim(false, "Table that does not exist should not be renamed.");
+        }
+    catch (IndexOutOfBoundsException e) { /* test passed */ }
+        try
+        {
+            db.renameTable("Animal", "Person");
+            claim(false, "Cannot change name to already existing table name.");
+        }
+        catch (IllegalArgumentException e) { /* test passed */ }
+
+        db.renameTable("Person", "NewTableName");
+        claim(!db.hasTable("Person"), "Old table name should not be present.");
+        claim(db.hasTable("NewTableName"), "New Table name should be present.");
+        Table newTable = db.getTable("NewTableName");
+        newTable.rename("Person");
+        claim(personTable.equals(newTable), "Name should be only thing changed.");
+    }
+
+    @Test
+    public void testHasTable()
+    {
+        claim(db.hasTable(personTable.getName()), "Should have this table.");
+        claim(db.hasTable(animalTable.getName()), "Should have this table.");
+        claim(!db.hasTable("NotATable"), "Shouldn't have this table.");
+    }
+
+    @Test
+    public void testGetFieldNames()
+    {
+        try
+        {
+            db.getFieldNames("NotATable.");
+            claim(false, "Should not be able to get field names from table not present.");
+        }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
+
+        String[] animalFields = db.getFieldNames("Animal");
+        claim(animalFields.length == 3, "Name list has incorrect number of fields.");
+        claim("Name".equals(animalFields[0]), "Incorrect field name.");
+        claim("Type".equals(animalFields[1]), "Incorrect field name.");
+        claim("Owner".equals(animalFields[2]), "Incorrect field name.");
     }
 
     @Test
@@ -103,7 +168,46 @@ public class DatabaseTest extends TestBase
         catch (IndexOutOfBoundsException e) { /* test passed */ }
     }
 
-    /*@Test
+    @Test
+    public void testPrintTable()
+    {
+        try
+        {
+            db.printTable("NotATable");
+            claim(false, "Can't print non-existent Table.");
+        }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
+
+        db.printTable("Animal");
+    }
+
+    @Test
+    public void renameColumn()
+    {
+        try
+        {
+            db.renameColumn("NotATable", "A", "B");
+            claim(false, "Can't rename column of non-existent Table.");
+        }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
+        try
+        {
+            db.renameColumn("Animal", "A", "B");
+            claim(false, "Can't rename non-existent column of Table.");
+        }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
+        try
+        {
+            db.renameColumn("Animal", "Name", "Type");
+            claim(false, "Can't rename column of Table to already existing column name.");
+        }
+        catch (IllegalArgumentException e) { /* test passed */ }
+
+        db.renameColumn("Animal", "Name", "Colour");
+        claim(db.getFieldNames("Animal")[0].equals("Colour"), "Rename has failed.");
+    }
+
+    @Test
     public void testSaveDatabase()
     {
         try
@@ -118,5 +222,5 @@ public class DatabaseTest extends TestBase
         Database loaded = new Database(testFolder);
         claim(personTable.equals(loaded.getTable("Person")), "Loaded Table does not match original.");
         claim(animalTable.equals(loaded.getTable("Animal")), "Loaded Table does not match original.");
-    }*/
+    }
 }

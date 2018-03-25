@@ -288,7 +288,7 @@ public class Table
             throw new IllegalArgumentException("Already a column named " + newName);
         int index = fieldNames.indexOf(oldName);
         if (index == -1)
-            throw new IllegalArgumentException("No column with name " + oldName);
+            throw new IndexOutOfBoundsException("No column with name " + oldName);
         fieldNames.set(index, newName);
         isDirty = true;
     }
@@ -361,16 +361,8 @@ public class Table
     {
         if (isDirty)
         {
+            TableFileReadWriter.writeToFile(this, parentFolderPath);
             isDirty = false;
-            try
-            {
-                TableFileReadWriter.writeToFile(this, parentFolderPath);
-            }
-            catch (IOException e)
-            {
-                isDirty = true;
-                throw e;
-            }
         }
     }
 

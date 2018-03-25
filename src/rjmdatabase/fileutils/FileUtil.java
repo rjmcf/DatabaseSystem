@@ -44,8 +44,8 @@ public class FileUtil
         // directories first.
         Path path = Paths.get(fName);
         Path pathToParent = path.getParent();
-        makeDirsIfNeeded(pathToParent.toFile());
-
+        if (pathToParent!=null)
+            makeDirsIfNeeded(pathToParent.toFile());
 
         try (BufferedWriter writer = Files.newBufferedWriter(path, ENCODING))
         {
@@ -99,6 +99,11 @@ public class FileUtil
                 deleteDirIfExists(f);
             }
         }
+        file.delete();
+    }
+
+    public static void deleteFileIfExists(File file)
+    {
         file.delete();
     }
 }
