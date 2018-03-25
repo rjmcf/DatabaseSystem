@@ -14,18 +14,27 @@ public abstract class TestBase
         JUST_ERRORS, JUST_CLASSES, WITH_MESSAGES, ALL
     }
 
-    protected Verbosity verbosity = Verbosity.JUST_ERRORS;
+    protected Verbosity verbosity = Verbosity.JUST_CLASSES;
+
     /**
-     * Runs the tests in this class. Needs to be called from main method in
-     * derived classes.
-     * @param args Command line arguments.
-     * @return The number of tests that were failed.
+     * Runs the tests in this class.
+     * @return THe number of tests that were failed.
      */
     public int startTest()
     {
-        int numFailed = 0;
         String className = this.getClass().getSimpleName();
         String classBeingTested = className.replace("Test", "");
+        return startTest(className, classBeingTested);
+    }
+
+    /**
+     * Runs the tests in this class.
+     * @param  classBeingTested The name of the class being tested.
+     * @return                  The number of tests that were failed.
+     */
+    public int startTest(String className, String classBeingTested)
+    {
+        int numFailed = 0;
         if (verbosity != Verbosity.JUST_ERRORS)
             System.out.println("Testing " + classBeingTested);
         for (Method test : this.getClass().getDeclaredMethods())
