@@ -1,13 +1,19 @@
 package rjmdatabase.dbcomponents;
 
+import rjmdatabase.fileutils.FileUtil;
 import rjmdatabase.testutils.TestBase;
 import rjmdatabase.testutils.Test;
+import rjmdatabase.testutils.PrintStreamFileWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.lang.IllegalArgumentException;
 
 public class TableTest extends TestBase
 {
     private String tableTestFolderPath = "dbTestFolders/table/";
+    private String printTestFolderPath = "printerTestOutput";
     private Table emptyTable;
     private Table filledTable;
     /**
@@ -356,8 +362,72 @@ public class TableTest extends TestBase
     @Test
     public void testPrintTable()
     {
-        emptyTable.printTable();
-        filledTable.printTable();
+        File testFolder = new File(printTestFolderPath);
+        String testFileName = printTestFolderPath + "/emptyPrintTest.txt";
+        try (PrintStreamFileWriter pS = new PrintStreamFileWriter(testFileName))
+        {
+            TablePrinter.setPrintStream(pS);
+            emptyTable.printTable();
+            TablePrinter.setPrintStream(System.out);
+        }
+        catch (FileNotFoundException e)
+        {
+            claim(false, "File not found.");
+        }
+
+        try
+        {
+            ArrayList<String> lines = FileUtil.readFile(testFileName);
+            claim(lines.size() == 7, "Incorrect size of output.");
+            claim(lines.get(0).equals(""), "Incorrect output");
+            claim(lines.get(1).equals("EmptyTable"), "Incorrect output");
+            claim(lines.get(2).equals(""), "Incorrect output");
+            claim(lines.get(3).equals("|----------|"), "Incorrect output");
+            claim(lines.get(4).equals("| KeyTable |"), "Incorrect output");
+            claim(lines.get(5).equals("|----------|"), "Incorrect output");
+            claim(lines.get(6).equals(""), "Incorrect output");
+        }
+        catch (IOException e)
+        {
+            claim(false, "IOException while reading file.");
+        }
+
+        testFileName = printTestFolderPath + "/filledPrintTest.txt";
+        try (PrintStreamFileWriter pS = new PrintStreamFileWriter(testFileName))
+        {
+            TablePrinter.setPrintStream(pS);
+            filledTable.printTable();
+            TablePrinter.setPrintStream(System.out);
+        }
+        catch (FileNotFoundException e)
+        {
+            claim(false, "File not found.");
+        }
+
+        try
+        {
+            ArrayList<String> lines = FileUtil.readFile(testFileName);
+            claim(lines.size() == 13, "Incorrect size of output.");
+            claim(lines.get( 0).equals(""), "Incorrect output");
+            claim(lines.get( 1).equals("Person"), "Incorrect output");
+            claim(lines.get( 2).equals(""), "Incorrect output");
+            claim(lines.get( 3).equals("|----------+-------+-----+--------------|"), "Incorrect output");
+            claim(lines.get( 4).equals("| KeyTable | Name  | Age | NumberOfPets |"), "Incorrect output");
+            claim(lines.get( 5).equals("|----------+-------+-----+--------------|"), "Incorrect output");
+            claim(lines.get( 6).equals("| 0        | Susan | 21  | 1            |"), "Incorrect output");
+            claim(lines.get( 7).equals("|----------+-------+-----+--------------|"), "Incorrect output");
+            claim(lines.get( 8).equals("| 1        | James | 47  | 3            |"), "Incorrect output");
+            claim(lines.get( 9).equals("|----------+-------+-----+--------------|"), "Incorrect output");
+            claim(lines.get(10).equals("| 2        | Alex  | 17  | 0            |"), "Incorrect output");
+            claim(lines.get(11).equals("|----------+-------+-----+--------------|"), "Incorrect output");
+            claim(lines.get(12).equals(""), "Incorrect output");
+        }
+        catch (IOException e)
+        {
+            claim(false, "IOException while reading file.");
+        }
+
+        FileUtil.deleteDirIfExists(testFolder);
     }
 
     @Test

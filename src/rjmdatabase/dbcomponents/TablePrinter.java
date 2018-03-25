@@ -2,6 +2,7 @@ package rjmdatabase.dbcomponents;
 
 import java.util.StringJoiner;
 import java.util.Collections;
+import java.io.PrintStream;
 
 /**
  * Utility class to pretty print a Table to the console.
@@ -24,6 +25,14 @@ public class TablePrinter
     private static final String RECORD_SEPARATOR_LAST_CHAR = "-|";
     // The String used to separate fields when printing.
     private static final String FIELD_SEPARATOR = " | ";
+    // The PrintStream that all printing is done to.
+    private static PrintStream out = System.out;
+
+    // Changes the output stream from the default System.out.
+    static void setPrintStream(PrintStream o)
+    {
+        out = o;
+    }
 
     /**
      * Prints the supplied Table to the console.
@@ -103,24 +112,24 @@ public class TablePrinter
         }
 
         // Actually print the table
-        System.out.println();
-        System.out.println(tableName);
-        System.out.println();
+        out.println();
+        out.println(tableName);
+        out.println();
         if (INCLUDE_FIRST_ROW_LINE)
-            System.out.println(recordSeparator);
+            out.println(recordSeparator);
 
         for (int row = 0; row < linesToPrint.length; row++)
         {
             String[] linesForRow = linesToPrint[row];
             for (String line: linesForRow)
-                System.out.println(line);
+                out.println(line);
             // Only print the record separator if we are between records or
             // we want to include the separator after the final line anyway.
             if (row != linesToPrint.length - 1 || INCLUDE_FINAL_ROW_LINE)
-                System.out.println(recordSeparator);
+                out.println(recordSeparator);
         }
 
-        System.out.println();
+        out.println();
     }
 
     // Gets the StringJoiner used to build up lines to print.

@@ -2,15 +2,19 @@ package rjmdatabase.dbcomponents;
 
 import rjmdatabase.testutils.TestBase;
 import rjmdatabase.testutils.Test;
+import rjmdatabase.testutils.PrintStreamFileWriter;
 import rjmdatabase.fileutils.FileUtil;
 import java.io.IOException;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.stream.Stream;
 import java.util.function.Predicate;
 
 public class DatabaseTest extends TestBase
 {
     String testFolder = "dbTestFolders/databaseTest";
+    String printTestFolderPath = "printTestOutput";
     Table personTable;
     Table animalTable;
     Database db;
@@ -178,7 +182,37 @@ public class DatabaseTest extends TestBase
         }
         catch (IndexOutOfBoundsException e) { /* test passed */ }
 
-        db.printTable("Animal");
+        File testFolder = new File(printTestFolderPath);
+        String testFileName = printTestFolderPath + "/dbPrintTest.txt";
+        try (PrintStreamFileWriter pS = new PrintStreamFileWriter(testFileName))
+        {
+            TablePrinter.setPrintStream(pS);
+            db.printTable("Animal");
+            TablePrinter.setPrintStream(System.out);
+        }
+        catch (FileNotFoundException e)
+        {
+            claim(false, "File not found.");
+        }
+
+        try
+        {
+            ArrayList<String> lines = FileUtil.readFile(testFileName);
+            claim(lines.size() == 7, "Incorrect size of output.");
+            claim(lines.get(0).equals(""), "Incorrect output");
+            claim(lines.get(1).equals("Animal"), "Incorrect output");
+            claim(lines.get(2).equals(""), "Incorrect output");
+            claim(lines.get(3).equals("|----------+------+------+-------|"), "Incorrect output");
+            claim(lines.get(4).equals("| KeyTable | Name | Type | Owner |"), "Incorrect output");
+            claim(lines.get(5).equals("|----------+------+------+-------|"), "Incorrect output");
+            claim(lines.get(6).equals(""), "Incorrect output");
+        }
+        catch (IOException e)
+        {
+            claim(false, "IOException while reading file.");
+        }
+
+        FileUtil.deleteDirIfExists(testFolder);
     }
 
     @Test
