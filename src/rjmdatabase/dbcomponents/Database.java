@@ -7,71 +7,142 @@ import java.util.HashMap;
 
 /**
  * Represents a database. Currently a collection of Tables with some utility
- * methods. Singleton class to restrict number of Database sessions to 1.
+ * methods.
  * @author Rjmcf
  */
 public class Database
 {
-    private static Database instance;
-
     private HashMap<String, Table> tables;
     // The path to where all the Table files will be saved.
     private String parentDirPath;
-    private boolean useSerialization;
-
-
-    private Database()
-    { }
 
     /**
-     * Creates a new Database using the supplied folder name and saving method.
-     * @param  fN The name of the folder to store all tables under.
-     * @param  uS Whether to use serialization to store the files.
-     * @return    The Database instance.
+     * Creates a new Database using the supplied folder name.
+     * @param fN The name of the folder to store all tables under.
      */
-    public static Database createNewDatabase(String fN, boolean uS)
+    public Database(String fN)
     {
-        instance = initialiseDatabase(fN, uS);
-        FileUtil.makeDirsIfNeeded(new File(instance.parentDirPath));
-
-        return instance;
+        tables = new HashMap<>();
+        parentDirPath = fN + "/";
+        FileUtil.makeDirsIfNeeded(new File(parentDirPath));
+        try
+        {
+            loadTablesFromFile();
+        }
+        catch (IOException e)
+        {
+            throw new Error("Unable to load table files.");
+        }
     }
 
-    private static Database initialiseDatabase(String fN, boolean uS)
+    /**
+     * Gets an array containing the names of the Tables stored in this database.
+     * @return The array of table names.
+     */
+    public String[] getTableNames()
     {
-        if (instance == null)
-            instance = new Database();
-
-        instance.tables = new HashMap<>();
-        instance.parentDirPath = fN + "/";
-        instance.useSerialization = uS;
-
-        return instance;
+        return tables.keySet().toArray(new String[0]);
     }
 
     /**
      * Add a Table to the database as long as no table with the same name is
      * already present.
-     * @param t The Table to be added.
+     * @param tableName  The name of the Table to add.
+     * @param fieldNames The field names of the Table.
      */
-    public void addTable(Table t)
+    public void addTable(String tableName, String fieldNames)
+    {
+        Table t = new Table(tableName, fieldNames);
+        addTable(t);
+    }
+
+    // Actually add the table to the database.
+    private void addTable(Table t)
     {
         String tableName = t.getName();
         if (tables.putIfAbsent(tableName, t) != null)
             throw new IllegalArgumentException("Table " + tableName + " already in database.");
     }
 
-    /**
-     * Gets the named Table if it exists in the database.
-     * @param  tableName The name of the Table to be retrieved.
-     * @return           The Table instance desired.
-     */
-    public Table getTable(String tableName)
+    // Gets the named Table if it exists in the database.
+    Table getTable(String tableName)
     {
         Table t = tables.get(tableName);
         if (t == null)
             throw new IndexOutOfBoundsException("No table " + tableName + " in database");
         return t;
+    }
+
+    /**
+     * Renames a Table if it exists in the database.
+     * @param tableName    The old name of the Table.
+     * @param newTableName The new name of the Table.
+     */
+    public void renameTable(String tableName, String newTableName)
+    {
+        if (tables.keySet().contains(newTableName))
+            throw new IllegalArgumentException("Cannot rename Table, names would clash.");
+        Table t = getTable(tableName);
+        t.rename(newTableName);
+        // Delete the old file so you can't load both versions of the table at once.
+        TableFileReadWriter.deleteTableFile(tableName, parentDirPath);
+        // Remove the old key from the hashmap.
+        tables.remove(tableName);
+        // Store the table under the new key.
+        tables.put(newTableName, t);
+    }
+
+    /**
+     * Gets whether a named Table appears in this database.
+     * @param  tableName The name of the Table to search for.
+     * @return           Whether the Table is present.
+     */
+    public boolean hasTable(String tableName)
+    {
+        return tables.keySet().contains(tableName);
+    }
+
+    /**
+     * Gets a list of the field names for the given table.
+     * @param  tableName The name of the Table.
+     * @return           The list of the field names.
+     */
+    public String[] getFieldNames(String tableName)
+    {
+        return getTable(tableName).getFieldNames().split(", ");
+    }
+
+    /**
+     * Adds the record with the supplied fields to the specified table.
+     * @param tableName The name of the Table to add the record to.
+     * @param fields    The fields to create the Record out of.
+     */
+    public void addRecord(String tableName, String fields)
+    {
+        Table table = getTable(tableName);
+        table.addRecord(fields);
+    }
+
+    /**
+     * Prints the specified Table.
+     * @param tableName The name of the Table.
+     */
+    public void printTable(String tableName)
+    {
+        Table t = getTable(tableName);
+        t.printTable();
+    }
+
+    /**
+     * Renames a column from the specified Table.
+     * @param tableName     The name of the Table whose column is being renamed.
+     * @param oldColumnName The old name of the column.
+     * @param newColumnName The new name of the column.
+     */
+    public void renameColumn(String tableName, String oldColumnName, String newColumnName)
+    {
+        Table t = getTable(tableName);
+        t.renameColumn(oldColumnName, newColumnName);
     }
 
     /**
@@ -82,22 +153,8 @@ public class Database
     {
         for (Table table : tables.values())
         {
-            table.saveTableToFile(parentDirPath, useSerialization);
+            table.saveTableToFile(parentDirPath);
         }
-    }
-
-    /**
-     * Loads the database Tables from the given folder name.
-     * @param  fN          The folder name to load the Tables from.
-     * @param  uS          Whether to use serialization when loading the Tables.
-     * @return             The loaded Database instance.
-     * @throws IOException If an io exception occurred.
-     */
-    public static Database loadDatabase(String fN, boolean uS) throws IOException
-    {
-        Database result = Database.initialiseDatabase(fN, uS);
-        result.loadTablesFromFile();
-        return result;
     }
 
     private void loadTablesFromFile() throws IOException
@@ -111,7 +168,7 @@ public class Database
             tableName = TableFileReadWriter.getTableNameFromFileName(tableFile.getName());
             if (tableName == null)
                 continue;
-            addTable(TableFileReadWriter.readFromFile(tableName, parentDirPath, useSerialization));
+            addTable(TableFileReadWriter.readFromFile(tableName, parentDirPath));
         }
     }
 }

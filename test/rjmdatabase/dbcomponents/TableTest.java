@@ -70,16 +70,14 @@ public class TableTest extends TestBase
             emptyTable.addRecord("TooMany");
             claim(false, "Too many fields.");
         }
-        catch (IllegalArgumentException e)
-        { /* test passed */ }
+        catch (IllegalArgumentException e) { /* test passed */ }
 
         try
         {
             filledTable.addRecord("TooFew");
             claim(false, "Too few fields.");
         }
-        catch (IllegalArgumentException e)
-        { /* test passed */ }
+        catch (IllegalArgumentException e) { /* test passed */ }
 
         filledTable.addRecord("Jean, 37, 4");
         Record record = filledTable.getRecord(3);
@@ -96,30 +94,26 @@ public class TableTest extends TestBase
             emptyTable.getRecord(-1);
             claim(false, "Invalid index -1");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
         try
         {
             emptyTable.getRecord(0);
             claim(false, "Invalid index 0");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
 
         try
         {
             filledTable.getRecord(-1);
             claim(false, "Invalid index -1");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
         try
         {
             filledTable.getRecord(3);
             claim(false, "Invalid index 3");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
 
         Record r0 = filledTable.getRecord(0);
         String[] fields = new String[]{"Susan", "21", "1"};
@@ -130,8 +124,7 @@ public class TableTest extends TestBase
             r0.getField(3);
             claim(false, "Invalid index 3");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
     }
 
     @Test
@@ -142,30 +135,26 @@ public class TableTest extends TestBase
             emptyTable.deleteRecord(-1);
             claim(false, "Invalid index -1");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
         try
         {
             emptyTable.deleteRecord(0);
             claim(false, "Invalid index 0");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
 
         try
         {
             filledTable.deleteRecord(-1);
             claim(false, "Invalid index -1");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
         try
         {
             filledTable.deleteRecord(3);
             claim(false, "Invalid index 3");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
 
 
         filledTable.deleteRecord(0);
@@ -175,8 +164,7 @@ public class TableTest extends TestBase
             filledTable.deleteRecord(0);
             claim(false, "Should not be able to re-delete Records.");
         }
-        catch(IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch(IndexOutOfBoundsException e) { /* test passed */ }
         Record r1 = filledTable.getRecord(1);
         claim("James".equals(filledTable.getRecord(1).getField(0)), "Incorrect record returned after deletion");
     }
@@ -189,37 +177,32 @@ public class TableTest extends TestBase
             emptyTable.updateRecord(-1, "Any", "Thing");
             claim(false, "Invalid index -1");
         }
-        catch(IllegalArgumentException e)
-        { /* test passed */ }
+        catch(IllegalArgumentException e) { /* test passed */ }
         try
         {
             emptyTable.updateRecord(0,"Any","Thing");
             claim(false, "Invalid index 0");
         }
-        catch(IllegalArgumentException e)
-        { /* test passed */ }
+        catch(IllegalArgumentException e) { /* test passed */ }
 
         try
         {
             filledTable.updateRecord(-1, "Name", "Fake");
             claim(false, "Invalid index -1");
         }
-        catch(IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch(IndexOutOfBoundsException e) { /* test passed */ }
         try
         {
             filledTable.updateRecord(3,"Name","Nope");
             claim(false, "Invalid index 3");
         }
-        catch(IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch(IndexOutOfBoundsException e) { /* test passed */ }
         try
         {
             filledTable.updateRecord(1,"NotAColumn","Val");
             claim(false, "Invalid column name NotAColumn");
         }
-        catch(IllegalArgumentException e)
-        { /* test passed */ }
+        catch(IllegalArgumentException e) { /* test passed */ }
         filledTable.updateRecord(1, "Name", "Beatrice");
         Record record = filledTable.getRecord(1);
         claim("Beatrice".equals(record.getField(0)), "Incorrect field value.");
@@ -235,15 +218,13 @@ public class TableTest extends TestBase
             emptyTable.addColumn(-1,"ColumnName", "Default");
             claim(false, "Invalid index -1");
         }
-        catch(IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch(IndexOutOfBoundsException e) { /* test passed */ }
         try
         {
             emptyTable.addColumn(1,"ColumnName", "Default");
             claim(false, "Invalid index 1");
         }
-        catch(IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch(IndexOutOfBoundsException e) { /* test passed */ }
         emptyTable.addColumn(0, "Column0", "Default");
         claim(emptyTable.getNumFields() == 1, "Number of fields is wrong.");
         claim("Column0".equals(emptyTable.getFieldNames()), "Field names are wrong.");
@@ -253,15 +234,13 @@ public class TableTest extends TestBase
             filledTable.addColumn(-1,"ColumnName", "Default");
             claim(false, "Invalid index -1");
         }
-        catch(IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch(IndexOutOfBoundsException e) { /* test passed */ }
         try
         {
             filledTable.addColumn(4,"ColumnName", "Default");
             claim(false, "Invalid index 4");
         }
-        catch(IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch(IndexOutOfBoundsException e) { /* test passed */ }
         filledTable.addColumn(2, "NewColumn", "DefaultVal");
         claim(filledTable.getNumFields() == 4, "Number of fields is wrong;");
         claim("Name, Age, NewColumn, NumberOfPets".equals(filledTable.getFieldNames()), "Field names are wrong.");
@@ -276,16 +255,14 @@ public class TableTest extends TestBase
             emptyTable.deleteColumn("NoColumn");
             claim(false, "No column named NoColumn");
         }
-        catch(IllegalArgumentException e)
-        { /* test passed */ }
+        catch(IllegalArgumentException e) { /* test passed */ }
 
         try
         {
             filledTable.deleteColumn("NoColumn");
             claim(false, "No column named NoColumn");
         }
-        catch(IllegalArgumentException e)
-        { /* test passed */ }
+        catch(IllegalArgumentException e) { /* test passed */ }
 
         filledTable.deleteColumn("Age");
         claim(filledTable.getNumFields() == 2, "Number of fields is wrong.");
@@ -297,8 +274,7 @@ public class TableTest extends TestBase
             record.getField(2);
             claim(false, "Column should be deleted.");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
 
         claim("3".equals(record.getField(1)), "Incorrect field value");
     }
@@ -320,23 +296,20 @@ public class TableTest extends TestBase
             emptyTable.renameColumn("Any", "Other");
             claim(false, "No column with that name.");
         }
-        catch (IllegalArgumentException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
 
         try
         {
             filledTable.renameColumn("NotAColumn", "Other");
             claim(false, "No column with that name.");
         }
-        catch (IllegalArgumentException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
         try
         {
             filledTable.renameColumn("Name", "Age");
             claim(false, "Already a column with that name.");
         }
-        catch (IllegalArgumentException e)
-        { /* test passed */ }
+        catch (IllegalArgumentException e) { /* test passed */ }
 
         filledTable.renameColumn("NumberOfPets", "NumPets");
         claim("Name, Age, NumPets".equals(filledTable.getFieldNames()), "Incorrect field names.");
@@ -393,49 +366,25 @@ public class TableTest extends TestBase
         claim(emptyTable.getIsDirty(), "Should be dirty when first created.");
         try
         {
-            emptyTable.saveTableToFile(tableTestFolderPath, true);
+            emptyTable.saveTableToFile(tableTestFolderPath);
             claim(!emptyTable.getIsDirty(), "Should not be dirty after saving.");
-            claim(emptyTable.equals(TableFileReadWriter.readFromFile(emptyTable.getName(), tableTestFolderPath, true)), "Serialization loaded table does not equal original.");
+            claim(emptyTable.equals(TableFileReadWriter.readFromFile(emptyTable.getName(), tableTestFolderPath)), "Loaded table does not equal original.");
         }
         catch (IOException e)
         {
-            claim (false, "IOException while reading or writing by serialization.");
-        }
-        emptyTable.rename("NewEmptyTable");
-        claim(emptyTable.getIsDirty(), "Should be dirty after rename.");
-        try
-        {
-            emptyTable.saveTableToFile(tableTestFolderPath, false);
-            claim(!emptyTable.getIsDirty(), "Should not be dirty after saving.");
-            claim(emptyTable.equals(TableFileReadWriter.readFromFile(emptyTable.getName(), tableTestFolderPath, false)), "RjmMethod loaded table does not equal original.");
-        }
-        catch (IOException e)
-        {
-            claim (false, "IOException while reading or writing by RjmMethod.");
+            claim (false, "IOException while reading or writing.");
         }
 
         claim(filledTable.getIsDirty(), "Should be dirty when first created.");
         try
         {
-            filledTable.saveTableToFile(tableTestFolderPath, true);
+            filledTable.saveTableToFile(tableTestFolderPath);
             claim(!filledTable.getIsDirty(), "Should not be dirty after saving.");
-            claim(filledTable.equals(TableFileReadWriter.readFromFile(filledTable.getName(), tableTestFolderPath, true)), "Serialization loaded table does not equal original.");
+            claim(filledTable.equals(TableFileReadWriter.readFromFile(filledTable.getName(), tableTestFolderPath)), "Loaded table does not equal original.");
         }
         catch (IOException e)
         {
-            claim (false, "IOException while reading or writing by serialization.");
-        }
-        filledTable.rename("NewFilledTable");
-        claim(filledTable.getIsDirty(), "Should be dirty after rename.");
-        try
-        {
-            filledTable.saveTableToFile(tableTestFolderPath, false);
-            claim(!filledTable.getIsDirty(), "Should not be dirty after saving.");
-            claim(filledTable.equals(TableFileReadWriter.readFromFile(filledTable.getName(), tableTestFolderPath, false)), "RjmMethod loaded table does not equal original.");
-        }
-        catch (IOException e)
-        {
-            claim (false, "IOException while reading or writing by RjmMethod.");
+            claim (false, "IOException while reading or writing.");
         }
     }
 
@@ -457,74 +406,74 @@ public class TableTest extends TestBase
         // Rename Table
         emptyTable.rename("NewEmptyName");
         claim(emptyTable.getIsDirty(), "Should be dirty after rename.");
-        try {emptyTable.saveTableToFile(tableTestFolderPath, true);}
+        try {emptyTable.saveTableToFile(tableTestFolderPath);}
         catch (IOException e) { claim(false, "IOException while saving to file."); }
         claim(!emptyTable.getIsDirty(), "Shouldn't be dirty after saving.");
 
         filledTable.rename("NewFilledName");
         claim(filledTable.getIsDirty(), "Should be dirty after rename.");
-        try {filledTable.saveTableToFile(tableTestFolderPath, true);}
+        try {filledTable.saveTableToFile(tableTestFolderPath);}
         catch (IOException e) { claim(false, "IOException while saving to file."); }
         claim(!filledTable.getIsDirty(), "Shouldn't be dirty after saving.");
 
         // Rename column
         filledTable.renameColumn("Name", "AString");
         claim(filledTable.getIsDirty(), "Should be dirty after renameColumn.");
-        try {filledTable.saveTableToFile(tableTestFolderPath, true);}
+        try {filledTable.saveTableToFile(tableTestFolderPath);}
         catch (IOException e) { claim(false, "IOException while saving to file."); }
         claim(!filledTable.getIsDirty(), "Shouldn't be dirty after saving.");
 
         // Add column
         emptyTable.addColumn(0, "NewColumn", "Blah");
         claim(emptyTable.getIsDirty(), "Should be dirty after addColumn.");
-        try {emptyTable.saveTableToFile(tableTestFolderPath, true);}
+        try {emptyTable.saveTableToFile(tableTestFolderPath);}
         catch (IOException e) { claim(false, "IOException while saving to file."); }
         claim(!emptyTable.getIsDirty(), "Shouldn't be dirty after saving.");
 
         filledTable.addColumn(0, "NewColumn", "Blah");
         claim(filledTable.getIsDirty(), "Shouldn't be dirty after addColumn.");
-        try {filledTable.saveTableToFile(tableTestFolderPath, true);}
+        try {filledTable.saveTableToFile(tableTestFolderPath);}
         catch (IOException e) { claim(false, "IOException while saving to file."); }
         claim(!filledTable.getIsDirty(), "Shouldn't be dirty after saving.");
 
         // Delete column
         emptyTable.deleteColumn("NewColumn");
         claim(emptyTable.getIsDirty(), "Should be dirty after deleting column.");
-        try {emptyTable.saveTableToFile(tableTestFolderPath, true);}
+        try {emptyTable.saveTableToFile(tableTestFolderPath);}
         catch (IOException e) { claim(false, "IOException while saving to file."); }
         claim(!emptyTable.getIsDirty(), "Shouldn't be dirty after saving.");
 
         filledTable.deleteColumn("NewColumn");
         claim(filledTable.getIsDirty(), "Should be dirty after deleting column.");
-        try {filledTable.saveTableToFile(tableTestFolderPath, true);}
+        try {filledTable.saveTableToFile(tableTestFolderPath);}
         catch (IOException e) { claim(false, "IOException while saving to file."); }
         claim(!filledTable.getIsDirty(), "Shouldn't be dirty after saving.");
 
         // Add Record
         filledTable.addRecord("Somebody, 30, 10");
         claim(filledTable.getIsDirty(), "Should b dirty after adding Record.");
-        try {filledTable.saveTableToFile(tableTestFolderPath, true);}
+        try {filledTable.saveTableToFile(tableTestFolderPath);}
         catch (IOException e) { claim(false, "IOException while saving to file."); }
         claim(!filledTable.getIsDirty(), "Shouldn't be dirty after saving.");
 
         // Update Record
         filledTable.updateRecord(3, "AString", "Elliot");
         claim(filledTable.getIsDirty(), "Should be dirty after updating Record.");
-        try {filledTable.saveTableToFile(tableTestFolderPath, true);}
+        try {filledTable.saveTableToFile(tableTestFolderPath);}
         catch (IOException e) { claim(false, "IOException while saving to file."); }
         claim(!filledTable.getIsDirty(), "Shouldn't be dirty after saving.");
 
         // Delete Record
         filledTable.deleteRecord(3);
         claim(filledTable.getIsDirty(), "Should be dirty after deleting Record.");
-        try {filledTable.saveTableToFile(tableTestFolderPath, true);}
+        try {filledTable.saveTableToFile(tableTestFolderPath);}
         catch (IOException e) { claim(false, "IOException while saving to file."); }
         claim(!filledTable.getIsDirty(), "Shouldn't be dirty after saving.");
 
         // Load Table
         try
         {
-            Table o = TableFileReadWriter.readFromFile(filledTable.getName(), tableTestFolderPath, true);
+            Table o = TableFileReadWriter.readFromFile(filledTable.getName(), tableTestFolderPath);
             claim(!o.getIsDirty(), "Shouldn't be dirty after loading.");
         }
         catch (IOException e)

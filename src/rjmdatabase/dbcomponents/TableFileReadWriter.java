@@ -4,10 +4,6 @@ import rjmdatabase.fileutils.FileUtil;
 import java.io.IOException;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.StringJoiner;
@@ -21,15 +17,10 @@ public class TableFileReadWriter
 {
     private static TableFileReadWriter instance;
 
-    // The folder in which all Tables are saved.
-    private static String parentDirPath;
-    // The file extension with which table files are saved.
-    private static String fileExtension;
     // The String used to separate fields in files.
     private static final String FIELD_SEPARATOR = String.valueOf((char)0x1F);
 
-    static final String SERIALIZATION_FILE_EXT = ".ser";
-    static final String CUSTOM_METHOD_FILE_EXT = ".rjmTable";
+    static final String FILE_EXT = ".rjmTable";
 
     /**
      * Gets the name of the Table from the supplied file name.
@@ -45,10 +36,16 @@ public class TableFileReadWriter
             throw new IllegalArgumentException("File name " + fName + " must be in form <tableName>.<extension>");
         if (parts[0].equals(""))
             return null;
-        if (!("." + parts[1]).equals(SERIALIZATION_FILE_EXT) && !("." + parts[1]).equals(CUSTOM_METHOD_FILE_EXT))
+        if (!("." + parts[1]).equals(FILE_EXT))
             throw new IllegalArgumentException("Invalid file extension ." + parts[1] + " for table files");
 
         return parts[0];
+    }
+
+    static void deleteTableFile(String tableName, String parentDirPath)
+    {
+        File tableFile = new File(parentDirPath + tableName + FILE_EXT);
+        FileUtil.deleteFileIfExists(tableFile);
     }
 
     /**
@@ -56,70 +53,7 @@ public class TableFileReadWriter
      * @param  t           The Table to write.
      * @throws IOException If an io exception occurred.
      */
-    static void writeToFile(Table t, String pDP, boolean useSerialization) throws IOException
-    {
-        parentDirPath = pDP;
-        fileExtension = useSerialization ? SERIALIZATION_FILE_EXT : CUSTOM_METHOD_FILE_EXT;
-        if (useSerialization)
-            serWriteToFile(t);
-        else
-            rjmWriteToFile(t);
-    }
-
-    /**
-     * Reads a table from a file, using the chosen method.
-     * @param  name        The name of the table to be read.
-     * @return             The Table instance that has been loaded.
-     * @throws IOException If an io exception occurred.
-     */
-    static Table readFromFile(String name, String pDP, boolean useSerialization) throws IOException
-    {
-        parentDirPath = pDP;
-        fileExtension = useSerialization ? SERIALIZATION_FILE_EXT : CUSTOM_METHOD_FILE_EXT;
-        if (useSerialization)
-            return serReadFromFile(name);
-        else
-            return rjmReadFromFile(name);
-    }
-
-    private static void serWriteToFile(Table t) throws IOException
-    {
-        // Need to make sure that the parent directories exist first.
-        FileUtil.makeDirsIfNeeded(new File(parentDirPath));
-
-        String fPath = parentDirPath + t.getName() + fileExtension;
-        try(FileOutputStream fileOut = new FileOutputStream(fPath);
-            ObjectOutputStream out = new ObjectOutputStream(fileOut);)
-        {
-            // This requires both Table and Record to implement Serializable.
-            out.writeObject(t);
-        }
-    }
-
-    private static Table serReadFromFile(String tableName) throws IOException
-    {
-        Table t = null;
-        try
-        {
-            FileInputStream fileIn = new FileInputStream(parentDirPath + tableName + fileExtension);
-            ObjectInputStream in = new ObjectInputStream(fileIn);
-            // This requires both Table and Record to implement Serializable.
-            t = (Table) in.readObject();
-            in.close();
-            fileIn.close();
-            return t;
-        }
-        catch (FileNotFoundException f)
-        {
-            throw new IllegalArgumentException("Table " + tableName + " file not found");
-        }
-        catch (ClassNotFoundException c)
-        {
-            throw new Error("Table class not found");
-        }
-    }
-
-    private static void rjmWriteToFile(Table t) throws IOException
+    static void writeToFile(Table t, String parentDirPath) throws IOException
     {
         String[][] tableData = t.getTableData();
 
@@ -140,13 +74,19 @@ public class TableFileReadWriter
             lines[row] = joiner.toString();
         }
 
-        String filePath = parentDirPath + t.getName() + fileExtension;
+        String filePath = parentDirPath + t.getName() + FILE_EXT;
         FileUtil.writeFile(filePath, lines);
     }
 
-    private static Table rjmReadFromFile(String name) throws IOException
+    /**
+     * Reads a table from a file, using the chosen method.
+     * @param  name        The name of the table to be read.
+     * @return             The Table instance that has been loaded.
+     * @throws IOException If an io exception occurred.
+     */
+    static Table readFromFile(String name, String parentDirPath) throws IOException
     {
-        ArrayList<String> lines = FileUtil.readFile(parentDirPath + name + fileExtension);
+        ArrayList<String> lines = FileUtil.readFile(parentDirPath + name + FILE_EXT);
         String[][] tableData = new String[lines.size()][];
         for (int row = 0; row < lines.size(); row++)
         {

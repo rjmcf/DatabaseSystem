@@ -38,29 +38,25 @@ public class RecordTest extends TestBase
             emptyRecord.getField(-1);
             claim(false, "Invalid index -1.");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
         try
         {
             emptyRecord.getField(0);
             claim(false, "Invalid index 0.");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
         try
         {
             filledRecord.getField(-1);
             claim(false, "Invalid index -1.");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
         try
         {
             filledRecord.getField(3);
             claim(false, "Invalid index 3.");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
 
         claim("Field0".equals(filledRecord.getField(0)), "Incorrect Field0 value.");
         claim("Field1".equals(filledRecord.getField(1)), "Incorrect Field1 value.");
@@ -75,15 +71,13 @@ public class RecordTest extends TestBase
             emptyRecord.addField(-1, "Anything");
             claim(false, "Invalid index -1.");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
         try
         {
             emptyRecord.addField(1, "Anything");
             claim(false, "Invalid index 1.");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
         emptyRecord.addField(0, "Field0");
         claim("Field0".equals(emptyRecord.getField(0)), "Incorrect Field0 value.");
 
@@ -92,15 +86,13 @@ public class RecordTest extends TestBase
             filledRecord.addField(-1, "Anything");
             claim(false, "Invalid index -1.");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
         try
         {
             filledRecord.addField(4, "Anything");
             claim(false, "Invalid index 4.");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
         filledRecord.addField(3, "Field3");
         claim("Field3".equals(filledRecord.getField(3)), "Incorrect Field3 value.");
         filledRecord.addField(2, "NewField2");
@@ -123,30 +115,26 @@ public class RecordTest extends TestBase
             emptyRecord.updateField(-1, "Anything");
             claim(false, "Invalid index -1.");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
         try
         {
             emptyRecord.updateField(0, "Anything");
             claim(false, "Invalid index 0.");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
 
         try
         {
             filledRecord.updateField(-1, "Anything");
             claim(false, "Invalid index -1.");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
         try
         {
             filledRecord.updateField(3, "Anything");
             claim(false, "Invalid index 3.");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
         filledRecord.updateField(1, "NewField1");
         for (int i = 0; i < 3; i++)
         {
@@ -163,30 +151,26 @@ public class RecordTest extends TestBase
             emptyRecord.deleteField(-1);
             claim(false, "Invalid index -1.");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
         try
         {
             emptyRecord.deleteField(0);
             claim(false, "Invalid index 0.");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
 
         try
         {
             filledRecord.deleteField(-1);
             claim(false, "Invalid index -1.");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
         try
         {
             filledRecord.deleteField(3);
             claim(false, "Invalid index 3.");
         }
-        catch (IndexOutOfBoundsException e)
-        { /* test passed */ }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
         filledRecord.deleteField(1);
         claim("Field0".equals(filledRecord.getField(0)), "Incorrect Field0 value.");
         claim("Field2".equals(filledRecord.getField(1)), "Incorrect Field1 value.");

@@ -14,14 +14,16 @@ public abstract class TestBase
         JUST_ERRORS, JUST_CLASSES, WITH_MESSAGES, ALL
     }
 
-    protected Verbosity verbosity = Verbosity.WITH_MESSAGES;
+    protected Verbosity verbosity = Verbosity.ALL;
     /**
      * Runs the tests in this class. Needs to be called from main method in
      * derived classes.
      * @param args Command line arguments.
+     * @return The number of tests that were failed.
      */
-    public void startTest()
+    public int startTest()
     {
+        int numFailed = 0;
         String className = this.getClass().getSimpleName();
         String classBeingTested = className.replace("Test", "");
         if (verbosity != Verbosity.JUST_ERRORS)
@@ -61,14 +63,15 @@ public abstract class TestBase
                         Throwable exceptionThrown = ite.getCause();
                         if (!(exceptionThrown instanceof TestFailedException))
                         {
-                            StackTraceElement claimStackTraceElement = exceptionThrown.getStackTrace()[1];
+                            StackTraceElement claimStackTraceElement = exceptionThrown.getStackTrace()[2];
                             String fullClassNameForClaim = claimStackTraceElement.getClassName();
                             String[] packagePathToClass = fullClassNameForClaim.split("\\.");
                             String classNameForClaim = packagePathToClass[packagePathToClass.length - 1];
                             int claimLineNumber = claimStackTraceElement.getLineNumber();
                             toPrint += String.format(", %s threw an exception on line %d", classNameForClaim, claimLineNumber);
                         }
-                        toPrint += String.format("\n    %s\n", exceptionThrown.getMessage());
+                        if (exceptionThrown.getMessage() != null)
+                            toPrint += String.format("\n    %s\n", exceptionThrown.getMessage());
                     }
                 }
                 afterTest();
@@ -80,6 +83,7 @@ public abstract class TestBase
 
             if (wasError)
             {
+                numFailed += 1;
                 if (verbosity == Verbosity.JUST_ERRORS)
                     System.out.println(toPrint += " in " + className);
                 else
@@ -93,6 +97,7 @@ public abstract class TestBase
         }
         if (verbosity != Verbosity.JUST_ERRORS)
             System.out.println("Testing " + classBeingTested + " completed");
+        return numFailed;
     }
 
     protected void beforeTest() {}

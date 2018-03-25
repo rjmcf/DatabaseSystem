@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.StringJoiner;
 
 /**
- * Represents a Record. Implements Serializable in order to allow saving to a
- * file by serialization.
+ * Represents a Record.
  * @author Rjmcf
  */
-public class Record implements java.io.Serializable
+public class Record
 {
     // Fields are stored as an array list to make adding new fields much easier.
     private ArrayList<String> fields;

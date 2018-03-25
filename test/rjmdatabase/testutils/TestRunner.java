@@ -33,9 +33,15 @@ public class TestRunner
                                     new TableTest(),
                                     new DatabaseTest(),
                                 };
+        int numFailed = 0;
         for (TestBase tester : testers)
         {
-            tester.startTest();
+            numFailed += tester.startTest();
         }
+
+        if (numFailed > 0)
+            throw new Error(String.format("%d tests failed.", numFailed));
+        else
+            System.out.println("All tests passed.");
     }
 }

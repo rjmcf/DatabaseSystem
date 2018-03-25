@@ -10,8 +10,8 @@ import java.io.File;
 
 public class TableFileReadWriterTest extends TestBase
 {
-    private String oldFolder = "dbTestFolders/tableFiles";
-    private String newFolder = "dbTestFolders/newTableFiles";
+    private String oldFolder = "dbTestFolders/tableFiles/";
+    private String newFolder = "dbTestFolders/newTableFiles/";
 
     /**
      * Run tests for TableFileReadWriter.
@@ -26,41 +26,34 @@ public class TableFileReadWriterTest extends TestBase
     public void beforeTest()
     {
         FileUtil.makeDirsIfNeeded(new File(oldFolder));
-        FileUtil.deleteDir(new File(newFolder));
+    }
+
+    @Override
+    public void afterTest()
+    {
+        FileUtil.deleteDirIfExists(new File(newFolder));
     }
 
     @Test
-    public void testSerializingOldFolder()
+    public void testOldFolder()
     {
-        repeatableTableFileReadWriter(oldFolder, true);
+        repeatableTableFileReadWriter(oldFolder);
     }
 
     @Test
-    public void testSerializingNewFolder()
+    public void testNewFolder()
     {
-        repeatableTableFileReadWriter(newFolder, true);
+        repeatableTableFileReadWriter(newFolder);
     }
 
-    @Test
-    public void testRjmMethodOldFolder()
-    {
-        repeatableTableFileReadWriter(oldFolder, false);
-    }
-
-    @Test
-    public void testRjmMethodNewFolder()
-    {
-        repeatableTableFileReadWriter(newFolder, false);
-    }
-
-    private void repeatableTableFileReadWriter(String pDP, boolean uS)
+    private void repeatableTableFileReadWriter(String pDP)
     {
         Table t = new Table("TestTable", "Attr1, Attr2");
         t.addRecord(new String[]{"Val1", "Val2"});
         t.addRecord(new String[]{"Val, 3!\n", "  Val  4  \n"});
         try
         {
-            TableFileReadWriter.writeToFile(t, pDP, uS);
+            TableFileReadWriter.writeToFile(t, pDP);
         }
         catch (IOException e)
         {
@@ -68,7 +61,7 @@ public class TableFileReadWriterTest extends TestBase
         }
         try
         {
-            Table r = TableFileReadWriter.readFromFile(t.getName(), pDP, uS);
+            Table r = TableFileReadWriter.readFromFile(t.getName(), pDP);
             claim(t.equals(r), "Read Table does not match original.");
         }
         catch (IOException e)
@@ -77,11 +70,10 @@ public class TableFileReadWriterTest extends TestBase
         }
         try
         {
-            TableFileReadWriter.readFromFile("NotATable", pDP, uS);
+            TableFileReadWriter.readFromFile("NotATable", pDP);
             claim(false, "Should not be able to read from a Table file that doesn't exist.");
         }
-        catch (IllegalArgumentException i)
-        { /* test passed */ }
+        catch (IllegalArgumentException i) { /* test passed */ }
         catch (IOException e)
         {
             claim(false, "Should not be trying to read from Table file that doesn't exist.");
@@ -93,11 +85,9 @@ public class TableFileReadWriterTest extends TestBase
             TableFileReadWriter.getTableNameFromFileName("tableName.txt");
             claim(false, "Incorrect file extension.");
         }
-        catch (IllegalArgumentException e)
-        { /* test passed */ }
+        catch (IllegalArgumentException e) { /* test passed */ }
 
         String tableName = "tableName";
-        claim(tableName.equals(TableFileReadWriter.getTableNameFromFileName(tableName + TableFileReadWriter.SERIALIZATION_FILE_EXT)), "Table name does not match.");
-        claim(tableName.equals(TableFileReadWriter.getTableNameFromFileName(tableName + TableFileReadWriter.CUSTOM_METHOD_FILE_EXT)), "Table name does not match.");
+        claim(tableName.equals(TableFileReadWriter.getTableNameFromFileName(tableName + TableFileReadWriter.FILE_EXT)), "Table name does not match.");
     }
 }
