@@ -14,7 +14,7 @@ public abstract class TestBase
         JUST_ERRORS, JUST_CLASSES, WITH_MESSAGES, ALL
     }
 
-    protected Verbosity verbosity = Verbosity.JUST_CLASSES;
+    protected Verbosity verbosity = Verbosity.ALL;
 
     /**
      * Runs the tests in this class.

@@ -1,3 +1,4 @@
 Implement interactive method to help find where exceptions where thrown.
 Add way to test user interface.
 Use Table dirty flag to implement incremental saving.
+Store records according to some order.

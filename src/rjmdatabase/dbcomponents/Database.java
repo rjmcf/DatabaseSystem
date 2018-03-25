@@ -4,10 +4,10 @@ import rjmdatabase.fileutils.FileUtil;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
- * Represents a database. Currently a collection of Tables with some utility
- * methods.
+ * Represents a database. Currently a collection of Tables with some utility methods.
  * @author Rjmcf
  */
 public class Database
@@ -24,10 +24,11 @@ public class Database
     {
         tables = new HashMap<>();
         parentDirPath = fN + "/";
-        FileUtil.makeDirsIfNeeded(new File(parentDirPath));
+        File parentDir = new File(parentDirPath);
+        FileUtil.makeDirsIfNeeded(parentDir);
         try
         {
-            loadTablesFromFile();
+            loadTablesFromFile(parentDir);
         }
         catch (IOException e)
         {
@@ -41,12 +42,12 @@ public class Database
      */
     public String[] getTableNames()
     {
-        return tables.keySet().toArray(new String[0]);
+        Set<String> tableNames = tables.keySet();
+        return tableNames.toArray(new String[0]);
     }
 
     /**
-     * Add a Table to the database as long as no table with the same name is
-     * already present.
+     * Add a Table to the database as long as no table with the same name is already present.
      * @param tableName  The name of the Table to add.
      * @param fieldNames The field names of the Table.
      */
@@ -60,6 +61,7 @@ public class Database
     private void addTable(Table t)
     {
         String tableName = t.getName();
+        // putIfAbsent returns null if key is not already present.
         if (tables.putIfAbsent(tableName, t) != null)
             throw new IllegalArgumentException("Table " + tableName + " already in database.");
     }
@@ -80,7 +82,8 @@ public class Database
      */
     public void renameTable(String tableName, String newTableName)
     {
-        if (tables.keySet().contains(newTableName))
+        Set<String> tableNames = tables.keySet();
+        if (tableNames.contains(newTableName))
             throw new IllegalArgumentException("Cannot rename Table, names would clash.");
         Table t = getTable(tableName);
         t.rename(newTableName);
@@ -99,7 +102,8 @@ public class Database
      */
     public boolean hasTable(String tableName)
     {
-        return tables.keySet().contains(tableName);
+        Set<String> tableNames = tables.keySet();
+        return tableNames.contains(tableName);
     }
 
     /**
@@ -109,7 +113,9 @@ public class Database
      */
     public String[] getFieldNames(String tableName)
     {
-        return getTable(tableName).getFieldNames().split(", ");
+        Table theTable = getTable(tableName);
+        String fieldNames = theTable.getFieldNames();
+        return fieldNames.split(", ");
     }
 
     /**
@@ -157,11 +163,9 @@ public class Database
         }
     }
 
-    private void loadTablesFromFile() throws IOException
+    // Goes through all table files in parentDir and loads the Tables found.
+    private void loadTablesFromFile(File parentDir) throws IOException
     {
-        File parentDir = new File(parentDirPath);
-        if (!parentDir.exists())
-            throw new IllegalArgumentException("Folder " + parentDirPath + " does not exist");
         String tableName;
         for (File tableFile : parentDir.listFiles())
         {
