@@ -1,3 +1,5 @@
+Remove need to check printout during Tests.
+Add way to test interface.
 Implement interactive method to help find where exceptions where thrown.
 Remove need to add new tests to TestRunner.
 Use Table dirty flag to implement incremental saving.
