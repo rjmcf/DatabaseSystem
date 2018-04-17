@@ -18,7 +18,7 @@ public abstract class TestBase
 
     /**
      * Runs the tests in this class.
-     * @return THe number of tests that were failed.
+     * @return The number of tests that were failed.
      */
     public int startTest()
     {
@@ -42,13 +42,13 @@ public abstract class TestBase
             if (!test.isAnnotationPresent(Test.class))
             {
                 if (test.getName().startsWith("test"))
-                    System.out.println("    Should " + test.getName() + " from have a @Test annotation?");
+                    System.out.println(String.format("    Should %s from %s have a @Test annotation?", test.getName(), className));
                 continue;
             }
 
             Annotation annotation = test.getAnnotation(Test.class);
             Test testAnn = (Test) annotation;
-            String toPrint = "    " + test.getName() + ": ";
+            String toPrint = String.format("    %s: ", test.getName());
             boolean wasError = true;
 
             if (testAnn.testEnabled())
@@ -70,17 +70,12 @@ public abstract class TestBase
                     if (verbosity == Verbosity.WITH_MESSAGES || verbosity == Verbosity.ALL)
                     {
                         Throwable exceptionThrown = ite.getCause();
-                        if (!(exceptionThrown instanceof TestFailedException))
+                        if (exceptionThrown instanceof TestFailedException)
                         {
-                            StackTraceElement claimStackTraceElement = exceptionThrown.getStackTrace()[0];
-                            String fullClassNameForClaim = claimStackTraceElement.getClassName();
-                            String[] packagePathToClass = fullClassNameForClaim.split("\\.");
-                            String classNameForClaim = packagePathToClass[packagePathToClass.length - 1];
-                            int claimLineNumber = claimStackTraceElement.getLineNumber();
-                            toPrint += String.format(", %s threw an exception on line %d", classNameForClaim, claimLineNumber);
-                        }
-                        if (exceptionThrown.getMessage() != null)
                             toPrint += String.format("\n    %s\n", exceptionThrown.getMessage());
+                        }
+                        else
+                            ExceptionExplorer.interactWithException(exceptionThrown, className, test.getName());
                     }
                 }
                 afterTest();
@@ -114,6 +109,7 @@ public abstract class TestBase
 
     protected void claim(boolean b, String message)
     {
+        // sT[0] is this line, sT[1] is this function, sT[2] is where it was called from.
         int callersLineNumber = Thread.currentThread().getStackTrace()[2].getLineNumber();
         if (!b) throw new TestFailedException(callersLineNumber, message);
     }

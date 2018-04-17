@@ -1,19 +1,18 @@
 package rjmdatabase.userinterface;
 
 import rjmdatabase.dbcomponents.Database;
-import java.util.Scanner;
+import static rjmdatabase.userinterface.ConsoleInterfaceUtil.*;
 import java.util.StringJoiner;
 import java.io.IOException;
 
 public class TextInterface
 {
-    private static Scanner in;
     private static Database database;
 
     public static void main(String[] args) {
         if (args.length != 1)
         {
-            System.out.println("Usage requires one parameter, the name of the database to interact with.");
+            println("Usage requires one parameter, the name of the database to interact with.");
             return;
         }
 
@@ -23,55 +22,8 @@ public class TextInterface
         mainMenu();
     }
 
-    private static void println(String s)
-    {
-        System.out.println(s);
-    }
-
-    private static void println()
-    {
-        System.out.println();
-    }
-
-    private static String getLineOfInput()
-    {
-        String result = in.nextLine();
-        if (result.equals(""))
-            return null;
-        return result;
-    }
-
-    private static String getLineOfInputNoSpaces()
-    {
-        String input = getLineOfInput();
-        if (input == null)
-            return null;
-
-        input = input.replaceAll("\\s", "");
-        return input.equals("") ? null : input;
-    }
-
-    private static int getIntInput()
-    {
-        int result; String input; boolean success = false;
-        while (true)
-        {
-            input = in.nextLine();
-            try
-            {
-                result = Integer.parseInt(input);
-                return result;
-            }
-            catch (NumberFormatException e)
-            {
-                println("Please enter a valid number.");
-            }
-        }
-    }
-
     private static void mainMenu()
     {
-        in = new Scanner(System.in);
         int choice;
         while (true)
         {
@@ -119,11 +71,9 @@ public class TextInterface
                     }
                     catch (IOException e)
                     {
-                        println("Unable to save database, do you still want to quit (Y/N)?");
-                        if (!"Y".equals(in.next().toUpperCase()))
+                        if (!userRespondedYes("Unable to save database, do you still want to quit?"))
                             break;
                     }
-                    in.close();
                     return;
                 default:
                     println("Please enter one of the numbers listed.");

@@ -6,15 +6,27 @@ import java.io.File;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 
+/**
+ * This redirects all calls to a PrintStream to use my own file writing methods.
+ * This is useful when testing TablePrinter, as normally PrintStreams don't let
+ * you select a character encoding.
+ * @author Rjmcf
+ */
 public class PrintStreamFileWriter extends java.io.PrintStream
 {
+    private static String dummyFileName;
     private ArrayList<String> lines = new ArrayList<>();
-    private String dummyFileName = "test.txt";
     private String fileName;
+
+    static
+    {
+        // This enables me to use dummyFileName in the constructor.
+        dummyFileName = "test.txt";
+    }
 
     public PrintStreamFileWriter(String fN) throws FileNotFoundException
     {
-        super("test.txt");
+        super(dummyFileName);
         fileName = fN;
     }
 
