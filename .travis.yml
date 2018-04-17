@@ -1,4 +1,4 @@
 language: java
 install: true
 script:
-- make -s runTests
+- make -s runTests DISABLE_INTERACTIVITY=1

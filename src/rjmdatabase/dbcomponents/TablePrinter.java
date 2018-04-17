@@ -2,6 +2,7 @@ package rjmdatabase.dbcomponents;
 
 import java.util.StringJoiner;
 import java.util.Collections;
+import java.io.PrintStream;
 
 /**
  * Utility class to pretty print a Table to the console.
@@ -24,6 +25,14 @@ public class TablePrinter
     private static final String RECORD_SEPARATOR_LAST_CHAR = "-|";
     // The String used to separate fields when printing.
     private static final String FIELD_SEPARATOR = " | ";
+    // The PrintStream that all printing is done to.
+    private static PrintStream out = System.out;
+
+    // Changes the output stream from the default System.out.
+    static void setPrintStream(PrintStream o)
+    {
+        out = o;
+    }
 
     /**
      * Prints the supplied Table to the console.
@@ -31,10 +40,10 @@ public class TablePrinter
      */
     static void printTable(String tableName, String[][] tableData)
     {
+        // First row contains version number, not important for here.
         // Stores some useful stats about the size of the table.
-        int numCols = tableData[0].length;
-        // -1 because of the table name.
-        int numRows = tableData.length;
+        int numCols = tableData[1].length;
+        int numRows = tableData.length - 1;
 
         // Stores the maximum sizes of individual columns and rows.
         int[] colWidths = new int[numCols];
@@ -46,7 +55,8 @@ public class TablePrinter
         for (int row = 0; row < numRows; row++)
             for (int col = 0; col < numCols; col++)
             {
-                value = tableData[row][col];
+                // +1 to skip the version number.
+                value = tableData[row+1][col];
                 String[] lines = value.split("\n");
                 // If this value has more lines than the current max height for this row,
                 // update the max height.
@@ -72,8 +82,7 @@ public class TablePrinter
         // lines within fields in those records.
         String[][] linesToPrint = new String[numRows][];
 
-        // Build the String to print for each row in lines. Start from 1 to skip
-        // the Table name
+        // Build the String to print for each row in lines.
         StringJoiner lineJ;
         for (int row = 0; row < numRows; row++)
         {
@@ -84,7 +93,8 @@ public class TablePrinter
             // Split each field in this record into lines.
             String[][] fieldsInLines = new String[numCols][];
             for (int col = 0; col < numCols; col++)
-                fieldsInLines[col] = tableData[row][col].split("\n");
+                // Start from 1 to skip the version number
+                fieldsInLines[col] = tableData[row+1][col].split("\n");
             // Now build up each line for this record.
             for (int lineNum = 0; lineNum < rowHeights[row]; lineNum++)
             {
@@ -102,24 +112,24 @@ public class TablePrinter
         }
 
         // Actually print the table
-        System.out.println();
-        System.out.println(tableName);
-        System.out.println();
+        out.println();
+        out.println(tableName);
+        out.println();
         if (INCLUDE_FIRST_ROW_LINE)
-            System.out.println(recordSeparator);
+            out.println(recordSeparator);
 
         for (int row = 0; row < linesToPrint.length; row++)
         {
             String[] linesForRow = linesToPrint[row];
             for (String line: linesForRow)
-                System.out.println(line);
+                out.println(line);
             // Only print the record separator if we are between records or
             // we want to include the separator after the final line anyway.
             if (row != linesToPrint.length - 1 || INCLUDE_FINAL_ROW_LINE)
-                System.out.println(recordSeparator);
+                out.println(recordSeparator);
         }
 
-        System.out.println();
+        out.println();
     }
 
     // Gets the StringJoiner used to build up lines to print.

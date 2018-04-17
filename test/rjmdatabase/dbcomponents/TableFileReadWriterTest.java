@@ -1,6 +1,7 @@
 package rjmdatabase.dbcomponents;
 
 import rjmdatabase.testutils.TestBase;
+import rjmdatabase.testutils.Test;
 import rjmdatabase.dbcomponents.Table;
 import rjmdatabase.fileutils.FileUtil;
 
@@ -9,78 +10,84 @@ import java.io.File;
 
 public class TableFileReadWriterTest extends TestBase
 {
+    private String oldFolder = "dbTestFolders/tableFiles/";
+    private String newFolder = "dbTestFolders/newTableFiles/";
+
     /**
      * Run tests for TableFileReadWriter.
      * @param args Command line arguments.
      */
-     public static void main(String[] args) {
-         TableFileReadWriterTest tester = new TableFileReadWriterTest();
-         tester.startTest(args);
-     }
-
-    @Override
-    protected void test(String[] args)
-    {
-        String oldFolder = "dbTestFolders/tableFiles";
-        String newFolder = "dbTestFolders/newTableFiles";
-        runTestTableFileReadWriter(oldFolder, true, false);
-        runTestTableFileReadWriter(oldFolder, false, false);
-        runTestTableFileReadWriter(newFolder, true, true);
-        runTestTableFileReadWriter(newFolder, false, true);
+    public static void main(String[] args) {
+        TableFileReadWriterTest tester = new TableFileReadWriterTest();
+        tester.startTest();
     }
 
-    private void runTestTableFileReadWriter(String pDP, boolean uS, boolean deleteDir)
+    @Override
+    public void beforeTest()
+    {
+        FileUtil.makeDirsIfNeeded(new File(oldFolder));
+    }
+
+    @Override
+    public void afterTest()
+    {
+        FileUtil.deleteDirIfExists(new File(newFolder));
+    }
+
+    @Test
+    public void testOldFolder()
+    {
+        repeatableTableFileReadWriter(oldFolder);
+    }
+
+    @Test
+    public void testNewFolder()
+    {
+        repeatableTableFileReadWriter(newFolder);
+    }
+
+    private void repeatableTableFileReadWriter(String pDP)
     {
         Table t = new Table("TestTable", "Attr1, Attr2");
         t.addRecord(new String[]{"Val1", "Val2"});
         t.addRecord(new String[]{"Val, 3!\n", "  Val  4  \n"});
         try
         {
-            TableFileReadWriter.writeToFile(t, pDP, uS);
+            TableFileReadWriter.writeToFile(t, pDP);
         }
         catch (IOException e)
         {
-            claim(false);
+            claim(false, "IOException while writing.");
         }
         try
         {
-            Table r = TableFileReadWriter.readFromFile(t.getName(), pDP, uS);
-            claim(t.equals(r));
+            Table r = TableFileReadWriter.readFromFile(t.getName(), pDP);
+            claim(t.equals(r), "Read Table does not match original.");
         }
         catch (IOException e)
         {
-            claim(false);
+            claim(false, "IOException while reading.");
         }
         try
         {
-            Table n = TableFileReadWriter.readFromFile("NotATable", pDP, uS);
-            claim(false);
+            TableFileReadWriter.readFromFile("NotATable", pDP);
+            claim(false, "Should not be able to read from a Table file that doesn't exist.");
         }
-        catch (IllegalArgumentException i)
-        {
-            // test passed
-        }
+        catch (IllegalArgumentException i) { /* test passed */ }
         catch (IOException e)
         {
-            // Should be the first, not the second exception type.
-            claim(false);
+            claim(false, "Should not be trying to read from Table file that doesn't exist.");
         }
 
-        claim(TableFileReadWriter.getTableNameFromFileName(".DS_Store") == null);
+        claim(TableFileReadWriter.getTableNameFromFileName(".DS_Store") == null, "Should not consider .DS_Store as a Table file.");
         try
         {
             TableFileReadWriter.getTableNameFromFileName("tableName.txt");
-            claim(false);
+            claim(false, "Incorrect file extension.");
         }
-        catch (IllegalArgumentException e)
-        {
-            // test passed
-        }
+        catch (IllegalArgumentException e) { /* test passed */ }
 
         String tableName = "tableName";
-        claim(tableName.equals(TableFileReadWriter.getTableNameFromFileName(tableName + TableFileReadWriter.SERIALIZATION_FILE_EXT)));
-        claim(tableName.equals(TableFileReadWriter.getTableNameFromFileName(tableName + TableFileReadWriter.CUSTOM_METHOD_FILE_EXT)));
-        if (deleteDir)
-            FileUtil.deleteDir(new File(pDP));
+        claim(tableName.equals(TableFileReadWriter.getTableNameFromFileName(tableName + TableFileReadWriter.FILE_EXT)), "Table name does not match.");
     }
 }

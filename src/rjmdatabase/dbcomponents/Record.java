@@ -4,13 +4,12 @@ import java.util.ArrayList;
 import java.util.StringJoiner;
 
 /**
- * Represents a Record. Implements Serializable in order to allow saving to a
- * file by serialization.
+ * Represents a Record.
  * @author Rjmcf
  */
-public class Record implements java.io.Serializable
+public class Record
 {
-    // Fields are stored as an array list to make adding new fields much easier.
+    // Fields are stored as an array list to make adding new fields easier.
     private ArrayList<String> fields;
 
     /**
@@ -19,7 +18,7 @@ public class Record implements java.io.Serializable
      */
     Record(ArrayList<String> fs)
     {
-        fields = fs;
+        fields = new ArrayList<>(fs);
     }
 
     /**
@@ -39,7 +38,7 @@ public class Record implements java.io.Serializable
     String getField(int i)
     {
         if (i<0 || i >= fields.size())
-            throw new IndexOutOfBoundsException("No field " + Integer.toString(i) + " exists");
+            throw new IndexOutOfBoundsException(String.format("No field %d exists", i));
 
         return fields.get(i);
     }
@@ -53,7 +52,7 @@ public class Record implements java.io.Serializable
     void updateField(int i, String r)
     {
         if (i<0 || i >= fields.size())
-            throw new IndexOutOfBoundsException("No field " + Integer.toString(i) + " exists");
+            throw new IndexOutOfBoundsException(String.format("No field %d exists", i));
 
         fields.set(i, r);
     }
@@ -66,7 +65,7 @@ public class Record implements java.io.Serializable
     void addField(int i, String val)
     {
         if (i<0 || i > fields.size())
-            throw new IndexOutOfBoundsException("Cannot add field at index " + Integer.toString(i));
+            throw new IndexOutOfBoundsException(String.format("Cannot add field at index %d", i));
         fields.add(i, val);
     }
 
@@ -78,7 +77,7 @@ public class Record implements java.io.Serializable
     void deleteField(int i)
     {
         if (i<0 || i >= fields.size())
-            throw new IndexOutOfBoundsException("No field " + Integer.toString(i) + " exists");
+            throw new IndexOutOfBoundsException(String.format("No field %d exists", i));
 
         fields.remove(i);
     }
@@ -95,12 +94,16 @@ public class Record implements java.io.Serializable
         if (!(that instanceof Record)) return false;
         Record thatRecord = (Record)that;
         int size = fields.size();
-        if (size != thatRecord.fields.size()) return false;
+        ArrayList<String> otherRecordsFields = thatRecord.fields;
+        if (size != otherRecordsFields.size()) return false;
 
         // The Records are only equal if all their fields are the same.
         for (int i = 0; i < size; i++)
-            if (!getField(i).equals(thatRecord.getField(i)))
+        {
+            String thatField = thatRecord.getField(i);
+            if (!getField(i).equals(thatField))
                 return false;
+        }
 
         return true;
     }

@@ -1,7 +1,6 @@
 package rjmdatabase.dbcomponents;
 
 import rjmdatabase.fileutils.FileUtil;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,16 +10,16 @@ import java.util.StringJoiner;
 import java.util.Collections;
 
 /**
- * Represents a Table, which stores Records. Implements Serializable in order to
- * allow saving to a file by serialization.
+ * Represents a Table, which stores Records.
  * @author Rjmcf
  */
-public class Table implements java.io.Serializable
+public class Table
 {
-    /**
-     * The actual name of the first column, representing the Key for the table.
-     */
+    // The actual name of the first column, representing the Key for the table.
     static final String KEY_COL_NAME = "KeyTable";
+    // The version number of this table. Will change when new code needs to be
+    // written to save and load from file.
+    static final String version = "1.0";
 
     // The name of this table.
     private String name;
@@ -29,10 +28,10 @@ public class Table implements java.io.Serializable
     private int nextKey;
     // The names of the fields stored by Records.
     private ArrayList<String> fieldNames;
-    // The map of keys to Records constituing the actual Table.
+    // The map of keys to Records constituting the actual Table.
     private HashMap<Integer, Record> table;
     // Whether the Table needs saving back to file
-    private boolean isDirty;
+    private boolean isDirty = true;
 
     /**
      * Factory method to load a Table from the data read in from a file.
@@ -42,27 +41,35 @@ public class Table implements java.io.Serializable
      */
     static Table createTableFromData(String name, String[][] data)
     {
-        // The first line is the human readable field names. We build the
+        // The first line is the version number.
+        if (!version.equals(data[0][0]))
+        {
+            throw new Error("Attempted to load old version of Table. This is not possible at present.");
+        }
+        // The second line is the human readable field names. We build the
         // comma separated list of field names for the Table constructor.
-        String[] keyAndAttrs = data[0];
+        String[] keyAndAttrs = data[1];
         StringJoiner joiner = new StringJoiner(", ");
         for (int i = 1; i < keyAndAttrs.length; i++)
             joiner.add(keyAndAttrs[i]);
 
         // The new Table instance.
-        Table t = new Table(name, joiner.toString(), false);
+        Table t = new Table(name, joiner.toString());
 
         // Now add the Records one at a time.
-        for (int row = 1; row < data.length; row++)
+        for (int row = 2; row < data.length; row++)
         {
             String[] recordFields = data[row];
             String[] fields = new String[recordFields.length - 1];
             int key = Integer.parseInt(recordFields[0]);
+            // Field 0 in Record = Field 1 in recordFields
             for (int f = 1; f < recordFields.length; f++)
                 fields[f - 1] = recordFields[f];
             t.insertRecord(key, fields);
         }
 
+        // We have just read from file, so no need to save it again right now.
+        t.isDirty = false;
         return t;
     }
 
@@ -71,20 +78,19 @@ public class Table implements java.io.Serializable
      * of column names.
      * @param name   The name of the new Table.
      * @param fNames A comma separated list of the Table's new column names.
-     * @param isNew  Whether or not the Table is completely new or has been loaded.
      */
-    Table(String name, String fNames, boolean isNew)
+    Table(String name, String fNames)
     {
         this.name = name;
         nextKey = 0;
-        fieldNames = new ArrayList<>(Arrays.asList(fNames.split(", ")));
+        if (fNames.equals(""))
+            fieldNames = new ArrayList<>();
+        else
+        {
+            String[] fNameArray = fNames.split(", ");
+            fieldNames = new ArrayList<>(Arrays.asList(fNameArray));
+        }
         table = new HashMap<>();
-        isDirty = isNew;
-    }
-
-    Table(String name, String fNames)
-    {
-        this(name, fNames, true);
     }
 
     /**
@@ -96,6 +102,7 @@ public class Table implements java.io.Serializable
         return name;
     }
 
+    // Returns a comma separated list of the field names.
     String getFieldNames()
     {
         StringJoiner names = new StringJoiner(", ");
@@ -105,15 +112,13 @@ public class Table implements java.io.Serializable
         return names.toString();
     }
 
-    /**
-     * Gets the key that will be assigned to the next Record which is added.
-     * @return The next key to be assigned.
-     */
+    // Gets the key that will be assigned to the next Record which is added.
     private int getNextKey()
     {
         return nextKey;
     }
 
+    // Gets whether this Table needs saving or not.
     boolean getIsDirty()
     {
         return isDirty;
@@ -127,25 +132,20 @@ public class Table implements java.io.Serializable
         nextKey = Collections.max(table.keySet()) + 1;
     }
 
+    // Gets a list of all the keys stored in the Table.
     private ArrayList<Integer> getAllKeys()
     {
         return new ArrayList<>(table.keySet());
     }
 
-    /**
-     * Gets the number of fields stored by Records. Also the number of columns
-     * not including the key column.
-     * @return The number of fields.
-     */
+    // Gets the number of fields stored by Records. Also the number of columns
+    // not including the key column.
     int getNumFields()
     {
         return fieldNames.size();
     }
 
-    /**
-     * Gets the number of Records stored by the Table.
-     * @return The number of Records.
-     */
+    // Gets the number of Records stored by the Table.
     int getNumRecords()
     {
         return table.size();
@@ -154,7 +154,7 @@ public class Table implements java.io.Serializable
     /**
      * Adds a new Record to the Table under a unique key, as long as there are
      * the right number of fields provided.
-     * <p>
+     *
      * An array is used rather than an
      * ArrayList because arrays are easier to build inline on the fly, such as
      * new String[]{"Field1", "Field2",..., "FieldN"}; The equivalent with
@@ -165,14 +165,15 @@ public class Table implements java.io.Serializable
     {
         ArrayList<String> fields = new ArrayList<>(Arrays.asList(fs));
         if (fields.size() != getNumFields())
-            throw new IllegalArgumentException("Expected " +
-                Integer.toString(getNumFields()) + " fields but got " +
-                Integer.toString(fields.size())
-            );
+        {
+            String errorMsg = String.format("Expected %d fields but got %d" , getNumFields(), fields.size());
+            throw new IllegalArgumentException(errorMsg);
+        }
         // HashMap.putIfAbsent returns null only if the key wasn't already
         // assigned in the map. Thus if the key has been assigned, we need to
-        // update the next key.
-        while (table.putIfAbsent(nextKey, new Record(fields)) != null)
+        // update the next key and try again.
+        Record newRecord = new Record(fields);
+        while (table.putIfAbsent(nextKey, newRecord) != null)
             setNextKeyBasedOnRecords();
         nextKey++;
 
@@ -202,10 +203,10 @@ public class Table implements java.io.Serializable
             throw new IllegalArgumentException("Key must be non-negative");
         ArrayList<String> fields = new ArrayList<>(Arrays.asList(fs));
         if (fields.size() != getNumFields())
-            throw new IllegalArgumentException("Expected " +
-                Integer.toString(getNumFields()) + " fields but got " +
-                Integer.toString(fields.size())
-            );
+        {
+            String errorMsg = String.format("Expected %d fields but got %d" , getNumFields(), fields.size());
+            throw new IllegalArgumentException(errorMsg);
+        }
         // Don't bother updating nextKey and trying again here, as the user
         // specified this key for a reason.
         if (table.putIfAbsent(key, new Record(fields)) != null)
@@ -240,7 +241,7 @@ public class Table implements java.io.Serializable
         // field name to refer to it by.
         int fieldIndex = fieldNames.indexOf(fieldName);
         if (fieldIndex == -1)
-            throw new IndexOutOfBoundsException("No attribute: " + fieldName + " exists");
+            throw new IllegalArgumentException("No attribute: " + fieldName + " exists");
         getRecord(key).updateField(fieldIndex, replacement);
         isDirty = true;
     }
@@ -267,7 +268,7 @@ public class Table implements java.io.Serializable
     void addColumn(int index, String name, String defaultVal)
     {
         if (index < 0 || index > fieldNames.size())
-            throw new IndexOutOfBoundsException("Cannot insert new column at index " + Integer.toString(index));
+            throw new IndexOutOfBoundsException(String.format("Cannot insert new column at index %d", index));
 
         fieldNames.add(index, name);
         for (Record r: table.values())
@@ -287,7 +288,7 @@ public class Table implements java.io.Serializable
             throw new IllegalArgumentException("Already a column named " + newName);
         int index = fieldNames.indexOf(oldName);
         if (index == -1)
-            throw new IllegalArgumentException("No column with name " + oldName);
+            throw new IndexOutOfBoundsException("No column with name " + oldName);
         fieldNames.set(index, newName);
         isDirty = true;
     }
@@ -326,24 +327,31 @@ public class Table implements java.io.Serializable
      */
     String[][] getTableData()
     {
-        // We need space for all the Records and the names
-        // of the fields.
-        String[][] tableData = new String[getNumRecords() + 1][];
+        // We need space for all the Records, the names of the fields, and the
+        // version number.
+        String[][] tableData = new String[getNumRecords() + 2][];
+        // First line stores our version number.
+        tableData[0] = new String[]{version};
         // Need to have the first col name be the key col name.
         ArrayList<String> colNames = new ArrayList<>();
         colNames.add(KEY_COL_NAME);
         colNames.addAll(fieldNames);
-        tableData[0] = colNames.toArray(new String[0]);
+        tableData[1] = colNames.toArray(new String[0]);
 
-        // Record 0 is row 1.
-        int counter = 1;
+        // Record 0 is row 2.
+        int counter = 2;
         ArrayList<String> fields;
         for (Map.Entry<Integer, Record> entry : table.entrySet())
         {
             fields = new ArrayList<>();
-            fields.add(Integer.toString(entry.getKey()));
+            int key = entry.getKey();
+            fields.add(Integer.toString(key));
             for (int i = 0; i < getNumFields(); i ++)
-                fields.add(entry.getValue().getField(i));
+            {
+                Record r = entry.getValue();
+                String field = r.getField(i);
+                fields.add(field);
+            }
             tableData[counter++] = fields.toArray(new String[0]);
         }
         return tableData;
@@ -354,20 +362,12 @@ public class Table implements java.io.Serializable
         TablePrinter.printTable(name, getTableData());
     }
 
-    void saveTableToFile(String parentFolderPath, boolean useSerialization) throws IOException
+    void saveTableToFile(String parentFolderPath) throws IOException
     {
         if (isDirty)
         {
+            TableFileReadWriter.writeToFile(this, parentFolderPath);
             isDirty = false;
-            try
-            {
-                TableFileReadWriter.writeToFile(this, parentFolderPath, useSerialization);
-            }
-            catch (IOException e)
-            {
-                isDirty = true;
-                throw e;
-            }
         }
     }
 
@@ -379,11 +379,13 @@ public class Table implements java.io.Serializable
     public boolean equals(Object that)
     {
         if (this == that) return true;
-        if (!(that instanceof Table))return false;
+        if (!(that instanceof Table)) return false;
         Table thatTable = (Table)that;
-        if (!name.equals(thatTable.name)) return false;
+        String thatTableName = thatTable.name;
+        if (!name.equals(thatTableName)) return false;
         // Tables are equal only if they share the same field names.
-        if (!getFieldNames().equals(thatTable.getFieldNames())) return false;
+        String thatTableFields = thatTable.getFieldNames();
+        if (!getFieldNames().equals(thatTableFields)) return false;
         int numRecords = getNumRecords();
         if (numRecords != thatTable.getNumRecords()) return false;
 
@@ -391,8 +393,12 @@ public class Table implements java.io.Serializable
         try
         {
             for (int key : table.keySet())
-                if (!table.get(key).equals(thatTable.getRecord(key)))
+            {
+                Record thisRecord = table.get(key);
+                Record thatRecord = thatTable.getRecord(key);
+                if (!thisRecord.equals(thatRecord))
                     return false;
+            }
         }
         catch (IndexOutOfBoundsException e)
         {
