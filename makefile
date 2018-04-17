@@ -2,6 +2,7 @@ SRCDIR = src
 TESTDIR = test
 PACKDIR = rjmdatabase
 DBDIR = databases
+DBS = $(patsubst $(DBDIR)/%,%,$(wildcard $(DBDIR)/*))
 GREP_COLORS='mt=1;41;37'
 
 .SILENT:
@@ -55,3 +56,7 @@ textInterface: allSources
 ## Removes all the .class files.
 clean:
 	find . -name "*.class" -type f -delete
+
+## Lists the names of databases available
+listDBs:
+	@$(foreach db,${DBS},echo ${db};)

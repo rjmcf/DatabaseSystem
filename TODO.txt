@@ -1,4 +1,3 @@
-Get list of possible databases.
 Add way to test user interface.
 Use Table dirty flag to implement incremental saving.
 Store records according to some order.
