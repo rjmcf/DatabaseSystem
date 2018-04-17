@@ -24,7 +24,7 @@ public abstract class TestBase
     {
         String className = this.getClass().getSimpleName();
         String classBeingTested = className.replace("Test", "");
-        return startTest(className, classBeingTested);
+        return startTest(className, classBeingTested, true);
     }
 
     /**
@@ -32,7 +32,7 @@ public abstract class TestBase
      * @param  classBeingTested The name of the class being tested.
      * @return                  The number of tests that were failed.
      */
-    public int startTest(String className, String classBeingTested)
+    public int startTest(String className, String classBeingTested, boolean useInteractivity)
     {
         int numFailed = 0;
         if (verbosity != Verbosity.JUST_ERRORS)
@@ -74,8 +74,10 @@ public abstract class TestBase
                         {
                             toPrint += String.format("\n    %s\n", exceptionThrown.getMessage());
                         }
-                        else
+                        else if (useInteractivity)
                             ExceptionExplorer.interactWithException(exceptionThrown, className, test.getName());
+                        else
+                            toPrint += ", an exception was thrown.";
                     }
                 }
                 afterTest();

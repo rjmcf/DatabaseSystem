@@ -17,10 +17,11 @@ public class TestRunner
      */
     public static void main(String[] args)
     {
-        runAllTests();
+        // If we have passed an argument, it's beacuse we don't want the interactivity.
+        runAllTests(args.length == 0);
     }
 
-    private static void runAllTests()
+    private static void runAllTests(boolean useInteractivity)
     {
         String topLevelTestDirName = "rjmdatabase";
         File topLevelTestDir = new File(topLevelTestDirName);
@@ -37,7 +38,7 @@ public class TestRunner
                 String testClassName = fName.replaceAll("(\\w)+\\.", "");
                 String classBeingTested = testClassName.replace("Test", "");
                 TestBase test = (TestBase)o;
-                numFailed += test.startTest(testClassName, classBeingTested);
+                numFailed += test.startTest(testClassName, classBeingTested, useInteractivity);
             }
             catch (ClassNotFoundException e)
             {
