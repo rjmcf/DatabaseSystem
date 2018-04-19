@@ -152,6 +152,17 @@ public class Database
     }
 
     /**
+     * Deletes a Record from the chosen Table.
+     * @param tableName The table to delete from.
+     * @param key       The key of the Record to delete.
+     */
+    public void deleteRecord(String tableName, int key)
+    {
+        Table t = getTable(tableName);
+        t.deleteRecord(key);
+    }
+
+    /**
      * Saves the Tables stored in this database to the correct folder.
      * @throws IOException If an io exception occurred.
      */

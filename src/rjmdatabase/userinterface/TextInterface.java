@@ -130,11 +130,12 @@ public class TextInterface
             println("1). Add a new record.");
             println("2). Search the table.");
             println("3). Update a record.");
-            println("4). Add a new column.");
-            println("5). Delete a column.");
-            println("6). Rename a column.");
-            println("7). Rename the table.");
-            println("8). Return to the main menu.");
+            println("4). Delete a record.");
+            println("5). Add a new column.");
+            println("6). Delete a column.");
+            println("7). Rename a column.");
+            println("8). Rename the table.");
+            println("9). Return to the main menu.");
 
             choice = getIntInput();
 
@@ -150,18 +151,21 @@ public class TextInterface
                     println("Cannot yet update records.");
                     break;
                 case 4:
-                    println("Cannot yet add a new column.");
+                    deleteRecordFromTable(name);
                     break;
                 case 5:
-                    println("Cannot yet delete columns.");
+                    println("Cannot yet add a new column.");
                     break;
                 case 6:
-                    renameColumn(name);
+                    println("Cannot yet delete columns.");
                     break;
                 case 7:
-                    name = renameTable(name);
+                    renameColumn(name);
                     break;
                 case 8:
+                    name = renameTable(name);
+                    break;
+                case 9:
                     return;
                 default:
                     println("Please enter one of the options listed.");
@@ -188,6 +192,24 @@ public class TextInterface
 
         database.addRecord(tableName, fieldJoiner.toString());
         println("Record added successfully.");
+    }
+
+    private static void deleteRecordFromTable(String tableName)
+    {
+        println("Please enter the key of the record you wish to delete, or -1 if you wish to cancel.");
+        int key = getIntInput();
+        if (key == -1)
+            return;
+
+        try
+        {
+            database.deleteRecord(tableName, key);
+            println("Record deleted successfully.");
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            println(String.format("Cannot delete record with key %d from table %s, no such record exists.", key, tableName));
+        }
     }
 
     private static void renameColumn(String tableName)

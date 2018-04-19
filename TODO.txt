@@ -1,3 +1,6 @@
+Save when exception thrown during interface.
+Catch Error from renameTable.
+Allow commas in interface entry.
 Add way to test user interface.
 Use Table dirty flag to implement incremental saving.
 Store records according to some order.

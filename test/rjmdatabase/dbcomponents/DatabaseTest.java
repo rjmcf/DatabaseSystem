@@ -242,6 +242,34 @@ public class DatabaseTest extends TestBase
     }
 
     @Test
+    public void testDeleteRecord()
+    {
+        String tableName = personTable.getName();
+        db.addRecord(tableName, "John, Address1");
+        db.addRecord(tableName, "Jane, Address2");
+
+        claim(db.getTable(tableName).getNumRecords() == 2, "Table must have 2 records before test starts.");
+
+        try
+        {
+            db.deleteRecord(tableName, 2);
+            claim(false, "Should not be able to delete Record not present.");
+        }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
+
+        db.deleteRecord(tableName, 0);
+        claim(db.getTable(tableName).getNumRecords() == 1, "Should only have 1 Record after deletion.");
+        try
+        {
+            db.deleteRecord(tableName, 0);
+            claim(false, "Cannot delete same record twice.");
+        }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
+
+        claim(db.getTable(tableName).getRecord(1).getField(0).equals("Jane"), "Data in remaining Record must be correct.");
+    }
+
+    @Test
     public void testSaveDatabase()
     {
         try
