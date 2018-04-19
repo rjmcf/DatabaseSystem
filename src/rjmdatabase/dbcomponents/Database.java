@@ -163,6 +163,20 @@ public class Database
     }
 
     /**
+     * Update the chosen field from the chosen Record from the chosen table, with
+     * the specified replacement.
+     * @param tableName   The name of the Table.
+     * @param key         The key of the Record.
+     * @param fieldName  The name of the field.
+     * @param replacement The value to update it with.
+     */
+    public void updateRecord(String tableName, int key, String fieldName, String replacement)
+    {
+        Table t = getTable(tableName);
+        t.updateRecord(key, fieldName, replacement);
+    }
+
+    /**
      * Saves the Tables stored in this database to the correct folder.
      * @throws IOException If an io exception occurred.
      */

@@ -216,7 +216,7 @@ public class DatabaseTest extends TestBase
     }
 
     @Test
-    public void renameColumn()
+    public void testRenameColumn()
     {
         try
         {
@@ -252,6 +252,12 @@ public class DatabaseTest extends TestBase
 
         try
         {
+            db.deleteRecord("FakeTable", 0);
+            claim(false, "Table does not exist.");
+        }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
+        try
+        {
             db.deleteRecord(tableName, 2);
             claim(false, "Should not be able to delete Record not present.");
         }
@@ -259,6 +265,7 @@ public class DatabaseTest extends TestBase
 
         db.deleteRecord(tableName, 0);
         claim(db.getTable(tableName).getNumRecords() == 1, "Should only have 1 Record after deletion.");
+
         try
         {
             db.deleteRecord(tableName, 0);
@@ -267,6 +274,39 @@ public class DatabaseTest extends TestBase
         catch (IndexOutOfBoundsException e) { /* test passed */ }
 
         claim(db.getTable(tableName).getRecord(1).getField(0).equals("Jane"), "Data in remaining Record must be correct.");
+    }
+
+    @Test
+    public void testUpdateRecord()
+    {
+        String tableName = personTable.getName();
+        db.addRecord(tableName, "John, Address1");
+        db.addRecord(tableName, "Jane, Address2");
+
+        try
+        {
+            db.updateRecord("FakeTable", 0, "Name", "Phil");
+            claim(false, "Table does not exist");
+        }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
+        try
+        {
+            db.updateRecord(tableName, 2, "Name", "Phil");
+            claim(false, "Record does not exist");
+        }
+        catch (IndexOutOfBoundsException e) { /* test passed */ }
+        try
+        {
+            db.updateRecord(tableName, 0, "FakeColumn", "Phil");
+            claim(false, "Column does not exist");
+        }
+        catch (IllegalArgumentException e) { /* test passed */ }
+
+        db.updateRecord(tableName, 0, "Name", "Phil");
+        Table theTable = db.getTable(tableName);
+        Record theRecord = theTable.getRecord(0);
+        String theField = theRecord.getField(0);
+        claim(theField.equals("Phil"), "Update has not succeeded.");
     }
 
     @Test
