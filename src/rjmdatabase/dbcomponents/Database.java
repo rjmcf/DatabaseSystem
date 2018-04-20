@@ -107,15 +107,25 @@ public class Database
     }
 
     /**
+     * Gets a list of the field names for the given table as an array.
+     * @param  tableName The name of the Table.
+     * @return           The list of the field names.
+     */
+    public String[] getFieldNamesAsArray(String tableName)
+    {
+        String fieldNames = getFieldNames(tableName);
+        return fieldNames.split(", ");
+    }
+
+    /**
      * Gets a list of the field names for the given table.
      * @param  tableName The name of the Table.
      * @return           The list of the field names.
      */
-    public String[] getFieldNames(String tableName)
+    public String getFieldNames(String tableName)
     {
         Table theTable = getTable(tableName);
-        String fieldNames = theTable.getFieldNames();
-        return fieldNames.split(", ");
+        return theTable.getFieldNames();
     }
 
     /**

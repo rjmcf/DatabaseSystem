@@ -148,7 +148,7 @@ public class TextInterface
                     println("Cannot yet search tables.");
                     break;
                 case 3:
-                    println("Cannot yet update records.");
+                    updateRecordInTable(name);
                     break;
                 case 4:
                     deleteRecordFromTable(name);
@@ -177,7 +177,7 @@ public class TextInterface
     {
         StringJoiner fieldJoiner = new StringJoiner(", ");
         println("Enter the value you want to store under each field name.");
-        for (String fieldName : database.getFieldNames(tableName))
+        for (String fieldName : database.getFieldNamesAsArray(tableName))
         {
             println(String.format("%s:", fieldName));
             String fieldValue;
@@ -192,6 +192,38 @@ public class TextInterface
 
         database.addRecord(tableName, fieldJoiner.toString());
         println("Record added successfully.");
+    }
+
+    private static void updateRecordInTable(String tableName)
+    {
+        println("Please enter the key of the record you wish to update, or -1 if you wish to cancel.");
+        int key = getIntInput();
+        if (key == -1)
+            return;
+
+        println("Enter the name of the field whose value you wish to update, or leave blank to cancel. Your choices are:");
+        String fieldNames = database.getFieldNames(tableName);
+        println(fieldNames + ".");
+        String fieldName = getLineOfInputNoSpaces();
+        if (fieldName == null)
+            return;
+
+        println("Please enter the value you wish to save here.");
+        String replacement = getLineOfInput();
+
+        try
+        {
+            database.updateRecord(tableName, key, fieldName, replacement);
+            println("Update completed successfully.");
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            println(e.getMessage());
+        }
+        catch (IllegalArgumentException e)
+        {
+            println(e.getMessage());
+        }
     }
 
     private static void deleteRecordFromTable(String tableName)

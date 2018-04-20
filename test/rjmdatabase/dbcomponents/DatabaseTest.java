@@ -121,16 +121,16 @@ public class DatabaseTest extends TestBase
     }
 
     @Test
-    public void testGetFieldNames()
+    public void testGetFieldNamesAsArray()
     {
         try
         {
-            db.getFieldNames("NotATable.");
+            db.getFieldNamesAsArray("NotATable.");
             claim(false, "Should not be able to get field names from table not present.");
         }
         catch (IndexOutOfBoundsException e) { /* test passed */ }
 
-        String[] animalFields = db.getFieldNames("Animal");
+        String[] animalFields = db.getFieldNamesAsArray("Animal");
         claim(animalFields.length == 3, "Name list has incorrect number of fields.");
         claim("Name".equals(animalFields[0]), "Incorrect field name.");
         claim("Type".equals(animalFields[1]), "Incorrect field name.");
@@ -238,7 +238,7 @@ public class DatabaseTest extends TestBase
         catch (IllegalArgumentException e) { /* test passed */ }
 
         db.renameColumn("Animal", "Name", "Colour");
-        claim(db.getFieldNames("Animal")[0].equals("Colour"), "Rename has failed.");
+        claim(db.getFieldNamesAsArray("Animal")[0].equals("Colour"), "Rename has failed.");
     }
 
     @Test
