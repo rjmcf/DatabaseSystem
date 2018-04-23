@@ -83,7 +83,7 @@ public class Record
     }
 
     /**
-     * Overrides Object.equals(Object that) to allow Records to be compared.
+     * Overrides Object.equals(Object) to allow Records to be compared.
      * @param  that The Record being compared with.
      * @return      Whether or not the Records are equal.
      */

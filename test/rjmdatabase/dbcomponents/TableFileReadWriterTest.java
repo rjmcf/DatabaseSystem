@@ -53,7 +53,7 @@ public class TableFileReadWriterTest extends TestBase
         t.addRecord(new String[]{"Val, 3!\n", "  Val  4  \n"});
         try
         {
-            TableFileReadWriter.writeToFile(t, pDP);
+            t.saveTableToFile(pDP);
         }
         catch (IOException e)
         {
@@ -88,6 +88,6 @@ public class TableFileReadWriterTest extends TestBase
         catch (IllegalArgumentException e) { /* test passed */ }
 
         String tableName = "tableName";
-        claim(tableName.equals(TableFileReadWriter.getTableNameFromFileName(tableName + TableFileReadWriter.FILE_EXT)), "Table name does not match.");
+        claim(tableName.equals(TableFileReadWriter.getTableNameFromFileName(tableName + ".rjmTable")), "Table name does not match.");
     }
 }

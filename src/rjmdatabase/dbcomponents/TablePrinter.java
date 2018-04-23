@@ -28,7 +28,10 @@ public class TablePrinter
     // The PrintStream that all printing is done to.
     private static PrintStream out = System.out;
 
-    // Changes the output stream from the default System.out.
+    /**
+     * Changes the output stream from the default System.out.
+     * @param o The PrintStream to print to.
+     */
     static void setPrintStream(PrintStream o)
     {
         out = o;
@@ -36,7 +39,8 @@ public class TablePrinter
 
     /**
      * Prints the supplied Table to the console.
-     * @param t The Table to be printed.
+     * @param tableName The name of the Table to be printed.
+     * @param tableData The data of the Table to be printed.
      */
     static void printTable(String tableName, String[][] tableData)
     {

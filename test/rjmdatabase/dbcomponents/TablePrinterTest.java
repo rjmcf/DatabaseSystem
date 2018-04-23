@@ -35,7 +35,7 @@ public class TablePrinterTest extends TestBase
         try (PrintStreamFileWriter pS = new PrintStreamFileWriter(testFileName))
         {
             TablePrinter.setPrintStream(pS);
-            TablePrinter.printTable(t.getName(), t.getTableData());
+            t.printTable();
             TablePrinter.setPrintStream(System.out);
         }
         catch (FileNotFoundException e)

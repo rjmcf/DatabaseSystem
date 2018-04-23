@@ -10,17 +10,15 @@ import java.util.StringJoiner;
 import javax.xml.bind.DatatypeConverter;
 
 /**
- * A utility class that reads and writes Tables to files. A Singleton class.
+ * A utility class that reads and writes Tables to files.
  * @author Rjmcf
  */
 public class TableFileReadWriter
 {
-    private static TableFileReadWriter instance;
-
     // The String used to separate fields in files.
     private static final String FIELD_SEPARATOR = String.valueOf((char)0x1F);
-
-    static final String FILE_EXT = ".rjmTable";
+    // The extension added to filenames.
+    private static final String FILE_EXT = ".rjmTable";
 
     /**
      * Gets the name of the Table from the supplied file name.
@@ -33,7 +31,7 @@ public class TableFileReadWriter
     {
         String[] parts = fName.split("\\.");
         if (parts.length != 2)
-            throw new IllegalArgumentException("File name " + fName + " must be in form <tableName>.<extension>");
+            throw new IllegalArgumentException(String.format("File name %s must be in form <tableName>.<extension>", fName));
         if (parts[0].equals(""))
             return null;
         if (!("." + parts[1]).equals(FILE_EXT))
@@ -42,6 +40,11 @@ public class TableFileReadWriter
         return parts[0];
     }
 
+    /**
+     * Deletes the table file if it exists.
+     * @param tableName     The name of the Table whose file we're deleting.
+     * @param parentDirPath The folder containing the table file.
+     */
     static void deleteTableFile(String tableName, String parentDirPath)
     {
         File tableFile = new File(parentDirPath + tableName + FILE_EXT);
@@ -49,14 +52,13 @@ public class TableFileReadWriter
     }
 
     /**
-     * Writes the given table to a file, using the chosen method.
-     * @param  t           The Table to write.
-     * @throws IOException If an io exception occurred.
+     * Writes the given tableData to a file.
+     * @param  tableData     The table data to write.
+     * @param  parentDirPath The folder in which the file should be saved.
+     * @throws IOException   if an error occurred during writing.
      */
-    static void writeToFile(Table t, String parentDirPath) throws IOException
+    static void writeToFile(String tableName, String[][] tableData, String parentDirPath) throws IOException
     {
-        String[][] tableData = t.getTableData();
-
         // The lines to write.
         String[] lines = new String[tableData.length];
         StringJoiner joiner = new StringJoiner(FIELD_SEPARATOR);
@@ -74,7 +76,7 @@ public class TableFileReadWriter
             lines[row] = joiner.toString();
         }
 
-        String filePath = parentDirPath + t.getName() + FILE_EXT;
+        String filePath = parentDirPath + tableName + FILE_EXT;
         FileUtil.writeFile(filePath, lines);
     }
 
@@ -88,9 +90,11 @@ public class TableFileReadWriter
     {
         ArrayList<String> lines = FileUtil.readFile(parentDirPath + name + FILE_EXT);
         String[][] tableData = new String[lines.size()][];
+        String line;
         for (int row = 0; row < lines.size(); row++)
         {
-            tableData[row] = lines.get(row).split(FIELD_SEPARATOR);
+            line = lines.get(row);
+            tableData[row] = line.split(FIELD_SEPARATOR);
             for (int col = 0; col < tableData[row].length; col++)
                 tableData[row][col] = convertHexToString(tableData[row][col]);
         }
@@ -105,7 +109,8 @@ public class TableFileReadWriter
 
     private static String convertStringToHex(String s)
     {
-        String result = String.format("%x", new BigInteger(1, s.getBytes(FileUtil.ENCODING)));
+        byte[] stringBytes = s.getBytes(FileUtil.ENCODING);
+        String result = String.format("%x", new BigInteger(1, stringBytes));
         // Remember to add a leading "0" if we need it.
         return result.length() % 2 == 0 ? result : "0" + result;
     }

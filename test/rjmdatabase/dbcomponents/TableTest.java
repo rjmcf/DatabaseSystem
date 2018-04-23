@@ -459,15 +459,6 @@ public class TableTest extends TestBase
     }
 
     @Test
-    public void testCreateTableFromDataTest()
-    {
-        String[][] emptyTableData = emptyTable.getTableData();
-        claim(emptyTable.equals(Table.createTableFromData(emptyTable.getName(), emptyTableData)), "Created Table does not equal original.");
-        String[][] filledTableData = filledTable.getTableData();
-        claim(filledTable.equals(Table.createTableFromData(filledTable.getName(), filledTableData)), "Created Table does not equal original.");
-    }
-
-    @Test
     public void testIsDirty()
     {
         claim(emptyTable.getIsDirty(), "Should be dirty after first creation.");

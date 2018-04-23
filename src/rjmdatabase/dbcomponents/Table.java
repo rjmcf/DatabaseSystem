@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Arrays;
 import java.util.StringJoiner;
 import java.util.Collections;
+import java.util.Set;
 
 /**
  * Represents a Table, which stores Records.
@@ -102,7 +103,10 @@ public class Table
         return name;
     }
 
-    // Returns a comma separated list of the field names.
+    /**
+     * Returns a comma separated list of the field names.
+     * @return the field names.
+     */
     String getFieldNames()
     {
         StringJoiner names = new StringJoiner(", ");
@@ -118,7 +122,10 @@ public class Table
         return nextKey;
     }
 
-    // Gets whether this Table needs saving or not.
+    /**
+     * Gets whether this Table needs saving or not.
+     * @return whether the Table is dirty.
+     */
     boolean getIsDirty()
     {
         return isDirty;
@@ -129,7 +136,8 @@ public class Table
     // discover that the next key is out of sync with the Records in the table.
     private void setNextKeyBasedOnRecords()
     {
-        nextKey = Collections.max(table.keySet()) + 1;
+        Set<Integer> keySet = table.keySet();
+        nextKey = Collections.max(keySet) + 1;
     }
 
     // Gets a list of all the keys stored in the Table.
@@ -138,14 +146,20 @@ public class Table
         return new ArrayList<>(table.keySet());
     }
 
-    // Gets the number of fields stored by Records. Also the number of columns
-    // not including the key column.
+    /**
+     * Gets the number of fields stored by Records. Also the number of columns
+     * not including the key column.
+     * @return the number of fields.
+     */
     int getNumFields()
     {
         return fieldNames.size();
     }
 
-    // Gets the number of Records stored by the Table.
+    /**
+     * Gets the number of Records stored by the Table.
+     * @return the size of the Table.
+     */
     int getNumRecords()
     {
         return table.size();
@@ -155,18 +169,18 @@ public class Table
      * Adds a new Record to the Table under a unique key, as long as there are
      * the right number of fields provided.
      *
-     * An array is used rather than an
-     * ArrayList because arrays are easier to build inline on the fly, such as
-     * new String[]{"Field1", "Field2",..., "FieldN"}; The equivalent with
-     * ArrayList takes N + 1 lines.
+     * An array is used rather than an ArrayList because arrays are easier to
+     * build inline on the fly, such as new String[]{"Field1", "Field2",..., "FieldN"};
+     * The equivalent with ArrayList takes N + 1 lines.
      * @param fs The values of the fields to be saved.
      */
     void addRecord(String[] fs)
     {
         ArrayList<String> fields = new ArrayList<>(Arrays.asList(fs));
-        if (fields.size() != getNumFields())
+        int numFieldsInTable = getNumFields();
+        if (fields.size() != numFieldsInTable)
         {
-            String errorMsg = String.format("Expected %d fields but got %d" , getNumFields(), fields.size());
+            String errorMsg = String.format("Expected %d fields but got %d" , numFieldsInTable, fields.size());
             throw new IllegalArgumentException(errorMsg);
         }
         // HashMap.putIfAbsent returns null only if the key wasn't already
@@ -202,9 +216,10 @@ public class Table
         if (key < 0)
             throw new IllegalArgumentException("Key must be non-negative");
         ArrayList<String> fields = new ArrayList<>(Arrays.asList(fs));
-        if (fields.size() != getNumFields())
+        int numFieldsInTable = getNumFields();
+        if (fields.size() != numFieldsInTable)
         {
-            String errorMsg = String.format("Expected %d fields but got %d" , getNumFields(), fields.size());
+            String errorMsg = String.format("Expected %d fields but got %d" , numFieldsInTable, fields.size());
             throw new IllegalArgumentException(errorMsg);
         }
         // Don't bother updating nextKey and trying again here, as the user
@@ -259,7 +274,7 @@ public class Table
     }
 
     /**
-     * Adds a column the Table. The default value is added to every Record. Throws
+     * Adds a column to the Table. The default value is added to every Record. Throws
      * an exception if the index is out of bounds.
      * @param name       The name of the new column.
      * @param defaultVal The default value to be added to every Record for this
@@ -325,7 +340,7 @@ public class Table
      * fields for a particular Record.
      * @return The PrintInfo instance.
      */
-    String[][] getTableData()
+    private String[][] getTableData()
     {
         // We need space for all the Records, the names of the fields, and the
         // version number.
@@ -357,16 +372,24 @@ public class Table
         return tableData;
     }
 
+    /**
+     * Prints the Table.
+     */
     void printTable()
     {
         TablePrinter.printTable(name, getTableData());
     }
 
+    /**
+     * Saves the Table to a file in the specified folder.
+     * @param  parentFolderPath the name of the folder in which to store the Table.
+     * @throws IOException      when something goes wrong while writing.
+     */
     void saveTableToFile(String parentFolderPath) throws IOException
     {
         if (isDirty)
         {
-            TableFileReadWriter.writeToFile(this, parentFolderPath);
+            TableFileReadWriter.writeToFile(name, getTableData(), parentFolderPath);
             isDirty = false;
         }
     }

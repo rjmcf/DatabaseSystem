@@ -7,11 +7,12 @@ import java.util.HashMap;
 import java.util.Set;
 
 /**
- * Represents a database. Currently a collection of Tables with some utility methods.
+ * Represents a database.
  * @author Rjmcf
  */
 public class Database
 {
+    // The map of names to Tables.
     private HashMap<String, Table> tables;
     // The path to where all the Table files will be saved.
     private String parentDirPath;
