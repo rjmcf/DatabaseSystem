@@ -36,49 +36,82 @@ public class TextInterface
 
             choice = getIntInput();
 
-            switch (choice)
+            try
             {
-                case 1:
-                    String[] tableNames = database.getTableNames();
-                    if (tableNames.length == 0)
-                    {
-                        println("Currently no tables present.");
+                switch (choice)
+                {
+                    case 1:
+                        String[] tableNames = database.getTableNames();
+                        if (tableNames.length == 0)
+                        {
+                            println("Currently no tables present.");
+                            println();
+                            break;
+                        }
+                        println("Tables:");
+                        for (String tableName : tableNames)
+                            println("    " + tableName);
                         println();
                         break;
-                    }
-                    println("Tables:");
-                    for (String tableName : tableNames)
-                        println("    " + tableName);
-                    println();
-                    break;
-                case 2:
-                    addTable();
-                    break;
-                case 3:
-                    editTable();
-                    break;
-                case 4:
-                    println("Enter the name of the table you'd like to print");
-                    String tableName = getLineOfInputNoSpaces();
-                    if (tableName == null)
+                    case 2:
+                        addTable();
                         break;
-                    database.printTable(tableName);
-                    break;
-                case 5:
-                    try
-                    {
-                        database.saveDatabase();
-                    }
-                    catch (IOException e)
-                    {
-                        if (!userRespondedYes("Unable to save database, do you still want to quit?"))
+                    case 3:
+                        editTable();
+                        break;
+                    case 4:
+                        println("Enter the name of the table you'd like to print");
+                        String tableName = getLineOfInputNoSpaces();
+                        if (tableName == null)
                             break;
-                    }
-                    return;
-                default:
-                    println("Please enter one of the numbers listed.");
+                        database.printTable(tableName);
+                        break;
+                    case 5:
+                        if (saveDatabaseAndQuit())
+                            return;
+                        else
+                            break;
+                    default:
+                        println("Please enter one of the numbers listed.");
+                }
+            }
+            catch (Throwable e)
+            {
+                println("An exception or error was thrown during the database operation.");
+                String msg = e.getMessage();
+                if (msg != null)
+                    println(msg);
+                boolean shouldSave = userRespondedYes("Do you want to save the database state? Bear in mind that the database may currently be in an invalid state.");
+
+                if (shouldSave)
+                    saveDatabase();
             }
         }
+    }
+
+    // return true if saving was successful.
+    private static boolean saveDatabase()
+    {
+        try
+        {
+            database.saveDatabase();
+            return true;
+        }
+        catch (IOException e)
+        {
+            println("Unable to save database.");
+            return false;
+        }
+    }
+
+    // Returns true if we should quit after save.
+    private static boolean saveDatabaseAndQuit()
+    {
+        boolean couldSave = saveDatabase();
+        if (couldSave)
+            return true;
+        else
+            return userRespondedYes("Do you still want to quit?");
     }
 
     private static void addTable()
