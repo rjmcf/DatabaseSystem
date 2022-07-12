@@ -1,13 +1,12 @@
 package rjmdatabase.dbcomponents;
 
 import rjmdatabase.fileutils.FileUtil;
-import java.io.IOException;
+
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.StringJoiner;
-import javax.xml.bind.DatatypeConverter;
 
 /**
  * A utility class that reads and writes Tables to files.
@@ -103,8 +102,15 @@ public class TableFileReadWriter
 
     private static String convertHexToString(String h)
     {
-        byte[] bytes = DatatypeConverter.parseHexBinary(h);
-        return new String(bytes, FileUtil.ENCODING);
+        // TODO update Java and use HexFormat.of().parseHex(s)
+
+        int len = h.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(h.charAt(i), 16) << 4)
+                    + Character.digit(h.charAt(i+1), 16));
+        }
+        return new String(data, FileUtil.ENCODING);
     }
 
     private static String convertStringToHex(String s)
