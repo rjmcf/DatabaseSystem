@@ -1,12 +1,11 @@
 package rjmdatabase.dbcomponents;
 
-import rjmdatabase.testutils.TestBase;
-import rjmdatabase.testutils.Test;
-import rjmdatabase.dbcomponents.Table;
 import rjmdatabase.fileutils.FileUtil;
+import rjmdatabase.testutils.Test;
+import rjmdatabase.testutils.TestBase;
 
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 
 public class TableFileReadWriterTest extends TestBase
 {

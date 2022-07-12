@@ -1,11 +1,14 @@
 package rjmdatabase.userinterface;
 
-import java.util.Scanner;
 import java.io.FilterInputStream;
 import java.io.IOException;
+import java.util.Scanner;
 
 public class ConsoleInterfaceUtil
 {
+    // Private to disallow instantiation
+    private ConsoleInterfaceUtil() {}
+
     public static void println(String s)
     {
         System.out.println(s);

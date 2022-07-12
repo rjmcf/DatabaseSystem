@@ -1,9 +1,10 @@
 package rjmdatabase.fileutils;
 
-import rjmdatabase.testutils.TestBase;
 import rjmdatabase.testutils.Test;
-import java.io.IOException;
+import rjmdatabase.testutils.TestBase;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class FileUtilTest extends TestBase

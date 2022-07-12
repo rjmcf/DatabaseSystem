@@ -1,15 +1,16 @@
 package rjmdatabase.dbcomponents;
 
-import rjmdatabase.testutils.TestBase;
-import rjmdatabase.testutils.Test;
-import rjmdatabase.testutils.PrintStreamFileWriter;
 import rjmdatabase.fileutils.FileUtil;
-import java.io.IOException;
+import rjmdatabase.testutils.PrintStreamFileWriter;
+import rjmdatabase.testutils.Test;
+import rjmdatabase.testutils.TestBase;
+
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.stream.Stream;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class DatabaseTest extends TestBase
 {

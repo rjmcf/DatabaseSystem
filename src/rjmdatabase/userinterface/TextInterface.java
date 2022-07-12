@@ -1,9 +1,11 @@
 package rjmdatabase.userinterface;
 
 import rjmdatabase.dbcomponents.Database;
-import static rjmdatabase.userinterface.ConsoleInterfaceUtil.*;
-import java.util.StringJoiner;
+
 import java.io.IOException;
+import java.util.StringJoiner;
+
+import static rjmdatabase.userinterface.ConsoleInterfaceUtil.*;
 
 public class TextInterface
 {

@@ -1,10 +1,11 @@
 package rjmdatabase.testutils;
 
 import rjmdatabase.fileutils.FileUtil;
-import java.util.ArrayList;
+
 import java.io.File;
-import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * This redirects all calls to a PrintStream to use my own file writing methods.

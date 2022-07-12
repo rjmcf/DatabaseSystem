@@ -1,7 +1,6 @@
 package rjmdatabase.dbcomponents;
 
 import java.util.ArrayList;
-import java.util.StringJoiner;
 
 /**
  * Represents a Record.

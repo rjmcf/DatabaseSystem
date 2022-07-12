@@ -1,14 +1,13 @@
 package rjmdatabase.dbcomponents;
 
-import rjmdatabase.testutils.TestBase;
-import rjmdatabase.testutils.Test;
-import rjmdatabase.testutils.PrintStreamFileWriter;
 import rjmdatabase.fileutils.FileUtil;
-import java.io.PrintStream;
+import rjmdatabase.testutils.PrintStreamFileWriter;
+import rjmdatabase.testutils.Test;
+import rjmdatabase.testutils.TestBase;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Scanner;
 import java.util.ArrayList;
 
 public class TablePrinterTest extends TestBase

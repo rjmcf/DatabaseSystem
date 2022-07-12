@@ -1,14 +1,13 @@
 package rjmdatabase.dbcomponents;
 
-import rjmdatabase.fileutils.FileUtil;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Arrays;
-import java.util.StringJoiner;
-import java.util.Collections;
 import java.util.Set;
+import java.util.StringJoiner;
 
 /**
  * Represents a Table, which stores Records.

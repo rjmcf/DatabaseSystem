@@ -1,8 +1,8 @@
 package rjmdatabase.dbcomponents;
 
-import rjmdatabase.testutils.TestBase;
 import rjmdatabase.testutils.Test;
-import rjmdatabase.dbcomponents.Record;
+import rjmdatabase.testutils.TestBase;
+
 import java.util.ArrayList;
 
 public class RecordTest extends TestBase
