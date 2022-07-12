@@ -1,5 +1,12 @@
+# Build Output
 **/*.class
-Brief.txt
-test/dbTestFolders/*
-databases/*
+
+# Tests
+**/dbTestFolders/*
+
+# Databases, they have a separate repo
 databases
+
+# IntelliJ Specific
+.idea
+*.iml
