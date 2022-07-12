@@ -1,7 +1,9 @@
 package rjmdatabase.testutils;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Runs all the tests for all the classes in this project.
@@ -16,28 +18,35 @@ public class TestRunner
      */
     public static void main(String[] args)
     {
-        // If we have passed an argument, it's beacuse we don't want the interactivity.
+        // If we have passed an argument, it's because we don't want the interactivity.
         runAllTests(args.length == 0);
     }
 
     private static void runAllTests(boolean useInteractivity)
     {
-        String topLevelTestDirName = "rjmdatabase";
-        File topLevelTestDir = new File(topLevelTestDirName);
+        String topLevelTestDirName = "out/test/DatabaseSystem/";
+        String packageName = "rjmdatabase";
 
-        int numFailed = 0;
-        for (String fName : getAllTestClassFileNames(topLevelTestDirName))
+        int numTestClasses = 0;
+        int totalTestsPassed = 0;
+        int totalTestsFailed = 0;
+
+        for (String fName : getAllTestClassFileNames(topLevelTestDirName, packageName))
         {
             try
             {
-                Object o = Class.forName(fName).newInstance();
+                Object o = Class.forName(fName).getDeclaredConstructor().newInstance();
                 if (!(o instanceof TestBase))
                     throw new Error(String.format("Test %s does not inherit TestBase.", fName));
 
                 String testClassName = fName.replaceAll("(\\w)+\\.", "");
                 String classBeingTested = testClassName.replace("Test", "");
                 TestBase test = (TestBase)o;
-                numFailed += test.startTest(testClassName, classBeingTested, useInteractivity);
+                TestResults results = test.startTest(testClassName, classBeingTested, useInteractivity);
+
+                numTestClasses++;
+                totalTestsPassed += results.numPassed;
+                totalTestsFailed += results.numFailed;
             }
             catch (ClassNotFoundException e)
             {
@@ -47,32 +56,54 @@ public class TestRunner
             {
                 throw new Error(fName + " class could not be instantiated.");
             }
+            catch (NoSuchMethodException e)
+            {
+                throw new Error(fName + " class could not be instantiated since there is no default constructor.");
+            }
             catch (IllegalAccessException e)
             {
                 throw new Error(fName + " class could not be accessed.");
             }
+            catch (InvocationTargetException e)
+            {
+                throw new Error(fName + " class' constructor threw an exception.");
+            }
         }
 
-        if (numFailed > 0)
-            throw new Error(String.format("%d tests failed.", numFailed));
-        else
-            System.out.println("All tests passed.");
+        System.out.println(String.format("Testing Complete: %d test classes run", numTestClasses));
+        if (totalTestsFailed > 0)
+        {
+            System.out.println(String.format("%d tests passed", totalTestsPassed));
+            System.err.println(String.format("%d tests failed", totalTestsFailed));
+        }
+        else if (totalTestsPassed > 0)
+        {
+            System.out.println(String.format("All %d tests passed", totalTestsPassed));
+        }
     }
 
-    private static ArrayList<String> getAllTestClassFileNames(String dirName)
+    private static ArrayList<String> getAllTestClassFileNames(String dirName, String packageName)
     {
+        // TODO consider how to make this work in all environments
+        String fullDirName = dirName + packageName.replace(".", "/");
+
         ArrayList<String> result = new ArrayList<>();
         for (String pck : ignorePackages)
-            if (dirName.contains(pck))
+            if (fullDirName.contains(pck))
                 return result;
 
-        String packageName = dirName.replaceAll("/", ".");
-        File dir = new File(dirName);
-        for (File f : dir.listFiles())
+        File dir = new File(fullDirName);
+        if (!dir.exists())
+        {
+            System.err.println(String.format("Directory '%s' does not exist", dir.getAbsolutePath()));
+            return result;
+        }
+
+        for (File f : Objects.requireNonNull(dir.listFiles()))
         {
             if (f.isDirectory())
             {
-                result.addAll(getAllTestClassFileNames(dirName + "/" + f.getName()));
+                result.addAll(getAllTestClassFileNames(dirName, String.format("%s.%s", packageName, f.getName())));
             }
             else
             {

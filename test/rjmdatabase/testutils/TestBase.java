@@ -15,9 +15,9 @@ public abstract class TestBase
 
     /**
      * Runs the tests in this class.
-     * @return The number of tests that were failed.
+     * @return The results of running these tests.
      */
-    public int startTest()
+    public TestResults startTest()
     {
         String className = this.getClass().getSimpleName();
         String classBeingTested = className.replace("Test", "");
@@ -27,11 +27,11 @@ public abstract class TestBase
     /**
      * Runs the tests in this class.
      * @param  classBeingTested The name of the class being tested.
-     * @return                  The number of tests that were failed.
+     * @return                  The results of running these tests.
      */
-    public int startTest(String className, String classBeingTested, boolean useInteractivity)
+    public TestResults startTest(String className, String classBeingTested, boolean useInteractivity)
     {
-        int numFailed = 0;
+        TestResults results = new TestResults();
         if (verbosity != Verbosity.JUST_ERRORS)
             System.out.println("Testing " + classBeingTested);
         for (Method test : this.getClass().getDeclaredMethods())
@@ -86,7 +86,7 @@ public abstract class TestBase
 
             if (wasError)
             {
-                numFailed += 1;
+                results.numFailed += 1;
                 if (verbosity == Verbosity.JUST_ERRORS)
                     System.out.println(toPrint += " in " + className);
                 else
@@ -94,13 +94,14 @@ public abstract class TestBase
             }
             else
             {
+                results.numPassed += 1;
                 if (verbosity == Verbosity.ALL)
                     System.out.println(toPrint + (toPrint.endsWith("Disabled") ? "" : "Succeeded"));
             }
         }
         if (verbosity != Verbosity.JUST_ERRORS)
             System.out.println("Testing " + classBeingTested + " completed");
-        return numFailed;
+        return results;
     }
 
     protected void beforeTest() {}
