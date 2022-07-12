@@ -2,6 +2,7 @@ package rjmdatabase.userinterface;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Scanner;
 
 public class ConsoleInterfaceUtil
@@ -18,6 +19,8 @@ public class ConsoleInterfaceUtil
     {
         System.out.println();
     }
+
+    public static void logError(String s) { System.err.println(s); }
 
     public static String getLineOfInput()
     {
