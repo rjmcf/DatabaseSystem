@@ -78,9 +78,10 @@ public class ConsoleInterfaceUtil
         do
         {
             println("Please enter either \"Y\" or \"N\".");
-            response = getLineOfInputNoSpaces();
+            response = getLineOfInputNoSpaces().toUpperCase(Locale.ROOT);
         }
         while(!response.equals("Y") && !response.equals("N"));
+
         return "Y".equals(response);
     }
 }
