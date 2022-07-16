@@ -74,7 +74,7 @@ public class TestRunner
         if (totalTestsFailed > 0)
         {
             System.out.println(String.format("%d tests passed", totalTestsPassed));
-            System.err.println(String.format("%d tests failed", totalTestsFailed));
+            throw new Error(String.format("%d tests failed", totalTestsFailed));
         }
         else if (totalTestsPassed > 0)
         {
@@ -95,8 +95,7 @@ public class TestRunner
         File dir = new File(fullDirName);
         if (!dir.exists())
         {
-            System.err.println(String.format("Directory '%s' does not exist", dir.getAbsolutePath()));
-            return result;
+            throw new Error(String.format("Directory '%s' does not exist", dir.getAbsolutePath()));
         }
 
         for (File f : Objects.requireNonNull(dir.listFiles()))
