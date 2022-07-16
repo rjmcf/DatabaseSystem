@@ -58,7 +58,7 @@ public class RecordTest extends TestBase
         }
         catch (IndexOutOfBoundsException e) { /* test passed */ }
 
-        claim("Field0".equals(filledRecord.getField(1)), "Incorrect Field0 value.");
+        claim("Field0".equals(filledRecord.getField(0)), "Incorrect Field0 value.");
         claim("Field1".equals(filledRecord.getField(1)), "Incorrect Field1 value.");
         claim("Field2".equals(filledRecord.getField(2)), "Incorrect Field2 value.");
     }
