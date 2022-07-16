@@ -24,7 +24,7 @@ public class TestRunner
 
     private static void runAllTests(boolean useInteractivity)
     {
-        String topLevelTestDirName = "out/test/DatabaseSystem/";
+        String topLevelTestDirName = "";
         String packageName = "rjmdatabase";
 
         int numTestClasses = 0;
