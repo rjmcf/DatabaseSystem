@@ -11,4 +11,3 @@ jobs:
       - name: Run all the tests
         run: |
           make -s runTests DISABLE_INTERACTIVITY=1
-      - run: echo "Job status is ${{ job.status }}."
