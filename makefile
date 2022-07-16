@@ -42,6 +42,7 @@ runTheTest: allSources
 runTests: allTests
 ifdef DISABLE_INTERACTIVITY
 	cd ${TESTDIR}; \
+	echo tree .; \
 	java -cp ../${SRCDIR}:./ ${PACKDIR}/testutils/TestRunner 1
 else
 	cd ${TESTDIR}; \
